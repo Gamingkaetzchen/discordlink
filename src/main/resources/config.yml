@@ -1,0 +1,26 @@
+#┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#┃     Synccord – Hauptkonfiguration ┃
+#┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+discord:
+  token: "YOURBOTTOKEN"
+
+  guild-id: "YOURSERVERIPHERE"
+
+  java-ip: "Change.me"
+  bedrock-ip: "Change.me"
+
+  role-link:
+    "123456789012345678": "vip"
+    "234567890123456789": "mod"
+    "345678901234567890": "admin"
+
+linking:
+  code-expiry-minutes: 15
+
+tps-monitor:
+  auto-update: true
+  update-interval: 60
+
+language: "en"
+debug: false

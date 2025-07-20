@@ -1,0 +1,178 @@
+dcfind_not_found: ❌ Für %name% wurde keine Link found.
+dcfind_success: '✅ Player %name% ist verknüpft mit:
+
+  §aDiscord-ID: §f%id%
+
+  §aDiscord-Tag: §f%tag%
+
+  '
+dcfind_usage: '§7Verwendung: /dcfind <spielername>'
+dcfind_user_unknown: '❌ Discord-User konnte not found werden. Discord-ID: %id%'
+debug_button_click: '[Debug] Button ''show_players'' wurde geklickt von: %user%'
+debug_button_no_permission: '[Debug] Keine Berechtigung für Button-Nutzung: %user%'
+debug_dcfind_foundid: '[Debug] Discord-ID ''%id%'' found'
+debug_dcfind_noid: '[Debug] Keine gespeicherte Discord-ID für UUID ''%UUID%'' found'
+debug_dcfind_start: '[Debug] Suche nach Discord-ID für Player ''%name%'' mit UUID
+  ''%UUID%'''
+debug_dcfind_tag: '[Debug] User-Tag lautet ''%tag%'''
+debug_discord_ready: '[Debug] Discord-Bot ist ready.'
+debug_discord_shutdown: '[Debug] Discord-Bot wird heruntergefahren...'
+debug_discord_starting: '[Debug] Starting Discord-Bot mit Token...'
+debug_info_autoupdate_disabled: Auto-Update deaktiviert – Task wird cancelled.
+debug_info_channel_not_found: Gespeicherter Channel not mehr verfügbar.
+debug_info_embed_update_error: 'Error beim Embed-Update: %error%'
+debug_info_embed_update_exception: '❌ Error beim Embed-Update (online):'
+debug_info_embed_updated: Status-Embed successfully geupdatet.
+debug_info_message_found: Message found – AutoUpdate wird started.
+debug_info_message_missing: Keine Message found – Task wird cancelled.
+debug_info_message_not_found_creating_new: Message not found – neue Embed wird erstellt.
+debug_info_message_sent: Neue Embed sent – AutoUpdate wird started.
+debug_info_no_state_found: Keine gespeicherte Message found.
+debug_info_starting_autoupdate: Starting AutoUpdate...
+debug_info_state_save_failed: ⚠ Konnte Status-Embed not speichern.
+debug_info_state_saved: Status-Datei gespeichert.
+debug_info_try_recover: Versuche bestehende Status-Message zu laden...
+debug_info_update_interval: 'Update-Intervall: %interval% Sekunden'
+debug_kick_unlinked: ⛔ Player %name% wurde gekickt – not verknüpft.
+debug_link_already_linked: Discord-Account %id% ist already verknüpft.
+debug_link_code_expired: 'code abgelaufen oder invalid: %code% für UUID: %UUID%'
+debug_link_code_generated: 'Neuer code generiert für %UUID%: %code% (valid für %minutes%
+  Minuten)'
+debug_link_code_not_found: 'No UUID found für code: %code%'
+debug_link_code_received: 'code empfangen von %id%: %code%'
+debug_link_code_still_valid: 'User %UUID% used noch gültigen code: %code%'
+debug_link_code_valid: 'Gültiger code erkannt: %code% → UUID: %UUID%'
+debug_link_invalid_code: 'Ungültiger Verknüpfungscode: %code%'
+debug_link_modal_opened: Linking-Modal geöffnet von %user%
+debug_link_stored: 'Verknüpft: UUID %UUID% mit Discord-ID %id%'
+debug_link_success: 'Link successfully: %UUID% ↔ %id%'
+debug_linkmc_invalid_uuid: '[Debug] Ungültige UUID eingegeben: %UUID%'
+debug_linkmc_received: '[Debug] SlashCommand /linkmc → UUID=%UUID%, discordId=%Discord%'
+debug_linkmc_success: '[Debug] Manuelle Link gespeichert: %UUID% → %Discord%'
+debug_no_discord_id: ⚠ Player %name% ist verknüpft, aber keine Discord-ID found.
+debug_offline_channel_not_found: 'Channel not found: %id%'
+debug_offline_embed_replaced: Offline-Embed successfully ersetzt.
+debug_offline_no_saved_message: No gespeicherter Channel oder Message vorhanden –
+  abbrechen.
+debug_offline_replace_failed: '❌ Offline-Embed konnte not ersetzt werden:'
+debug_registering_slash_commands: '[Debug] Slash-Befehle werden registriert...'
+debug_sending_player_list: '[Debug] Sende Spielerliste an Discord-Admin...'
+debug_setup_autocomplete: '[Debug] AutoComplete für /setup type ausgelöst.'
+debug_setup_info_started: '[Debug] Info-Embed wurde started mit Auto-Update.'
+debug_setup_linking_sent: '[Debug] Verknüpfungs-Embed wurde sent.'
+debug_setup_used: '[Debug] /setup used mit Typ: %type%'
+debug_sqlite_discord_not_found: '[Debug] Keine Discord-ID für %UUID% found.'
+debug_sqlite_found_discord: '[Debug] Discord-ID für %UUID%: %Discord%'
+debug_sqlite_initialized: '[Debug] SQLite-database wurde initialized.'
+debug_sqlite_isdiscordlinked: '[Debug] isDiscordLinked(%Discord%) = %linked%'
+debug_sqlite_islinked: '[Debug] isLinked(%UUID%) = %linked%'
+debug_sqlite_link_deleted: '[Debug] Link gelöscht: %UUID%'
+debug_sqlite_link_saved: '[Debug] Link gespeichert: %UUID% → %Discord%'
+debug_sync_start: 🔁 Starting Discord → Minecraft Rollensync für %name%
+debug_unlink_attempt: '[Debug] Unlink-Versuch für %name% (%UUID%)'
+debug_unlink_not_found: '[Debug] Keine Link für UUID %UUID% found.'
+debug_unlink_success: '[Debug] Link für UUID %UUID% removed.'
+debug_unlinkmc_invalid_uuid: '[Debug] Ungültige UUID empfangen: %UUID%'
+debug_unlinkmc_not_linked: '[Debug] Keine Link in DB für UUID %UUID%'
+debug_unlinkmc_success: '[Debug] Link successfully removed für UUID %UUID%'
+error_discord_member: '⚠ Error beim Abrufen des Discord-Mitglieds: %msg%'
+error_guild_not_found: ⚠ Discord-Guild mit ID '%id%' not found.
+error_no_guild_id: ❌ Keine Guild-ID in der config.yml found.
+footer_text: Mady by Gamingkaetzchen
+how_to_link: '%prefix%Click in Discord auf den Button and gib den code enter.'
+info_embed_error: ❌ Info-Embed konnte not aktualisiert werden.
+info_embed_field_bedrock: Bedrock IP
+info_embed_field_java: Java IP
+info_embed_field_mspt: MSPT
+info_embed_field_players: Player online
+info_embed_field_tps: TPS
+info_embed_field_version: Version
+info_embed_footer: Wird alle 60 Sekunden automatisch aktualisiert
+info_embed_offline: 🚫 Der Minecraft-server ist aktuell offline.
+info_embed_sent: Info-Embed wurde sent.
+info_embed_title: 📊 Serverstatus
+info_players_empty: ❌ Es sind aktuell keine Player online.
+info_players_title: Spielerlist
+info_sent: ✅ Info-Embed sent.
+invalid_type: ❌ Ungültiger Setup-Typ.
+link_already_linked: ❌ Dein Discord-Account ist already mit einem anderen Minecraft-Player
+  verknüpft.
+link_button: Verknüpfen
+link_code: '%prefix%Dein Verknüpfungscode lautet: §a%code%'
+link_embed_description: Click auf den Button unten and gib den code enter, den du
+  im Spiel erhalten hast.
+link_embed_title: 🔗 Verknüpfe deinen Minecraft-Account
+link_error: ❌ Error beim Verknüpfen.
+link_error_already_linked: ❌ Dein Discord-Account ist already mit einem anderen Minecraft-Player
+  verknüpft.
+link_error_generic: ❌ Error beim Verknüpfen.
+link_error_invalid_code: ❌ Ungültiger code. Hast du dich schon im Spiel eingeloggt?
+link_instruction: '%prefix%Click in Discord auf „Verknüpfen“ and gib diesen code enter.'
+link_invalid_code: ❌ Ungültiger code. Hast du dich schon im Spiel eingeloggt?
+link_manual_success: ✅ Der Player %name% wurde manuell mit Discord-ID %id% verknüpft.
+link_modal_input_label: Dein Minecraft-code
+link_modal_input_placeholder: z.B. 4F6X9Q
+link_modal_title: 🔗 Minecraft-Link
+link_reminder: '%prefix%Du bist noch not mit Discord verknüpft.'
+link_success: ✅ Du wurdest successfully mit deinem Minecraft-Account verknüpft!
+linkmc_description: Verknüpft einen Minecraft-Player mit einem Discord-Nutzer.
+linkmc_invalid_discordid: ❌ Ungültige Discord-ID.
+linkmc_invalid_uuid: ❌ Ungültige UUID.
+linkmc_missing_args: ❌ missing UUID oder Discord-ID.
+linkmc_no_permission: ❌ Du hast keine Berechtigung für diesen command.
+linkmc_option_discordid: Discord-ID des Nutzers
+linkmc_option_uuid: UUID des Minecraft-Spielers
+linkmc_success: '✅ Verknüpft:
+
+  - Minecraft UUID: `%UUID%`
+
+  - Discord-ID: `%Discord%`
+
+  '
+login_kick_message: '<red><b>🔒 Du bist not mit Discord verknüpft!</b></red>
+
+
+  <gray>•</gray> <white>Dein code: <green>%code%</green>
+
+  <gray>•</gray> <white>Click im Discord auf <aqua>„Verknüpfen“</aqua> and gib diesen
+  code enter.
+
+  <gray>•</gray> <white>Discord beitreten: <blue>https://Discord.gg/ykSHUmz83S
+
+  '
+missing_key: '§c[Fehlender Sprachschlüssel: %key%]'
+no_console: ❌ Dieser command ist nur für Player verfügbar.
+no_permission: ❌ Du hast keine Berechtigung dafür.
+not_linked: '%prefix%Du bist noch not mit Discord verknüpft.'
+prefix: §7[§bSynccord§7] §f
+role_sync_added: ✔ Player %name% wurde zur Group %group% added.
+role_sync_removed: ✖ Player %name% wurde aus Group %group% removed.
+role_sync_skip: ⏭ No Rollenwechsel nötig für %name%.
+role_sync_start: 🔁 Starting Discord → Minecraft Rollensynchronisation für %name%.
+setup_description: Führt Discord-Setup durch
+setup_option_type_description: linking oder info
+show_players_button: Spielerlist
+sqlite_init_error: §c❌ Die SQLite-database konnte not initialized werden.
+sync_added: ✅ [Sync] Group '%group%' added.
+sync_check: '🔄 [Sync] Prüfe: Discord-Role ''%role%'', Zielgruppe: ''%group%'''
+sync_discord_roles: '📋 [Sync] Discord-Rollen des Nutzers:'
+sync_done: ✅ [Sync] Rollenabgleich abgeschlossen.
+sync_has_group: Hat Group
+sync_has_role: Hat Discord-Role
+sync_no_change: ✔ [Sync] Keine Änderung nötig für '%group%'.
+sync_no_lp_user: ⚠ [Sync] No LuckPerms-User für UUID %UUID% found.
+sync_no_roles_config: ⚠ [Sync] Keine 'role-link' Konfiguration found.
+sync_removed: ❎ [Sync] Group '%group%' removed.
+sync_role_not_found: ❌ [Sync] Role mit ID %role% wurde not im Discord found.
+sync_start: '🛠 [Sync] Starting Rollenabgleich Discord → Minecraft für UUID: %UUID%'
+unknown_command: ❓ Unbekannter command oder falsche Syntax.
+unlink_never_seen: §cSpieler wurde nie auf dem server gesehen.
+unlink_not_found: ❌ Für diesen Player existiert keine Link.
+unlink_success: ✅ Die Link von %name% wurde removed.
+unlink_usage: '§7Verwendung: /unlinkdiscord <spielername>'
+unlinkmc_description: Hebt die Link eines Minecraft-Spielers auf.
+unlinkmc_invalid_uuid: ❌ Ungültige UUID.
+unlinkmc_missing_uuid: ❌ missing UUID.
+unlinkmc_not_linked: ❌ Die UUID `%UUID%` ist not verknüpft.
+unlinkmc_option_uuid: UUID des Minecraft-Spielers
+unlinkmc_success: ✅ Die Link für `%UUID%` wurde successfully removed.

@@ -1,0 +1,15 @@
+name: Synccord
+version: ${project.version}
+main: de.blizzardsmp.synccord.Synccord
+api-version: 1.21
+authors: [Gamingkaetzchen]
+description: Verlinkt Minecraft-Spieler mit Discord und synchronisiert Rollen.
+softdepend: [LuckPerms]
+commands:
+  unlinkdiscord:
+    description: Entfernt die Discord-Verknüpfung eines Spielers
+    usage: /unlinkdiscord <spielername>
+    permission: synccord.admin
+  dcfind:
+    description: Zeigt die verknüpfte Discord-ID eines Spielers
+    permission: synccord.admin
