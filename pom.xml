@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.blizzardsmp</groupId>
+    <groupId>de.gamingkaetzchen</groupId>
     <artifactId>synccord</artifactId>
     <version>0.1.0</version>
     <name>Synccord</name>
@@ -133,7 +133,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.bstats</pattern>
-                                    <shadedPattern>de.blizzardsmp.synccord.shaded.bstats</shadedPattern>
+                                    <shadedPattern>de.gamingkaetzchen.synccord.shaded.bstats</shadedPattern>
                                 </relocation>
                             </relocations>
                             <minimizeJar>true</minimizeJar>
@@ -141,7 +141,7 @@
                             <transformers>
                                 <transformer
                                     implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>de.blizzardsmp.synccord.Synccord</mainClass>
+                                    <mainClass>de.gamingkaetzchen.synccord.Synccord</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

@@ -1,6 +1,6 @@
 name: Synccord
 version: ${project.version}
-main: de.blizzardsmp.synccord.Synccord
+main: de.gamingkaetzchen.synccord.Synccord
 api-version: 1.21
 authors: [Gamingkaetzchen]
 description: Verlinkt Minecraft-Spieler mit Discord und synchronisiert Rollen.
