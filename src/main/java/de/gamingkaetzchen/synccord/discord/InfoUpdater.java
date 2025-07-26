@@ -28,7 +28,7 @@ public class InfoUpdater {
     private static final String STATE_FILE = "status-message.yml";
 
     public static void startAutoUpdate(MessageChannel channel, Message message) {
-        debugLog(Lang.get("debug_info_starting_autoupdate"));
+        debug("debug_info_starting_autoupdate");
         lastMessage = message;
         lastChannelId = channel.getId();
         lastMessageId = message.getId();
@@ -37,36 +37,33 @@ public class InfoUpdater {
     }
 
     public static void recoverOrOffline(JDA jda) {
-        debugLog(Lang.get("debug_info_try_recover"));
+        debug("debug_info_try_recover");
         loadState();
 
         if (lastChannelId == null || lastMessageId == null) {
-            debugLog(Lang.get("debug_info_no_state_found"));
+            debug("debug_info_no_state_found");
             return;
         }
 
         var channel = jda.getChannelById(MessageChannel.class, lastChannelId);
         if (channel == null) {
-            debugLog(Lang.get("debug_info_channel_not_found"));
+            debug("debug_info_channel_not_found");
             return;
         }
 
         channel.retrieveMessageById(lastMessageId).queue(
                 msg -> {
-                    debugLog(Lang.get("debug_info_message_found"));
+                    debug("debug_info_message_found");
                     lastMessage = msg;
                     startTask();
                 },
                 failure -> {
-                    debugLog(Lang.get("debug_info_message_not_found_creating_new"));
-                    EmbedBuilder embed = buildStatusEmbed(
-                            Synccord.getInstance().getDiscordBot().getJDA().getSelfUser().getAvatarUrl()
-                    );
-
+                    debug("debug_info_message_not_found_creating_new");
+                    EmbedBuilder embed = buildStatusEmbed(Synccord.getInstance().getDiscordBot().getJDA().getSelfUser().getAvatarUrl());
                     channel.sendMessageEmbeds(embed.build()).setActionRow(
                             Button.primary("show_players", "🔍 " + Lang.get("show_players_button"))
                     ).queue(sentMsg -> {
-                        debugLog(Lang.get("debug_info_message_sent"));
+                        debug("debug_info_message_sent");
                         startAutoUpdate(channel, sentMsg);
                     });
                 }
@@ -79,19 +76,19 @@ public class InfoUpdater {
         }
 
         int interval = Synccord.getInstance().getConfig().getInt("tps-monitor.update-interval", 60);
-        debugLog(Lang.get("debug_info_update_interval").replace("%interval%", String.valueOf(interval)));
+        debug("debug_info_update_interval", "%interval%", String.valueOf(interval));
 
         task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (!Synccord.getInstance().getConfig().getBoolean("tps-monitor.auto-update", true)) {
-                    debugLog(Lang.get("debug_info_autoupdate_disabled"));
+                    debug("debug_info_autoupdate_disabled");
                     cancel();
                     return;
                 }
 
                 if (lastMessage == null) {
-                    debugLog(Lang.get("debug_info_message_missing"));
+                    debug("debug_info_message_missing");
                     cancel();
                     return;
                 }
@@ -103,10 +100,10 @@ public class InfoUpdater {
                     lastMessage.editMessageEmbeds(embed.build()).setActionRow(
                             Button.primary("show_players", "🔍 " + Lang.get("show_players_button"))
                     ).queue(
-                            success -> debugLog(Lang.get("debug_info_embed_updated")),
+                            success -> debug("debug_info_embed_updated"),
                             error -> {
                                 Bukkit.getLogger().warning(Lang.get("info_embed_error"));
-                                debugLog(Lang.get("debug_info_embed_update_error").replace("%error%", error.getMessage()));
+                                debug("debug_info_embed_update_error", "%error%", error.getMessage());
                             }
                     );
                 } catch (Exception e) {
@@ -149,7 +146,7 @@ public class InfoUpdater {
         cfg.set("message-id", lastMessageId);
         try {
             cfg.save(file);
-            debugLog(Lang.get("debug_info_state_saved"));
+            debug("debug_info_state_saved");
         } catch (IOException e) {
             Synccord.getInstance().getLogger().warning(Lang.get("debug_info_state_save_failed"));
         }
@@ -160,14 +157,21 @@ public class InfoUpdater {
         if (!file.exists()) {
             return;
         }
+
         FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
         lastChannelId = cfg.getString("channel-id");
         lastMessageId = cfg.getString("message-id");
     }
 
-    private static void debugLog(String msg) {
+    private static void debug(String key) {
         if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info("🪲 DEBUG | " + msg);
+            Synccord.getInstance().getLogger().info(Lang.get(key));
+        }
+    }
+
+    private static void debug(String key, String placeholder, String value) {
+        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+            Synccord.getInstance().getLogger().info(Lang.get(key).replace(placeholder, value));
         }
     }
 

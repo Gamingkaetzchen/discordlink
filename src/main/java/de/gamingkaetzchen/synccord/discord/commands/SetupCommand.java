@@ -73,7 +73,7 @@ public class SetupCommand extends ListenerAdapter {
                         }
                     });
 
-            event.reply("✅ " + Lang.get("info_embed_sent")).setEphemeral(true).queue();
+            event.reply(Lang.get("info_sent")).setEphemeral(true).queue();
 
         } else {
             event.reply(Lang.get("invalid_type")).setEphemeral(true).queue();

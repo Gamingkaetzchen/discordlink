@@ -21,7 +21,7 @@ public class DcFindCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("synccord.admin")) {
-            sender.sendMessage("§cKeine Berechtigung.");
+            sender.sendMessage(Lang.get("no_permission"));
             return true;
         }
 
@@ -33,11 +33,9 @@ public class DcFindCommand implements CommandExecutor {
         OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
         UUID uuid = player.getUniqueId();
 
-        if (isDebug()) {
-            Bukkit.getLogger().info(Lang.get("debug_dcfind_start")
-                    .replace("%name%", args[0])
-                    .replace("%uuid%", uuid.toString()));
-        }
+        debugLog(Lang.get("debug_dcfind_start")
+                .replace("%name%", args[0])
+                .replace("%uuid%", uuid.toString()));
 
         if (!DatabaseManager.isLinked(uuid)) {
             sender.sendMessage(Lang.get("dcfind_not_found").replace("%name%", args[0]));
@@ -46,19 +44,15 @@ public class DcFindCommand implements CommandExecutor {
 
         Optional<String> discordIdOpt = LinkManager.getDiscordId(uuid);
         if (discordIdOpt.isEmpty()) {
-            if (isDebug()) {
-                Bukkit.getLogger().info(Lang.get("debug_dcfind_noid").replace("%uuid%", uuid.toString()));
-            }
+            debugLog(Lang.get("debug_dcfind_noid").replace("%uuid%", uuid.toString()));
             sender.sendMessage(Lang.get("dcfind_not_found").replace("%name%", args[0]));
             return true;
         }
 
         String discordId = discordIdOpt.get();
-        JDA jda = Synccord.getInstance().getDiscordBot().getJDA();
+        debugLog(Lang.get("debug_dcfind_foundid").replace("%id%", discordId));
 
-        if (isDebug()) {
-            Bukkit.getLogger().info(Lang.get("debug_dcfind_foundid").replace("%id%", discordId));
-        }
+        JDA jda = Synccord.getInstance().getDiscordBot().getJDA();
 
         jda.retrieveUserById(discordId).queue(
                 (User user) -> {
@@ -67,9 +61,7 @@ public class DcFindCommand implements CommandExecutor {
                             .replace("%id%", discordId)
                             .replace("%tag%", user.getAsTag()));
 
-                    if (isDebug()) {
-                        Bukkit.getLogger().info(Lang.get("debug_dcfind_tag").replace("%tag%", user.getAsTag()));
-                    }
+                    debugLog(Lang.get("debug_dcfind_tag").replace("%tag%", user.getAsTag()));
                 },
                 (error) -> {
                     sender.sendMessage(Lang.get("dcfind_user_unknown").replace("%id%", discordId));
@@ -79,7 +71,9 @@ public class DcFindCommand implements CommandExecutor {
         return true;
     }
 
-    private boolean isDebug() {
-        return Synccord.getInstance().getConfig().getBoolean("debug", false);
+    private void debugLog(String msg) {
+        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+            Bukkit.getLogger().info("🪲 DEBUG | " + msg);
+        }
     }
 }

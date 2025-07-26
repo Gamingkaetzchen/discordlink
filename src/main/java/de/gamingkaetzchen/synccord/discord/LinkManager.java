@@ -23,6 +23,18 @@ public class LinkManager {
         return DatabaseManager.isLinked(uuid);
     }
 
+    public static boolean isLinked(String discordId) {
+        return DatabaseManager.isDiscordLinked(discordId);
+    }
+
+    public static Optional<UUID> getUUID(String discordId) {
+        return DatabaseManager.getUUIDByDiscordId(discordId);
+    }
+
+    public static Optional<String> getDiscordId(UUID uuid) {
+        return DatabaseManager.getDiscordId(uuid);
+    }
+
     public static String generateCodeFor(UUID uuid) {
         long now = System.currentTimeMillis();
         CodeEntry existing = activeCodes.get(uuid);
@@ -58,13 +70,17 @@ public class LinkManager {
 
         CodeEntry entry = activeCodes.get(uuid);
         if (entry == null || System.currentTimeMillis() > entry.expiresAt) {
-            debugLog(Lang.get("debug_link_code_expired").replace("%code%", code).replace("%uuid%", uuid.toString()));
+            debugLog(Lang.get("debug_link_code_expired")
+                    .replace("%code%", code)
+                    .replace("%uuid%", uuid.toString()));
             activeCodes.remove(uuid);
             reverseCodes.remove(code);
             return null;
         }
 
-        debugLog(Lang.get("debug_link_code_valid").replace("%code%", code).replace("%uuid%", uuid.toString()));
+        debugLog(Lang.get("debug_link_code_valid")
+                .replace("%code%", code)
+                .replace("%uuid%", uuid.toString()));
         return uuid;
     }
 
@@ -72,11 +88,9 @@ public class LinkManager {
         activeCodes.remove(uuid);
         reverseCodes.entrySet().removeIf(entry -> entry.getValue().equals(uuid));
         DatabaseManager.link(uuid, discordId);
-        debugLog(Lang.get("debug_link_stored").replace("%uuid%", uuid.toString()).replace("%id%", discordId));
-    }
-
-    public static Optional<String> getDiscordId(UUID uuid) {
-        return DatabaseManager.getDiscordId(uuid);
+        debugLog(Lang.get("debug_link_stored")
+                .replace("%uuid%", uuid.toString())
+                .replace("%id%", discordId));
     }
 
     private static String generateUniqueCode(int length) {

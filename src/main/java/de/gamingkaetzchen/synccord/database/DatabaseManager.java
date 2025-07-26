@@ -1,12 +1,7 @@
 package de.gamingkaetzchen.synccord.database;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -100,8 +95,45 @@ public class DatabaseManager {
         return Optional.empty();
     }
 
+    public static Optional<UUID> getUUIDByDiscordId(String discordId) {
+        try {
+            PreparedStatement ps = connection.prepareStatement(
+                    "SELECT uuid FROM linked_users WHERE discord_id = ?;"
+            );
+            ps.setString(1, discordId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+
+                if (isDebug()) {
+                    Synccord.getInstance().getLogger().info(
+                            Lang.get("debug_sqlite_found_uuid")
+                                    .replace("%discord%", discordId)
+                                    .replace("%uuid%", uuid.toString())
+                    );
+                }
+
+                return Optional.of(uuid);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (isDebug()) {
+            Synccord.getInstance().getLogger().info(
+                    Lang.get("debug_sqlite_uuid_not_found")
+                            .replace("%discord%", discordId)
+            );
+        }
+
+        return Optional.empty();
+    }
+
     public static boolean isLinked(UUID uuid) {
         boolean linked = getDiscordId(uuid).isPresent();
+
         if (isDebug()) {
             Synccord.getInstance().getLogger().info(
                     Lang.get("debug_sqlite_islinked")
@@ -109,6 +141,7 @@ public class DatabaseManager {
                             .replace("%linked%", String.valueOf(linked))
             );
         }
+
         return linked;
     }
 
@@ -134,6 +167,7 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return false;
     }
 

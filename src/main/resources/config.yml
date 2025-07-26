@@ -1,15 +1,14 @@
-#┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-#┃     Synccord – Hauptkonfiguration ┃
-#┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃     Synccord – Hauptkonfiguration ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 discord:
   token: "YOURBOTTOKEN"
-
   guild-id: "YOURSERVERIPHERE"
-
   java-ip: "Change.me"
   bedrock-ip: "Change.me"
 
+  # Discord-Rollen, die mit Minecraft-Permissions verknüpft sind
   role-link:
     "123456789012345678": "vip"
     "234567890123456789": "mod"
@@ -21,6 +20,34 @@ linking:
 tps-monitor:
   auto-update: true
   update-interval: 60
+
+tickets:
+  support:
+    name: "Support Ticket"
+    description: "Wenn Sie ein Problem haben, erstellen Sie bitte ein Ticket."
+    button_name: "✉️ Create a Ticket"
+
+    # Rollen, die Zugriff auf Tickets haben
+    supporter_roles:
+      - "1111111111111"
+      - "2222222222222"
+
+    # Discord-Kategorie-ID, unter der die Tickets erstellt werden
+    ticketkategorie: "1111111111111"
+
+    # Fragen, die im Modal gestellt werden
+    question:
+      1:
+        input: 2000
+        questions:
+          - "Was ist dein Anliegen?"
+      2:
+        input: 16
+        questions:
+          - "Spielst du Java oder Bedrock?"
+
+    # Kanal, in dem Transkripte beim Schließen gepostet werden
+    log_channel_id: "999999999999999999"  # 🔁 <— bitte durch echten Channel ersetzen
 
 language: "en"
 debug: false

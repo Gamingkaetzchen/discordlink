@@ -11,6 +11,7 @@ import de.gamingkaetzchen.synccord.discord.DiscordBot;
 import de.gamingkaetzchen.synccord.discord.InfoUpdaterOffline;
 import de.gamingkaetzchen.synccord.listener.RoleSyncJoinListener;
 import de.gamingkaetzchen.synccord.util.Lang;
+import de.gamingkaetzchen.synccord.tickets.TicketManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
@@ -20,42 +21,44 @@ public class Synccord extends JavaPlugin {
     private DiscordBot discordBot;
     private LuckPerms luckPerms;
     private boolean debug;
+    private TicketManager ticketManager;
 
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
 
-        // Debug-Flag aus config.yml lesen
         this.debug = getConfig().getBoolean("debug", false);
 
         // Sprache laden
         Lang.init();
 
         // bStats starten
-        int pluginId = 26581;
-        Metrics metrics = new Metrics(this, pluginId);
+        Metrics metrics = new Metrics(this, 26581);
 
         // Datenbankverbindung initialisieren
         DatabaseManager.init();
 
-        // Commands registrieren
+        // ✅ TicketManager initialisieren — VOR DiscordBot!
+        ticketManager = new TicketManager(this);
+
+        // Befehle registrieren
         getCommand("unlinkdiscord").setExecutor(new UnlinkDiscordCommand());
         getCommand("dcfind").setExecutor(new DcFindCommand());
 
-        // Event Listener registrieren
+        // Event-Listener
         Bukkit.getPluginManager().registerEvents(new RoleSyncJoinListener(), this);
 
-        // LuckPerms initialisieren
+        // LuckPerms
         try {
             luckPerms = LuckPermsProvider.get();
         } catch (IllegalStateException e) {
             getLogger().warning("⚠ LuckPerms nicht verfügbar!");
         }
 
-        // Discord-Bot starten
+        // ✅ Jetzt DiscordBot starten
         try {
-            discordBot = new DiscordBot(getConfig().getString("discord.token"));
+            discordBot = new DiscordBot(getConfig().getString("discord.token"), ticketManager);
         } catch (Exception e) {
             getLogger().severe("❌ Fehler beim Starten des Discord-Bots:");
             e.printStackTrace();
@@ -92,5 +95,9 @@ public class Synccord extends JavaPlugin {
         if (getInstance().isDebug()) {
             getInstance().getLogger().info("§8[§3Debug§8] §7" + message);
         }
+    }
+
+    public TicketManager getTicketManager() {
+        return ticketManager;
     }
 }

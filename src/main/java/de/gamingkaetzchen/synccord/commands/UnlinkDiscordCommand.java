@@ -21,44 +21,37 @@ public class UnlinkDiscordCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("synccord.admin")) {
-            sender.sendMessage("§cDu hast keine Berechtigung.");
+            sender.sendMessage(Lang.get("no_permission"));
             return true;
         }
 
         if (args.length != 1) {
-            sender.sendMessage("§7Verwendung: /unlinkdiscord <spielername>");
+            sender.sendMessage(Lang.get("unlink_usage"));
             return true;
         }
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
         if (target.getName() == null) {
-            sender.sendMessage("§cSpieler wurde nie auf dem Server gesehen.");
+            sender.sendMessage(Lang.get("unlink_never_seen"));
             return true;
         }
 
         UUID uuid = target.getUniqueId();
 
-        if (isDebug()) {
-            Bukkit.getLogger().info("[Synccord] Unlink-Versuch für UUID: " + uuid + " (" + target.getName() + ")");
-        }
+        debugLog(Lang.get("debug_unlink_attempt")
+                .replace("%name%", target.getName())
+                .replace("%uuid%", uuid.toString()));
 
         if (!DatabaseManager.isLinked(uuid)) {
-            String msg = Lang.get("unlink_not_found").replace("%name%", target.getName());
-            sender.sendMessage(msg.replace("&", "§"));
-            if (isDebug()) {
-                Bukkit.getLogger().info("[Synccord] Keine Verknüpfung für " + uuid + " gefunden.");
-            }
+            sender.sendMessage(Lang.get("unlink_not_found").replace("%name%", target.getName()));
+            debugLog(Lang.get("debug_unlink_not_found").replace("%uuid%", uuid.toString()));
             return true;
         }
 
         DatabaseManager.unlink(uuid);
-        String msg = Lang.get("unlink_success").replace("%name%", target.getName());
-        sender.sendMessage(msg.replace("&", "§"));
+        sender.sendMessage(Lang.get("unlink_success").replace("%name%", target.getName()));
 
-        if (isDebug()) {
-            Bukkit.getLogger().info("[Synccord] Discord-Verknüpfung entfernt für " + uuid);
-        }
-
+        debugLog(Lang.get("debug_unlink_success").replace("%uuid%", uuid.toString()));
         return true;
     }
 
@@ -78,7 +71,9 @@ public class UnlinkDiscordCommand implements CommandExecutor, TabCompleter {
         return Collections.emptyList();
     }
 
-    private boolean isDebug() {
-        return Synccord.getInstance().getConfig().getBoolean("debug", false);
+    private void debugLog(String msg) {
+        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+            Bukkit.getLogger().info("🪲 DEBUG | " + msg);
+        }
     }
 }
