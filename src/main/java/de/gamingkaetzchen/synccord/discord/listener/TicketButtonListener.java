@@ -1,5 +1,19 @@
 package de.gamingkaetzchen.synccord.discord.listener;
 
+import java.awt.Color;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.time.Instant;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
+
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.tickets.TicketManager;
 import de.gamingkaetzchen.synccord.tickets.TicketQuestion;
@@ -23,20 +37,6 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.utils.FileUpload;
-
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.jetbrains.annotations.NotNull;
-import java.util.List;
-import java.util.ArrayList;
-
-import java.awt.Color;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.time.Instant;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class TicketButtonListener extends ListenerAdapter {
 
@@ -165,6 +165,7 @@ public class TicketButtonListener extends ListenerAdapter {
                 try {
                     File dir = new File("ticket", type.getId());
                     dir.mkdirs();
+
                     File file = new File(dir, channelId + ".txt");
                     Files.write(file.toPath(), transcript.toString().getBytes(StandardCharsets.UTF_8));
 
@@ -181,11 +182,11 @@ public class TicketButtonListener extends ListenerAdapter {
 
                         logChannel.sendMessageEmbeds(embed.build())
                                 .addFiles(upload)
-                                .queue(msg -> {
-                                    msg.delete().queueAfter(5, TimeUnit.MINUTES);
-                                    file.delete();
-                                });
+                                .queue(); // ⛔ Kein auto-delete mehr
                     }
+
+                    // ✅ Debug-Ausgabe
+                    Synccord.debug("[Debug] Transkript gespeichert unter: " + file.getAbsolutePath());
 
                 } catch (IOException e) {
                     replyEmbed(event, "⚠ Fehler beim Speichern des Transkripts: " + e.getMessage(), Color.RED);

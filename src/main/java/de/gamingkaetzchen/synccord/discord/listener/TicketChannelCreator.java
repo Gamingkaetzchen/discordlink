@@ -1,5 +1,19 @@
 package de.gamingkaetzchen.synccord.discord.listener;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.discord.LinkManager;
 import de.gamingkaetzchen.synccord.tickets.TicketManager;
@@ -13,21 +27,6 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 public class TicketChannelCreator {
 
@@ -140,6 +139,18 @@ public class TicketChannelCreator {
                     }
 
                     event.reply(Lang.get("ticket_created_user_message")).setEphemeral(true).queue();
+
+                    // ✅ Minecraft-Support-Benachrichtigung
+                    Bukkit.getScheduler().runTask(Synccord.getInstance(), () -> {
+                        for (Player player : Bukkit.getOnlinePlayers()) {
+                            if (player.hasPermission("synccord.ticket.alert")) {
+                                String msg = Lang.get("ticket_alert_message")
+                                        .replace("%user%", member.getEffectiveName())
+                                        .replace("%ticket%", type.getName());
+                                player.sendMessage(msg);
+                            }
+                        }
+                    });
                 });
     }
 

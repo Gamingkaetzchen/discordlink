@@ -1,0 +1,70 @@
+regeln:
+  allgemeines_verhalten:
+    - "§1.1 Sei respektvoll zu anderen. Beleidigungen, Diskriminierung oder toxisches Verhalten sind verboten."
+    - "§1.2 Spam, Mobbing oder provozierendes Verhalten wird bestraft."
+    - "§1.3 Bugs oder Glitches (z. B. mit AnvilColor oder BoosterFly) dürfen nicht ausgenutzt werden – melde sie dem Team."
+    - "§1.4 Werbung für andere Server oder Produkte ist untersagt."
+    - "§1.5 Strafen zu umgehen (z. B. mit Alt-Accounts oder VPNs) ist verboten."
+    - "§1.6 Accounts dürfen nicht weitergegeben werden – du bist für deinen Account verantwortlich."
+    - "§1.7 Jeder Spieler darf nur mit einem Account gleichzeitig spielen. Teammitglieder dürfen einen Zweitaccount ausschließlich für administrative oder bauliche Zwecke verwenden – nicht zur Spielerüberwachung."
+    - "§1.8 Spam umfasst schnelle Wiederholungen, unsinnige Nachrichten, Capslock-Spam oder Geräusche im Voicechat. Toxisches Verhalten umfasst provozierende Kommentare, permanentes Kritisieren oder Einschüchtern anderer."
+    - "§12.3 Das Weitergeben des Codeworts Sklave an andere Spieler ist verboten."
+
+  griefing_und_schutz:
+    - "§2.1 Griefing (mutwilliges Zerstören fremder Bauwerke) ist strengstens verboten."
+    - "§2.2 Es gibt kein Claim-System – baue mit Verantwortung und Respekt gegenüber anderen."
+    - "§2.3 Griefing-Vorfälle können durch Admin-Tools nachvollzogen werden."
+
+  pvp_und_kampfverhalten:
+    - "§3.1 PvP ist auf dem gesamten Server verboten."
+    - "§3.2 Das absichtliche oder fahrlässige Verursachen von Schaden durch indirekte Mittel (z. B. Lava, Mobs, Elytra-Crashes) ist verboten."
+
+
+  bauen_und_umgebung:
+    - "§4.1 Redstone-Clock-Spam und performance-intensive Farmen sind zu vermeiden."
+    - "§4.2 Landschaftsverschandelung (TNT, riesige Löcher, fliegende Plattformen) ist untersagt."
+    - "§4.3 ItemFrameToggle darf nicht zum Trollen oder Laggen anderer verwendet werden."
+    - "§4.4 Große Redstonesysteme sind mit dem Serverteam abzusprechen."
+
+  wirtschaft_und_shops:
+    - "§5.1 Handel ist erlaubt, aber Scamming (absichtlicher Betrug) verboten."
+    - "§5.2 Verkaufe nur legitime Items – keine Dupes oder Exploits."
+
+  teams_und_gruppen:
+    - "§6.1 Gruppen sind erlaubt. Sabotage (z. B. Base leaken, Items entwenden, vorsätzliche Zerstörung) ist verboten – auch beim Verlassen der Gruppe."
+
+  teleportation_und_reisen:
+    - "§7.1 TPA-, Home- und Warp-Befehle sind erlaubt – Teleportfallen sind verboten."
+    - "§7.2 SpawnElytra darf nicht zum gezielten Crashen anderer Spieler genutzt werden."
+
+  stats_und_timers:
+    - "§8.1 Der SimpleTimer darf nicht manipuliert werden. Statistiken (PlayerStats) werden überwacht."
+    - "§8.2 Das absichtliche Manipulieren von Stats, z. B. durch Autoklicker oder AFK-Mining, ist verboten."
+
+  moderation_und_team:
+    - "§9.1 Folge den Anweisungen des Teams. Widerspruch kann im Nachhinein per Ticket erfolgen (Synccord)."
+    - "§9.2 Teammitglieder dürfen ihre Rechte nicht zum Vorteil nutzen."
+    - "§9.3 Wiederholte Regelverstöße führen zu Bans."
+    - "§9.4 Admins behalten sich vor, Spieler auch ohne Angabe von Gründen zu entfernen."
+
+  modifikationen_und_voicechat:
+    - "§10.1 Verboten sind Mods mit Vorteilen (X-Ray, KillAura, Tracer, Damage-Indicator und weitere unfairen Mods)."
+    - "§10.2 Voicechat unterliegt denselben Regeln wie der Chat – kein Spam, kein Belästigen."
+    - "§10.3 Zum bestätigen der Regln brauchst du: Spezi."
+    - "§10.4 Voicechat hat eine Mindestaltergrenze von 14 Jahren."
+    - "§10.5 ReplayMod ist erlaubt, solange keine Live-Vorteile entstehen."
+
+  zusätzliche_features:
+    - "§11.1 BoosterFly kann nur unter bestimmten Voraussetzungen genutzt werden."
+    - "§11.2 Events, Timer und andere Funktionen gehören zum Spiel – kein Grund zur Beschwerde."
+    - "§11.3 Jumpscares oder visuelle Effekte können vorkommen – dies ist rein spielerisch."
+
+  datenschutz:
+    - "§12.1 Der Server speichert gewisse Daten wie Positionen, Statistiken und Chatverläufe."
+    - "§12.2 Mit dem Betreten akzeptierst du diese Speicherung zur Verbesserung des Spielerlebnisses."
+
+  kriegserklaerung_und_tickets:
+    - "§13.1 Kriege oder Konflikte zwischen Gruppen dürfen nur mit vorheriger Genehmigung durch das Team (via Synccord-Ticket) stattfinden."
+    - "§13.2 In Kriegsfällen können bestimmte Regeln (§2.1 §3.1 §5.1 §7.1 §7.2) temporär aufgehoben werden. Nach Ticketerstellung fügt das Serverteam den gegnerischen Teamleiter hinzu. Die Regelanpassungen werden dort gemeinsam mit dem Team diskutiert und dokumentiert."
+    - "§13.3 Jede Kriegserklärung muss schriftlich per Ticket eingereicht und genehmigt werden."
+    - "§13.4 Der Missbrauch von Kriegstickets führt zu temporärem Ausschluss von weiteren Kriegserklärungen."

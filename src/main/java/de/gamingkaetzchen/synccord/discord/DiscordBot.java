@@ -1,10 +1,13 @@
 package de.gamingkaetzchen.synccord.discord;
 
 import de.gamingkaetzchen.synccord.Synccord;
+import de.gamingkaetzchen.synccord.discord.commands.EmbitCommand;
 import de.gamingkaetzchen.synccord.discord.commands.LinkMCCommand;
 import de.gamingkaetzchen.synccord.discord.commands.SetupCommand;
 import de.gamingkaetzchen.synccord.discord.commands.TicketSetupCommand;
 import de.gamingkaetzchen.synccord.discord.commands.UnlinkMCCommand;
+import de.gamingkaetzchen.synccord.discord.listener.EmbitListener;
+import de.gamingkaetzchen.synccord.discord.listener.RuleAcceptListener;
 import de.gamingkaetzchen.synccord.discord.listener.TicketButtonListener;
 import de.gamingkaetzchen.synccord.tickets.TicketManager;
 import de.gamingkaetzchen.synccord.util.Lang;
@@ -36,6 +39,9 @@ public class DiscordBot {
         jda.awaitReady();
 
         jda.addEventListener(
+                new EmbitCommand(),
+                new EmbitListener(),
+                new RuleAcceptListener(),
                 new SetupCommand(),
                 new LinkHandler(),
                 new InfoButtonListener(),
@@ -56,13 +62,7 @@ public class DiscordBot {
 
         jda.updateCommands().addCommands(
                 Commands.slash("setup", Lang.get("setup_description"))
-                        .addOption(
-                                OptionType.STRING,
-                                "type",
-                                Lang.get("setup_option_type_description"),
-                                true,
-                                true
-                        ),
+                        .addOption(OptionType.STRING, "type", Lang.get("setup_option_type_description"), true, true),
                 Commands.slash("linkmc", Lang.get("linkmc_description"))
                         .addOption(OptionType.STRING, "uuid", Lang.get("linkmc_option_uuid"), true)
                         .addOption(OptionType.STRING, "discordid", Lang.get("linkmc_option_discordid"), true),
@@ -73,8 +73,10 @@ public class DiscordBot {
                                 new SubcommandData("setup", "Ticket-Buttons posten")
                                         .addOption(OptionType.STRING, "type", "Tickettyp-ID aus config.yml", true, true)
                                         .addOption(OptionType.CHANNEL, "channel", "Channel, in dem der Button gepostet werden soll", true)
-                        )
+                        ),
+                EmbitCommand.getCommandData() // ✅ hinzugefügt
         ).queue();
+
     }
 
     public void shutdown() {
