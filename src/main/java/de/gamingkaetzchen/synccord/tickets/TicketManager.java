@@ -1,5 +1,14 @@
 package de.gamingkaetzchen.synccord.tickets;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -7,9 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-
-import java.io.File;
-import java.util.*;
 
 public class TicketManager {
 
@@ -41,6 +47,10 @@ public class TicketManager {
             String categoryId = ticketSection.getString("ticketkategorie");
             List<String> supporterRoles = ticketSection.getStringList("supporter_roles");
 
+            // 🔥 HIER: litebans aus config lesen
+            boolean litebansHook = ticketSection.getBoolean("litebanshook",
+                    ticketSection.getBoolean("litebans-hook", false));
+
             Map<Integer, TicketQuestion> questions = new TreeMap<>();
             ConfigurationSection questionSection = ticketSection.getConfigurationSection("question");
             if (questionSection != null) {
@@ -56,7 +66,17 @@ public class TicketManager {
                 }
             }
 
-            TicketType ticketType = new TicketType(key, name, description, buttonName, categoryId, supporterRoles, questions);
+            // 🔥 HIER: boolean an den Typ durchreichen
+            TicketType ticketType = new TicketType(
+                    key,
+                    name,
+                    description,
+                    buttonName,
+                    categoryId,
+                    supporterRoles,
+                    questions,
+                    litebansHook
+            );
             ticketTypes.put(key, ticketType);
         }
     }

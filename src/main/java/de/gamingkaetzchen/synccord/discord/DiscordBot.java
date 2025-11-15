@@ -7,6 +7,7 @@ import de.gamingkaetzchen.synccord.discord.commands.SetupCommand;
 import de.gamingkaetzchen.synccord.discord.commands.TicketSetupCommand;
 import de.gamingkaetzchen.synccord.discord.commands.UnlinkMCCommand;
 import de.gamingkaetzchen.synccord.discord.listener.EmbitListener;
+import de.gamingkaetzchen.synccord.discord.listener.MultiTicketSelectListener;
 import de.gamingkaetzchen.synccord.discord.listener.RuleAcceptListener;
 import de.gamingkaetzchen.synccord.discord.listener.TicketButtonListener;
 import de.gamingkaetzchen.synccord.tickets.TicketManager;
@@ -38,17 +39,19 @@ public class DiscordBot {
         this.jda = builder.build();
         jda.awaitReady();
 
+        // alle Listener registrieren
         jda.addEventListener(
                 new EmbitCommand(),
                 new EmbitListener(),
                 new RuleAcceptListener(),
-                new SetupCommand(),
+                new SetupCommand(), // <- hier drin ist jetzt /setup multiticket
                 new LinkHandler(),
                 new InfoButtonListener(),
                 new LinkMCCommand(),
                 new UnlinkMCCommand(),
                 new TicketButtonListener(ticketManager),
-                new TicketSetupCommand(ticketManager, jda)
+                new TicketSetupCommand(ticketManager, jda),
+                new MultiTicketSelectListener() // <- NEU: reagiert auf das Dropdown vom multiticket
         );
 
         debug("debug_discord_ready");
@@ -61,8 +64,10 @@ public class DiscordBot {
         debug("debug_registering_slash_commands");
 
         jda.updateCommands().addCommands(
+                // /setup kriegt jetzt optional den channel, weil multiticket ihn braucht
                 Commands.slash("setup", Lang.get("setup_description"))
-                        .addOption(OptionType.STRING, "type", Lang.get("setup_option_type_description"), true, true),
+                        .addOption(OptionType.STRING, "type", Lang.get("setup_option_type_description"), true, true)
+                        .addOption(OptionType.CHANNEL, "channel", "Zielkanal (für multiticket)", false),
                 Commands.slash("linkmc", Lang.get("linkmc_description"))
                         .addOption(OptionType.STRING, "uuid", Lang.get("linkmc_option_uuid"), true)
                         .addOption(OptionType.STRING, "discordid", Lang.get("linkmc_option_discordid"), true),
@@ -74,7 +79,8 @@ public class DiscordBot {
                                         .addOption(OptionType.STRING, "type", "Tickettyp-ID aus config.yml", true, true)
                                         .addOption(OptionType.CHANNEL, "channel", "Channel, in dem der Button gepostet werden soll", true)
                         ),
-                EmbitCommand.getCommandData() // ✅ hinzugefügt
+                // dein Embit-Command
+                EmbitCommand.getCommandData()
         ).queue();
 
     }
@@ -103,4 +109,26 @@ public class DiscordBot {
             Synccord.getInstance().getLogger().info(Lang.get(key));
         }
     }
+
+    public void sendSimpleEmbed(String channelId, String title, String description, java.awt.Color color, String thumbnailUrl) {
+        if (jda == null) {
+            return;
+        }
+        var channel = jda.getChannelById(net.dv8tion.jda.api.entities.channel.middleman.MessageChannel.class, channelId);
+        if (channel == null) {
+            return;
+        }
+
+        net.dv8tion.jda.api.EmbedBuilder eb = new net.dv8tion.jda.api.EmbedBuilder()
+                .setTitle(title)
+                .setDescription(description)
+                .setColor(color);
+
+        if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+            eb.setThumbnail(thumbnailUrl);
+        }
+
+        channel.sendMessageEmbeds(eb.build()).queue();
+    }
+
 }

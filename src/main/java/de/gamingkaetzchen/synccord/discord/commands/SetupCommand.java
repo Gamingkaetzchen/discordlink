@@ -3,17 +3,21 @@ package de.gamingkaetzchen.synccord.discord.commands;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.discord.InfoUpdater;
+import de.gamingkaetzchen.synccord.tickets.TicketManager;
+import de.gamingkaetzchen.synccord.tickets.TicketType;
 import de.gamingkaetzchen.synccord.util.Lang;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -21,6 +25,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 public class SetupCommand extends ListenerAdapter {
 
@@ -49,6 +54,7 @@ public class SetupCommand extends ListenerAdapter {
             Synccord.getInstance().getLogger().info(Lang.get("debug_setup_used").replace("%type%", type));
         }
 
+        // ====================== /setup linking ======================
         if (type.equalsIgnoreCase("linking")) {
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle(Lang.get("link_embed_title"))
@@ -64,8 +70,11 @@ public class SetupCommand extends ListenerAdapter {
             if (isDebug()) {
                 Synccord.getInstance().getLogger().info(Lang.get("debug_setup_linking_sent"));
             }
+            return;
+        }
 
-        } else if (type.equalsIgnoreCase("info")) {
+        // ====================== /setup info ======================
+        if (type.equalsIgnoreCase("info")) {
             EmbedBuilder embed = InfoUpdater.buildStatusEmbed(guildIconUrl);
             MessageChannel channel = event.getChannel();
 
@@ -80,8 +89,11 @@ public class SetupCommand extends ListenerAdapter {
                     });
 
             event.reply(Lang.get("info_sent")).setEphemeral(true).queue();
+            return;
+        }
 
-        } else if (type.equalsIgnoreCase("regel")) {
+        // ====================== /setup regel ======================
+        if (type.equalsIgnoreCase("regel")) {
             File ruleFile = new File(Synccord.getInstance().getDataFolder(), "rules.yml");
             YamlConfiguration rulesConfig = YamlConfiguration.loadConfiguration(ruleFile);
             List<MessageEmbed> embeds = new ArrayList<>();
@@ -107,7 +119,6 @@ public class SetupCommand extends ListenerAdapter {
                 embeds.add(embed.build());
             }
 
-            // letzte Seite mit Button
             event.deferReply().queue((InteractionHook hook) -> {
                 MessageChannel channel = event.getChannel();
                 if (channel == null) {
@@ -131,10 +142,66 @@ public class SetupCommand extends ListenerAdapter {
             if (isDebug()) {
                 Synccord.getInstance().getLogger().info(Lang.get("debug_setup_regel_sent"));
             }
-
-        } else {
-            event.reply(Lang.get("invalid_type")).setEphemeral(true).queue();
+            return;
         }
+
+        // ====================== /setup multiticket (NEU) ======================
+        if (type.equalsIgnoreCase("multiticket")) {
+            // Channel kommt jetzt optional aus dem Slash-Command (in DiscordBot registriert)
+            var channelOpt = event.getOption("channel");
+            if (channelOpt == null || !(channelOpt.getAsChannel() instanceof TextChannel targetChannel)) {
+                event.reply("⚠ Bitte einen Zielkanal angeben: `/setup multiticket` + Channel auswählen.")
+                        .setEphemeral(true)
+                        .queue();
+                return;
+            }
+
+            // TicketManager aus dem Bot holen
+            if (Synccord.getInstance().getDiscordBot() == null
+                    || Synccord.getInstance().getDiscordBot().getTicketManager() == null) {
+                event.reply("❌ Ticket-System nicht verfügbar.").setEphemeral(true).queue();
+                return;
+            }
+
+            TicketManager ticketManager = Synccord.getInstance().getDiscordBot().getTicketManager();
+            Collection<TicketType> allTypes = ticketManager.getAllTicketTypes(); // <-- Collection statt List
+            if (allTypes == null || allTypes.isEmpty()) {
+                event.reply("⚠ Es wurden noch keine Ticket-Typen in der config.yml definiert.")
+                        .setEphemeral(true)
+                        .queue();
+                return;
+            }
+
+            // Dropdown bauen – maximal 5 auswählbar
+            StringSelectMenu.Builder menu = StringSelectMenu.create(
+                    "multiticket-select:" + event.getUser().getId() + ":" + targetChannel.getId())
+                    .setPlaceholder("Wähle bis zu 5 Ticket-Arten …")
+                    .setMinValues(1)
+                    .setMaxValues(Math.min(5, allTypes.size()));
+
+            for (TicketType tt : allTypes) {
+                menu.addOption(tt.getName(), tt.getId());
+            }
+
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle("Multi-Ticket Setup")
+                    .setDescription("Wähle jetzt die Ticket-Arten aus.\nZielkanal: " + targetChannel.getAsMention())
+                    .setColor(Color.CYAN);
+
+            event.replyEmbeds(embed.build())
+                    .addActionRow(menu.build())
+                    .setEphemeral(true)
+                    .queue();
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info("[Debug] /setup multiticket von "
+                        + event.getUser().getName() + " für Channel " + targetChannel.getId() + " gestartet.");
+            }
+            return;
+        }
+
+        // wenn keiner der bekannten Typen
+        event.reply(Lang.get("invalid_type")).setEphemeral(true).queue();
     }
 
     @Override
@@ -146,7 +213,8 @@ public class SetupCommand extends ListenerAdapter {
         List<Command.Choice> choices = List.of(
                 new Command.Choice("linking", "linking"),
                 new Command.Choice("info", "info"),
-                new Command.Choice("regel", "regel") // ✅ Autocomplete ergänzt
+                new Command.Choice("regel", "regel"),
+                new Command.Choice("multiticket", "multiticket") // neu
         );
 
         event.replyChoices(choices).queue();

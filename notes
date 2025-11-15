@@ -1,8 +1,13 @@
-AnvilColor,
-BoosterFly, 
-ItemFrameToggle,
-PlayerStats, 
-SimpleTimer, 
-SpawnElytra, 
-Synccord, 
-voicechat, 
+TicketButtonListener.java
+→ Der wichtigste Teil!
+Hier erstellen wir den Ticket-Channel und das Embed, dort wird die LiteBans-Abfrage eingebaut.
+
+LinkManager.java
+→ Damit ich weiß, wie wir die Minecraft-UUID anhand der Discord-ID bekommen.
+(Wir brauchen das, um die Strafen abzufragen.)
+
+Synccord.java (Hauptklasse)
+→ Nur damit ich sehe, wie du den TicketManager, LinkManager usw. initialisierst (für Hook-Zugriff).
+
+(Optional, falls vorhanden)
+LiteBansHook.java – falls du die Datei schon hast, sonst schreibe ich sie komplett neu.

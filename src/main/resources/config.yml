@@ -3,16 +3,27 @@
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 discord:
-  token: "YOURBOTTOKEN"
-  guild-id: "YOURSERVERIPHERE"
-  java-ip: "Change.me"
-  bedrock-ip: "Change.me"
-
+  token: "XXXXXX_REDACTED_BOT_TOKEN_XXXXXX"
+  guild-id: "0000000000000000000"
+  java-ip: "example-server.de"
+  bedrock-ip: "X"
+  chat-channel-id: "0000000000000000000"    # MC-Chat <-> Discord
+  join-channel-id: "0000000000000000000"    # Join-Nachrichten
+  leave-channel-id: "0000000000000000000"   # Leave-Nachrichten
+  
+  death-messages:
+    - "{player} ist gestorben: {reason}"
+  join-messages:
+    - "Willkommen {player} auf dem Server!"
+    - "{player} ist beigetreten ✅"
+    - "Hey {player}, hab Spaß!"
+  leave-messages:
+    - "{player} hat den Server verlassen."
+    - "Tschüss {player}, bis bald 👋"
+    - "{player} ist gegangen 🥲"
   # Discord-Rollen, die mit Minecraft-Permissions verknüpft sind
   role-link:
-    "123456789012345678": "vip"
-    "234567890123456789": "mod"
-    "345678901234567890": "admin"
+    "0000000000000000000": "booster"
 
 linking:
   code-expiry-minutes: 15
@@ -24,33 +35,261 @@ tps-monitor:
 tickets:
   support:
     name: "Support Ticket"
-    description: "Wenn Sie ein Problem haben, erstellen Sie bitte ein Ticket."
-    button_name: "✉️ Create a Ticket"
-
-    # Rollen, die Zugriff auf Tickets haben
+    description: "Erstelle ein Ticket, wenn du Hilfe brauchst."
+    button_name: "✉️ Support erstellen"
+    litebans-hook: true
     supporter_roles:
-      - "1111111111111"
-      - "2222222222222"
-
-    # Discord-Kategorie-ID, unter der die Tickets erstellt werden
-    ticketkategorie: "1111111111111"
-
-    # Fragen, die im Modal gestellt werden
+      - "0000000000000000000" # Inhaber
+      - "0000000000000000000" # Host/Dev
+      - "0000000000000000000" # Admin
+      - "0000000000000000000" # Supporter
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
     question:
       1:
         input: 2000
         questions:
-          - "Was ist dein Anliegen?"
+          - "Beschreibe dein Problem genau."
       2:
         input: 16
         questions:
-          - "Spielst du Java oder Bedrock?"
+          - "Welche Minecraft-Version nutzt du?"
 
-    # Kanal, in dem Transkripte beim Schließen gepostet werden
-    log_channel_id: "999999999999999999"  # 🔁 <— bitte durch echten Channel ersetzen
+  endbannungsantrag:
+    name: "Entbannungsantrag"
+    description: "Wurdest du gebannt? Stelle hier Antrag."
+    button_name: "🚫 Entbannung beantragen"
+    litebans-hook: true
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 2000
+        questions:
+          - "Warum möchtest du entbannt werden?"
+      2:
+        input: 200
+        questions:
+          - "Was hast du aus dem Bann gelernt?"
+
+  bugreport:
+    name: "Bug Report"
+    description: "Melde Fehler, Bugs oder technische Probleme."
+    button_name: "🐞 Bug melden"
+    litebans-hook: false
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 1000
+        questions:
+          - "Beschreibe den Bug genau."
+      2:
+        input: 200
+        questions:
+          - "Wie kann man den Bug auslösen?"
+      3:
+        input: 100
+        questions:
+          - "Welche Welt oder Version betrifft das?"
+
+  playerreport:
+    name: "Spieler melden"
+    description: "Melde Spieler, die Regeln brechen."
+    button_name: "⚠️ Spieler melden"
+    litebans-hook: true
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 64
+        questions:
+          - "Welchen Spieler meldest du?"
+      2:
+        input: 500
+        questions:
+          - "Was ist passiert?"
+      3:
+        input: 200
+        questions:
+          - "Hast du Beweise (z. B. Screenshot)?"
+
+  kriegsanfrage:
+    name: "Kriegsanfrage"
+    description: "Beantrage Krieg zwischen Teams."
+    button_name: "⚔️ Krieg beantragen"
+    litebans-hook: false
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 64
+        questions:
+          - "Wie heißt dein Team?"
+      2:
+        input: 64
+        questions:
+          - "Gegen welches Team kämpfst du?"
+      3:
+        input: 500
+        questions:
+          - "Warum willst du Krieg starten?"
+
+  bewerbung:
+    name: "Bewerbung"
+    description: "Bewirb dich als Teammitglied oder Partner."
+    button_name: "📋 Bewerbung starten"
+    litebans-hook: false
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 64
+        questions:
+          - "Für welche Rolle bewirbst du dich?"
+      2:
+        input: 1000
+        questions:
+          - "Warum willst du im Team sein?"
+      3:
+        input: 500
+        questions:
+          - "Welche Erfahrung hast du?"
+
+  vorschlag:
+    name: "Vorschlag"
+    description: "Teile Ideen oder Verbesserungsvorschläge."
+    button_name: "💡 Vorschlag senden"
+    litebans-hook: false
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 1000
+        questions:
+          - "Beschreibe deine Idee kurz."
+      2:
+        input: 200
+        questions:
+          - "Warum ist dein Vorschlag gut?"
+
+  teambeschwerde:
+    name: "Team-Beschwerde"
+    description: "Melde Fehlverhalten von Teammitgliedern."
+    button_name: "🚨 Team melden"
+    litebans-hook: false
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 64
+        questions:
+          - "Gegen wen richtet sich die Beschwerde?"
+      2:
+        input: 500
+        questions:
+          - "Was ist passiert?"
+      3:
+        input: 200
+        questions:
+          - "Hast du Beweise (z. B. Screenshot)?"
+
+  feedback:
+    name: "Feedback"
+    description: "Teile dein Feedback oder Verbesserungsideen."
+    button_name: "💬 Feedback senden"
+    litebans-hook: false
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 500
+        questions:
+          - "Worauf bezieht sich dein Feedback?"
+      2:
+        input: 1000
+        questions:
+          - "Was möchtest du uns mitteilen?"
+
+  fraktionsbewerbung:
+    name: "Fraktionsbewerbung"
+    description: "Bewerbe deine Fraktion für den Server."
+    button_name: "🏰 Fraktion bewerben"
+    litebans-hook: false
+    supporter_roles:
+      - "0000000000000000000"
+      - "0000000000000000000"
+      - "0000000000000000000"
+    ticketkategorie: "0000000000000000000"
+    log-channel-id: "0000000000000000000"
+    question:
+      1:
+        input: 64
+        questions:
+          - "Wie heißt deine Fraktion?"
+      2:
+        input: 100
+        questions:
+          - "Was ist euer Tag (z. B. RCT)?"
+      3:
+        input: 200
+        questions:
+          - "Welche Farben nutzt euer Tagverlauf?"
+      4:
+        input: 500
+        questions:
+          - "Warum sollte eure Fraktion angenommen werden?"
 
 language: "en"
-debug: false
+debug: true
 rules:
-  accept-role-id: "123456789012345678"
-  keyword: "gelesen"
+  accept-role-id: "0000000000000000000"
+  keyword: "WEIHNACHTEN"
+
+chat:
+  format-to-discord: "<%player%> %message%"
+  format-to-minecraft: "&9[DC] &7%user%: &f%message%"
+  ignore-bots: true
+
+features:
+  send-join: true
+  send-leave: true
+  send-death: false
+  allow-mc-command-to-discord: false
+  allow-discord-online-command: false
+
+info:
+  allowed-roles:
+    - "0000000000000000000"

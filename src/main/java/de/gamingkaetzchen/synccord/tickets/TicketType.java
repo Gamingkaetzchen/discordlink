@@ -1,13 +1,13 @@
 package de.gamingkaetzchen.synccord.tickets;
 
-import de.gamingkaetzchen.synccord.Synccord;
-import de.gamingkaetzchen.synccord.util.Lang;
-import net.dv8tion.jda.api.EmbedBuilder;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import de.gamingkaetzchen.synccord.Synccord;
+import de.gamingkaetzchen.synccord.util.Lang;
+import net.dv8tion.jda.api.EmbedBuilder;
 
 public class TicketType {
 
@@ -18,9 +18,22 @@ public class TicketType {
     private final String categoryId;
     private final List<String> supporterRoles;
     private final Map<Integer, TicketQuestion> questions;
+
+    // ⬇️ NEU: pro Tickettyp konfigurierbar
+    private final boolean litebansHook;
+
+    // das hier wirkt bei dir wie ein altes Überbleibsel – ich lass es drin,
+    // damit nix anderes bei dir kaputtgeht
     private final Map<String, TicketType> ticketTypes = new HashMap<>();
 
-    public TicketType(String id, String name, String description, String buttonName, String categoryId, List<String> supporterRoles, Map<Integer, TicketQuestion> questions) {
+    public TicketType(String id,
+            String name,
+            String description,
+            String buttonName,
+            String categoryId,
+            List<String> supporterRoles,
+            Map<Integer, TicketQuestion> questions,
+            boolean litebansHook) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -28,6 +41,7 @@ public class TicketType {
         this.categoryId = categoryId;
         this.supporterRoles = supporterRoles;
         this.questions = questions;
+        this.litebansHook = litebansHook;
     }
 
     public String getId() {
@@ -58,6 +72,11 @@ public class TicketType {
         return questions;
     }
 
+    // ⬇️ NEU: von außen abfragen
+    public boolean isLitebansHook() {
+        return litebansHook;
+    }
+
     public EmbedBuilder toFancyEmbed() {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("📩 " + getName());
@@ -85,6 +104,9 @@ public class TicketType {
         }
 
         embed.addField("❓ Fragen", String.valueOf(questions.size()), true);
+
+        // hier NICHT direkt LiteBans anzeigen – das machen wir im TicketButtonListener,
+        // weil wir da erst den Spieler kennen
         return embed;
     }
 

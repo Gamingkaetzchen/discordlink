@@ -254,3 +254,6 @@ debug_embit_submitted: "[Debug] Modal-Daten empfangen: %title% / %content% / %im
 embit_command_description: "Öffnet ein Menü zum Erstellen eines Embeds"
 ticket_alert_message: "§6[Ticket] §e%user% hat ein neues Ticket vom Typ §7%ticket% §eeröffnet!"
 ticket_alert_join: "§e📬 Es sind derzeit noch offene Tickets vorhanden!"
+not_your_setup: "❌ Dieses Setup gehört nicht dir, %user%."
+ticket_litebans_no_link: "Spieler nicht verlinkt – keine Abfrage möglich"
+ticket_litebans_none: "Keine aktiven Strafen gefunden"

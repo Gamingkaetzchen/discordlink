@@ -1,5 +1,6 @@
 package de.gamingkaetzchen.synccord.discord;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -23,7 +24,28 @@ public class InfoButtonListener extends ListenerAdapter {
         debug("debug_button_click", "%user%", event.getUser().getAsTag());
 
         Member member = event.getMember();
-        if (member == null || !member.hasPermission(Permission.ADMINISTRATOR)) {
+        if (member == null) {
+            event.reply(Lang.get("no_permission")).setEphemeral(true).queue();
+            return;
+        }
+
+        // 1) Rollen aus der config holen
+        List<String> allowedRoles = Synccord.getInstance()
+                .getConfig()
+                .getStringList("info.allowed-roles");
+
+        boolean hasPermission = false;
+
+        if (allowedRoles != null && !allowedRoles.isEmpty()) {
+            // 2) prüfen ob Member eine dieser Rollen hat
+            hasPermission = member.getRoles().stream()
+                    .anyMatch(role -> allowedRoles.contains(role.getId()));
+        } else {
+            // 3) Fallback: wenn nix in config steht -> Admin-Recht wie bisher
+            hasPermission = member.hasPermission(Permission.ADMINISTRATOR);
+        }
+
+        if (!hasPermission) {
             debug("debug_button_no_permission", "%user%", event.getUser().getAsTag());
             event.reply(Lang.get("no_permission")).setEphemeral(true).queue();
             return;

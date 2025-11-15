@@ -15,6 +15,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import de.gamingkaetzchen.synccord.Synccord;
+import de.gamingkaetzchen.synccord.discord.DiscordBot;
 import de.gamingkaetzchen.synccord.tickets.TicketManager;
 import de.gamingkaetzchen.synccord.tickets.TicketQuestion;
 import de.gamingkaetzchen.synccord.tickets.TicketType;
@@ -123,6 +124,7 @@ public class TicketButtonListener extends ListenerAdapter {
             return;
         }
 
+        // ========================== TICKET SCHLIESSEN ==========================
         if (id.startsWith("ticket:confirm_close:")) {
             String channelId = id.split(":")[2];
             TextChannel ticketChannel = event.getJDA().getTextChannelById(channelId);
@@ -146,11 +148,20 @@ public class TicketButtonListener extends ListenerAdapter {
                 return;
             }
 
-            // 🟢 Hole den Log-Channel aus der config
-            String logChannelId = Synccord.getInstance().getConfig().getString("tickets." + type.getId() + ".log-channel-id");
-            TextChannel logChannel = event.getGuild().getTextChannelById(logChannelId);
+            // 1. ticket-spezifische config
+            String logChannelId = Synccord.getInstance().getConfig()
+                    .getString("tickets." + type.getId() + ".log-channel-id");
+
+            // 2. globaler fallback
+            if (logChannelId == null || logChannelId.isEmpty()) {
+                logChannelId = Synccord.getInstance().getConfig().getString("tickets.log_channel_id");
+            }
+
+            TextChannel logChannel = resolveLogChannel(event, logChannelId);
 
             event.deferReply(true).queue();
+
+            TextChannel finalLogChannel = logChannel;
 
             ticketChannel.getHistory().retrievePast(100).queue(messages -> {
                 StringBuilder transcript = new StringBuilder();
@@ -169,8 +180,8 @@ public class TicketButtonListener extends ListenerAdapter {
                     File file = new File(dir, channelId + ".txt");
                     Files.write(file.toPath(), transcript.toString().getBytes(StandardCharsets.UTF_8));
 
-                    // 📤 Sende Transkript direkt in den Log-Channel (falls vorhanden)
-                    if (logChannel != null) {
+                    // nur senden, wenn wir wirklich einen Channel haben
+                    if (finalLogChannel != null) {
                         ByteArrayInputStream input = new ByteArrayInputStream(Files.readAllBytes(file.toPath()));
                         FileUpload upload = FileUpload.fromData(input, "transcript.txt");
 
@@ -180,12 +191,17 @@ public class TicketButtonListener extends ListenerAdapter {
                                 .setColor(Color.DARK_GRAY)
                                 .setTimestamp(Instant.now());
 
-                        logChannel.sendMessageEmbeds(embed.build())
+                        finalLogChannel.sendMessageEmbeds(embed.build())
                                 .addFiles(upload)
-                                .queue(); // ⛔ Kein auto-delete mehr
+                                .queue();
+                    } else {
+                        // debug ausgeben, warum nicht
+                        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+                            Synccord.getInstance().getLogger().info("[Debug] Kein Log-Channel gefunden für Ticket-Typ " + type.getId()
+                                    + " (config tickets." + type.getId() + ".log-channel-id oder tickets.log_channel_id prüfen)");
+                        }
                     }
 
-                    // ✅ Debug-Ausgabe
                     Synccord.debug("[Debug] Transkript gespeichert unter: " + file.getAbsolutePath());
 
                 } catch (IOException e) {
@@ -200,21 +216,48 @@ public class TicketButtonListener extends ListenerAdapter {
 
                 ticketChannel.delete().queueAfter(5, TimeUnit.SECONDS);
 
-                event.getHook().sendMessageEmbeds(new EmbedBuilder()
-                        .setDescription(Lang.get("ticket_closing_success"))
-                        .setColor(Color.GREEN)
-                        .build()).setEphemeral(true).queue();
+                // user feedback
+                if (finalLogChannel == null) {
+                    event.getHook().sendMessageEmbeds(new EmbedBuilder()
+                            .setDescription("✅ Ticket geschlossen.\n⚠ Kein Log-Channel gefunden, Transkript nur gespeichert.")
+                            .setColor(Color.YELLOW)
+                            .build()).setEphemeral(true).queue();
+                } else {
+                    event.getHook().sendMessageEmbeds(new EmbedBuilder()
+                            .setDescription(Lang.get("ticket_closing_success"))
+                            .setColor(Color.GREEN)
+                            .build()).setEphemeral(true).queue();
+                }
             });
             return;
         }
 
+        // ========================== TRANSCRIPT NACHTRÄGLICH SENDEN ==========================
         if (id.startsWith("ticket:send_transcript:")) {
             String channelId = id.split(":")[2];
 
-            // ✅ Hole Log-Channel aus config.yml
-            String logChannelId = Synccord.getInstance().getConfig().getString("tickets.log_channel_id");
-            TextChannel logChannel = event.getGuild().getTextChannelById(logChannelId);
+            // erst Ticket-YAML laden, um die Ticket-ID zu bekommen
+            File ticketYaml = new File("tickets", channelId + ".yml");
+            String typeId = null;
+            if (ticketYaml.exists()) {
+                YamlConfiguration ty = YamlConfiguration.loadConfiguration(ticketYaml);
+                typeId = ty.getString("ticket_id");
+            }
 
+            // jetzt logchannel suchen: 1. ticket-spezifisch 2. global
+            String logChannelId = null;
+            if (typeId != null) {
+                logChannelId = Synccord.getInstance().getConfig()
+                        .getString("tickets." + typeId + ".log-channel-id");
+            }
+            if (logChannelId == null || logChannelId.isEmpty()) {
+                logChannelId = Synccord.getInstance().getConfig()
+                        .getString("tickets.log_channel_id");
+            }
+
+            TextChannel logChannel = resolveLogChannel(event, logChannelId);
+
+            // nach gespeicherter Datei suchen
             File ticketDir = new File("ticket");
             File foundFile = null;
 
@@ -257,11 +300,13 @@ public class TicketButtonListener extends ListenerAdapter {
             }
             return;
         }
+
         if (id.startsWith("ticket:cancel_close:")) {
             replyEmbed(event, Lang.get("ticket_close_cancelled"), Color.GRAY);
             return;
         }
 
+        // ========================== Ticket-Button (Ticket erstellen) ==========================
         String[] idParts = id.split(":");
         if (idParts.length == 2 && idParts[0].equals("ticket")) {
             String ticketId = idParts[1];
@@ -323,6 +368,37 @@ public class TicketButtonListener extends ListenerAdapter {
         }
     }
 
+    private TextChannel resolveLogChannel(ButtonInteractionEvent event, String id) {
+        if (id == null) {
+            return null;
+        }
+        id = id.trim();
+        if (id.isEmpty()) {
+            return null;
+        }
+
+        TextChannel logChannel = null;
+
+        // 1. über das Guild-Objekt
+        if (event.getGuild() != null) {
+            logChannel = event.getGuild().getTextChannelById(id);
+        }
+
+        // 2. fallback über die globale JDA (falls event.getGuild() == null oder channel in cache anders)
+        if (logChannel == null) {
+            DiscordBot bot = Synccord.getInstance().getDiscordBot();
+            if (bot != null && bot.getJDA() != null) {
+                logChannel = bot.getJDA().getTextChannelById(id);
+            }
+        }
+
+        if (logChannel == null && Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+            Synccord.getInstance().getLogger().info("[Debug] Konnte Log-Channel mit ID '" + id + "' nicht finden.");
+        }
+
+        return logChannel;
+    }
+
     private void replyEmbed(ButtonInteractionEvent event, String message, Color color) {
         event.replyEmbeds(new EmbedBuilder().setDescription(message).setColor(color).setTimestamp(Instant.now()).build()).setEphemeral(true).queue();
     }
@@ -332,7 +408,7 @@ public class TicketButtonListener extends ListenerAdapter {
     }
 
     public TicketType getTypeByChannel(TextChannel channel) {
-        String name = channel.getName(); // z. B. "support-1234"
+        String name = channel.getName();
         for (TicketType type : ticketManager.getTicketTypes()) {
             if (name.startsWith(type.getId() + "-")) {
                 return type;
@@ -355,21 +431,5 @@ public class TicketButtonListener extends ListenerAdapter {
         }
 
         return ticketManager.getTicketTypeById(typeId);
-    }
-
-    private void debug(String key, String value) {
-        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info("[Debug] " + Lang.get(key)
-                    .replace("%value%", value)
-                    .replace("%ticket%", value)
-                    .replace("%channel%", value)
-                    .replace("%role%", value));
-        }
-    }
-
-    private void debug(String key) {
-        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info("[Debug] " + Lang.get(key));
-        }
     }
 }

@@ -4,12 +4,18 @@ main: de.gamingkaetzchen.synccord.Synccord
 api-version: 1.21
 authors: [Gamingkaetzchen]
 description: Verlinkt Minecraft-Spieler mit Discord und synchronisiert Rollen.
-softdepend: [LuckPerms]
+
+# LuckPerms ist eine Hard-Dependency (weil du Rollen synchronisierst),
+# LiteBans dagegen nur optional – daher softdepend.
+depend: [LuckPerms]
+softdepend: [LiteBans]
+
 commands:
   unlinkdiscord:
     description: Entfernt die Discord-Verknüpfung eines Spielers
     usage: /unlinkdiscord <spielername>
     permission: synccord.admin
+
   dcfind:
     description: Zeigt die verknüpfte Discord-ID eines Spielers
     permission: synccord.admin
