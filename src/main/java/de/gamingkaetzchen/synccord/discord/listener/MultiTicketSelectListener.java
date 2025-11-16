@@ -26,7 +26,7 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         // multiticket-select:<userId>:<channelId>
         String[] parts = componentId.split(":");
         if (parts.length < 3) {
-            event.reply("❌ Ungültige MultiTicket-ID. Bitte `/setup multiticket` neu ausführen.")
+            event.reply(Lang.get("multiticket_invalid_id"))
                     .setEphemeral(true).queue();
             return;
         }
@@ -35,7 +35,8 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         long targetChannelId = Long.parseLong(parts[2]);
 
         if (event.getUser().getIdLong() != ownerId) {
-            event.reply(Lang.get("not_your_setup", java.util.Map.of("user", event.getUser().getName())))
+            // not_your_setup: "❌ Dieses Setup gehört nicht dir, %user%."
+            event.reply(Lang.get("not_your_setup").replace("%user%", event.getUser().getName()))
                     .setEphemeral(true).queue();
             return;
         }
@@ -45,22 +46,26 @@ public class MultiTicketSelectListener extends ListenerAdapter {
 
         List<String> selected = event.getValues();
         if (selected.isEmpty()) {
-            event.reply("⚠ Bitte mindestens einen Ticket-Typ auswählen.").setEphemeral(true).queue();
+            event.reply(Lang.get("multiticket_no_type_selected"))
+                    .setEphemeral(true).queue();
             return;
         }
 
         TextChannel target = event.getJDA().getTextChannelById(targetChannelId);
         if (target == null) {
-            event.reply("❌ Zielkanal nicht gefunden.").setEphemeral(true).queue();
+            event.reply(Lang.get("multiticket_target_not_found"))
+                    .setEphemeral(true).queue();
             return;
         }
 
+        String guildIconUrl = event.getGuild() != null ? event.getGuild().getIconUrl() : null;
+
         EmbedBuilder eb = new EmbedBuilder()
-                .setTitle("📨 Support Ticket")
-                .setDescription("Wähle unten die passende Kategorie aus.")
+                .setTitle(Lang.get("multiticket_embed_title"))
+                .setDescription(Lang.get("multiticket_embed_description"))
                 .setColor(0x6E0B0B)
-                .setThumbnail(event.getGuild() != null ? event.getGuild().getIconUrl() : null)
-                .setFooter("Ticket-System | Synccord");
+                .setThumbnail(guildIconUrl)
+                .setFooter(Lang.get("ticket_embed_footer"), guildIconUrl);
 
         List<Button> buttons = new ArrayList<>();
 
@@ -72,7 +77,7 @@ public class MultiTicketSelectListener extends ListenerAdapter {
 
             String kategorie = (type.getCategoryId() != null && !type.getCategoryId().isEmpty())
                     ? "<#" + type.getCategoryId() + ">"
-                    : "_keine_";
+                    : Lang.get("multiticket_category_none");
 
             String rollen;
             if (type.getSupporterRoles() != null && !type.getSupporterRoles().isEmpty()) {
@@ -80,32 +85,52 @@ public class MultiTicketSelectListener extends ListenerAdapter {
                         .map(r -> "<@&" + r + ">")
                         .collect(Collectors.joining("\n"));
             } else {
-                rollen = "_keine_";
+                rollen = Lang.get("multiticket_roles_none");
             }
 
             int fragen = type.getQuestions() != null ? type.getQuestions().size() : 0;
 
-            // ⬅️ 1. Feld: Ticketname + Kategorie
-            eb.addField("🎫 " + type.getName(), "📁 " + kategorie, true);
-            // 2. Feld: Rollen
-            eb.addField("🧑‍💻 Supporter-Rollen", rollen, true);
-            // 3. Feld: Fragen
-            eb.addField("❓ Fragen", String.valueOf(fragen), true);
+            // Feld 1: Ticketname + Kategorie
+            String ticketTitle = "🎫 " + type.getName();
+            String categoryValue = Lang.get("ticket_panel_category_value")
+                    .replace("{category}", kategorie);
+            eb.addField(ticketTitle, categoryValue, true);
 
-            // Buttons → immer den Ticketnamen anzeigen (Bug 3)
+            // Feld 2: Rollen
+            eb.addField(
+                    Lang.get("ticket_panel_roles_label"),
+                    Lang.get("ticket_panel_roles_value").replace("{roles}", rollen),
+                    true
+            );
+
+            // Feld 3: Fragen
+            eb.addField(
+                    Lang.get("ticket_panel_questions_label"),
+                    Lang.get("ticket_panel_questions_value")
+                            .replace("{count}", String.valueOf(fragen)),
+                    true
+            );
+
+            // Buttons → Ticketname als Beschriftung
             buttons.add(Button.primary("ticket:" + type.getId(), type.getName()));
         }
 
         target.sendMessageEmbeds(eb.build())
                 .setActionRow(buttons)
                 .queue(msg -> {
-                    event.reply("✅ Multi-Ticket-Embed wurde in " + target.getAsMention() + " erstellt.")
+                    event.reply(
+                            Lang.get("multiticket_created_success")
+                                    .replace("%channel%", target.getAsMention())
+                    )
                             .setEphemeral(true).queue();
                 });
 
         if (plugin.getConfig().getBoolean("debug", false)) {
-            plugin.getLogger().info("[Debug] Multi-Ticket-Embed von " + event.getUser().getName()
-                    + " in #" + target.getName() + " erstellt.");
+            plugin.getLogger().info(
+                    Lang.get("debug_multiticket_embed_created")
+                            .replace("%user%", event.getUser().getName())
+                            .replace("%channel%", target.getName())
+            );
         }
     }
 }

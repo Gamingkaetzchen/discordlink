@@ -77,39 +77,53 @@ public class TicketChannelCreator {
                     String discordId = member.getId();
                     Optional<UUID> uuidOpt = LinkManager.getUUID(discordId);
 
+                    // Label für LiteBans-Feld aus Langfile
+                    String litebansLabel = "🔒 " + Lang.get("ticket_field_litebans");
+
                     if (uuidOpt.isPresent()) {
                         UUID uuid = uuidOpt.get();
                         OfflinePlayer offline = Bukkit.getOfflinePlayer(uuid);
 
-                        embed.addField("🧍 " + Lang.get("ticket_field_name"),
-                                offline.getName() != null ? offline.getName() : "Unbekannt",
-                                true);
+                        embed.addField(
+                                "🧍 " + Lang.get("ticket_field_name"),
+                                offline.getName() != null
+                                ? offline.getName()
+                                : Lang.get("ticket_unknown_name"),
+                                true
+                        );
 
                         Player player = Bukkit.getPlayer(uuid);
                         if (player != null && player.isOnline()) {
                             Location loc = player.getLocation();
                             World world = loc.getWorld();
                             if (world != null) {
-                                embed.addField("🌍 " + Lang.get("ticket_field_world"), world.getName(), true);
+                                embed.addField(
+                                        "🌍 " + Lang.get("ticket_field_world"),
+                                        world.getName(),
+                                        true
+                                );
                             }
-                            embed.addField("📍 " + Lang.get("ticket_field_coordinates"),
-                                    String.format("x: %.0f, y: %.0f, z: %.0f", loc.getX(), loc.getY(), loc.getZ()),
-                                    false);
+                            embed.addField(
+                                    "📍 " + Lang.get("ticket_field_coordinates"),
+                                    String.format("x: %.0f, y: %.0f, z: %.0f",
+                                            loc.getX(), loc.getY(), loc.getZ()),
+                                    false
+                            );
                         }
 
                         // LiteBans anzeigen, wenn für diesen Ticket-Typ aktiviert
                         if (type.isLitebansHook()) {
                             String lbText = fetchLitebansInfo(uuid);
                             if (lbText != null && !lbText.isEmpty()) {
-                                embed.addField("🔒 LiteBans", lbText, false);
+                                embed.addField(litebansLabel, lbText, false);
                             } else {
-                                embed.addField("🔒 LiteBans", "_Keine aktiven Strafen gefunden_", false);
+                                embed.addField(litebansLabel, Lang.get("ticket_litebans_none"), false);
                             }
                         }
 
                     } else {
                         if (type.isLitebansHook()) {
-                            embed.addField("🔒 LiteBans", "_Spieler nicht verlinkt – keine Abfrage möglich_", false);
+                            embed.addField(litebansLabel, Lang.get("ticket_litebans_no_link"), false);
                         }
                     }
 
@@ -245,29 +259,42 @@ public class TicketChannelCreator {
             return null;
         }
 
-        // Text bauen
+        // Text bauen – jetzt komplett über Langfile
         StringBuilder sb = new StringBuilder();
 
-        sb.append("• Ban: ").append(banned ? "**JA**" : "nein");
+        String yes = Lang.get("litebans_value_yes");   // z.B. **JA**
+        String no = Lang.get("litebans_value_no");     // z.B. nein
+
+        String banValue = banned ? yes : no;
+        sb.append(Lang.get("litebans_ban_line").replace("{value}", banValue));
         if (banDetails != null) {
             sb.append("\n").append(banDetails);
         }
         sb.append("\n");
 
-        sb.append("• Mute: ").append(muted ? "**JA**" : "nein");
+        String muteValue = muted ? yes : no;
+        sb.append(Lang.get("litebans_mute_line").replace("{value}", muteValue));
         if (muteDetails != null) {
             sb.append("\n").append(muteDetails);
         }
         sb.append("\n");
 
         if (!warnDetails.isEmpty()) {
-            sb.append("• Warns (").append(warnDetails.size()).append("):\n");
+            sb.append(
+                    Lang.get("litebans_warns_header")
+                            .replace("{count}", String.valueOf(warnDetails.size()))
+            ).append("\n");
+
             int i = 1;
             for (String w : warnDetails) {
-                sb.append("  ").append(i++).append("️⃣ ").append(w).append("\n");
+                sb.append(
+                        Lang.get("litebans_warn_entry")
+                                .replace("{number}", String.valueOf(i++))
+                                .replace("{text}", w)
+                ).append("\n");
             }
         } else {
-            sb.append("• Warns: keine");
+            sb.append(Lang.get("litebans_warns_none"));
         }
 
         return sb.toString().trim();
@@ -285,24 +312,18 @@ public class TicketChannelCreator {
     }
 
     /**
-     * Liest Reason + Ablauf aus einem LiteBans-Punishment. Erkennt mehrere
-     * Methodennamen und Sekunden/ms.
+     * Liest Reason + Ablauf aus einem LiteBans-Punishment.
      */
     private String extractPunishmentInfo(Object pun) {
         boolean debug = Synccord.getInstance().getConfig().getBoolean("debug", false);
         var log = Synccord.getInstance().getLogger();
 
-        // 1) erstmal gucken ob permanent
         Boolean isPermanent = tryBoolGetter(pun, "isPermanent");
-
-        // 2) Ablaufzeit ermitteln
         Long expires = null;
         if (isPermanent != null && !isPermanent) {
-            // wenn NICHT permanent, dann versuchen wir ein echtes Enddatum zu bekommen
             expires = readExpiry(pun);
         }
 
-        // 3) Grund lesen
         String reason = null;
         try {
             var m = pun.getClass().getMethod("getReason");
@@ -315,33 +336,40 @@ public class TicketChannelCreator {
 
         StringBuilder sb = new StringBuilder();
         if (reason != null && !reason.isEmpty()) {
-            sb.append("  • Grund: ").append(reason).append("\n");
+            sb.append(
+                    Lang.get("litebans_reason_line")
+                            .replace("{reason}", reason)
+            ).append("\n");
         }
 
         if (isPermanent != null && isPermanent) {
-            sb.append("  • Dauer: permanent\n");
+            sb.append(Lang.get("litebans_duration_perm")).append("\n");
         } else if (expires != null) {
             long now = System.currentTimeMillis();
             if (expires > now) {
-                sb.append("  • Läuft ab in: ").append(formatDuration(expires - now)).append("\n");
+                String duration = formatDuration(expires - now);
+                sb.append(
+                        Lang.get("litebans_expires_in")
+                                .replace("{time}", duration)
+                ).append("\n");
             } else {
-                sb.append("  • Läuft ab: abgelaufen\n");
+                sb.append(Lang.get("litebans_expired")).append("\n");
             }
         } else {
-            // letzter Fallback
-            // evtl. hat die Klasse schon eine fertige Dauer-String
             String remainingStr = tryStringGetter(pun, "getRemainingDurationString");
             if (remainingStr == null) {
                 remainingStr = tryStringGetter(pun, "getDurationString");
             }
             if (remainingStr != null) {
-                sb.append("  • Läuft ab in: ").append(remainingStr).append("\n");
+                sb.append(
+                        Lang.get("litebans_expires_in")
+                                .replace("{time}", remainingStr)
+                ).append("\n");
             } else {
-                // wirklich nix gefunden
                 if (debug) {
                     log.info("[Synccord-LiteBans] keine passende Zeit gefunden, zeige permanent an.");
                 }
-                sb.append("  • Dauer: permanent\n");
+                sb.append(Lang.get("litebans_duration_perm")).append("\n");
             }
         }
 
@@ -349,32 +377,26 @@ public class TicketChannelCreator {
     }
 
     private Long readExpiry(Object pun) {
-        // 1) getDateEnd() – das hast du
         Long dateEnd = tryNumberGetter(pun, "getDateEnd");
         if (dateEnd != null && dateEnd > 0) {
-            // Sekunden vs ms
             if (dateEnd < 10_000_000_000L) {
                 dateEnd = dateEnd * 1000L;
             }
             return dateEnd;
         }
 
-        // 2) getRemainingDuration() – Restzeit
         Long remaining = tryNumberGetter(pun, "getRemainingDuration");
         if (remaining != null && remaining > 0) {
-            // hier ist es ziemlich sicher in ms
             long now = System.currentTimeMillis();
             return now + remaining;
         }
 
-        // 3) getDuration() + getDateStart()
         Long duration = tryNumberGetter(pun, "getDuration");
         Long start = tryNumberGetter(pun, "getDateStart");
         if (duration != null) {
             if (start == null) {
                 start = System.currentTimeMillis();
             }
-            // duration ist bei LiteBans i.d.R. ms
             return start + duration;
         }
 
@@ -388,15 +410,21 @@ public class TicketChannelCreator {
         long days = hours / 24;
 
         if (days > 0) {
-            return days + "d " + (hours % 24) + "h";
+            return Lang.get("litebans_duration_days_hours")
+                    .replace("{days}", String.valueOf(days))
+                    .replace("{hours}", String.valueOf(hours % 24));
         }
         if (hours > 0) {
-            return hours + "h " + (minutes % 60) + "m";
+            return Lang.get("litebans_duration_hours_minutes")
+                    .replace("{hours}", String.valueOf(hours))
+                    .replace("{minutes}", String.valueOf(minutes % 60));
         }
         if (minutes > 0) {
-            return minutes + "m";
+            return Lang.get("litebans_duration_minutes")
+                    .replace("{minutes}", String.valueOf(minutes));
         }
-        return seconds + "s";
+        return Lang.get("litebans_duration_seconds")
+                .replace("{seconds}", String.valueOf(seconds));
     }
 
     private void debug(String key) {

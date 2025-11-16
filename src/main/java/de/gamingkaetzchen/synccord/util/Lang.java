@@ -30,6 +30,7 @@ public class Lang {
 
         if (!fallbackPath.exists()) {
             Synccord.getInstance().saveResource("lang/en.yml", false);
+            Synccord.getInstance().saveResource("lang/de.yml", false);
         }
 
         langFile = YamlConfiguration.loadConfiguration(langFilePath);

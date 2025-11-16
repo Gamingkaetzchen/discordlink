@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.util.Lang;
@@ -19,11 +20,10 @@ public class TicketType {
     private final List<String> supporterRoles;
     private final Map<Integer, TicketQuestion> questions;
 
-    // ⬇️ NEU: pro Tickettyp konfigurierbar
+    // pro Tickettyp konfigurierbar
     private final boolean litebansHook;
 
-    // das hier wirkt bei dir wie ein altes Überbleibsel – ich lass es drin,
-    // damit nix anderes bei dir kaputtgeht
+    // altes Überbleibsel – bleibt drin, damit nichts anderes bricht
     private final Map<String, TicketType> ticketTypes = new HashMap<>();
 
     public TicketType(String id,
@@ -72,46 +72,70 @@ public class TicketType {
         return questions;
     }
 
-    // ⬇️ NEU: von außen abfragen
     public boolean isLitebansHook() {
         return litebansHook;
     }
 
     public EmbedBuilder toFancyEmbed() {
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("📩 " + getName());
-        embed.setDescription(getDescription());
+
+        // Titel & Beschreibung jetzt komplett aus der Langfile
+        embed.setTitle(Lang.get("ticket_panel_title"));
+        embed.setDescription(Lang.get("ticket_panel_description"));
+
         embed.setColor(0x2F3136);
 
-        if (Synccord.getInstance().getDiscordBot() != null && Synccord.getInstance().getDiscordBot().getJDA() != null) {
-            String botAvatar = Synccord.getInstance().getDiscordBot().getJDA().getSelfUser().getEffectiveAvatarUrl();
+        // Thumbnail + Footer: Bot-Avatar + Lang-Footer
+        String botAvatar = null;
+        if (Synccord.getInstance().getDiscordBot() != null
+                && Synccord.getInstance().getDiscordBot().getJDA() != null) {
+            botAvatar = Synccord.getInstance().getDiscordBot().getJDA()
+                    .getSelfUser()
+                    .getEffectiveAvatarUrl();
             embed.setThumbnail(botAvatar);
             embed.setFooter(Lang.get("ticket_embed_footer"), botAvatar);
         } else {
             embed.setFooter(Lang.get("ticket_embed_footer"));
         }
 
+        // Kategorie-Feld
         if (categoryId != null && !categoryId.isEmpty()) {
-            embed.addField("📁 Kategorie", "<#" + categoryId + ">", true);
+            String categoryDisplay = "<#" + categoryId + ">";
+            embed.addField(
+                    Lang.get("ticket_panel_category_label"),
+                    Lang.get("ticket_panel_category_value").replace("{category}", categoryDisplay),
+                    true
+            );
         }
 
+        // Supporter-Rollen-Feld
         if (supporterRoles != null && !supporterRoles.isEmpty()) {
             String rolesFormatted = supporterRoles.stream()
                     .map(roleId -> "<@&" + roleId + ">")
-                    .reduce((a, b) -> a + "\n" + b)
-                    .orElse("N/A");
-            embed.addField("👥 Supporter-Rollen", rolesFormatted, true);
+                    .collect(Collectors.joining("\n"));
+
+            embed.addField(
+                    Lang.get("ticket_panel_roles_label"),
+                    Lang.get("ticket_panel_roles_value").replace("{roles}", rolesFormatted),
+                    true
+            );
         }
 
-        embed.addField("❓ Fragen", String.valueOf(questions.size()), true);
+        // Fragen-Feld
+        int questionCount = (questions != null) ? questions.size() : 0;
+        String questionCountStr = String.valueOf(questionCount);
 
-        // hier NICHT direkt LiteBans anzeigen – das machen wir im TicketButtonListener,
-        // weil wir da erst den Spieler kennen
+        embed.addField(
+                Lang.get("ticket_panel_questions_label"),
+                Lang.get("ticket_panel_questions_value").replace("{count}", questionCountStr),
+                true
+        );
+
+        // LiteBans-Hinweis NICHT hier – das machst du später im Button-Listener pro Spieler
         return embed;
     }
 
     public Collection<TicketType> getTicketTypes() {
         return ticketTypes.values();
     }
-
 }

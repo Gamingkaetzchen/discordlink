@@ -15,6 +15,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import de.gamingkaetzchen.synccord.util.Lang;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class TicketManager {
@@ -30,24 +31,37 @@ public class TicketManager {
 
     public void loadTickets() {
         ticketTypes.clear();
+
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("tickets");
         if (section == null) {
+            // optionales Debug-Log, falls keine tickets-Sektion existiert
+            if (isDebug()) {
+                plugin.getLogger().warning(Lang.get("debug_ticket_no_config"));
+            }
             return;
         }
 
         for (String key : section.getKeys(false)) {
             ConfigurationSection ticketSection = section.getConfigurationSection(key);
             if (ticketSection == null) {
+                if (isDebug()) {
+                    plugin.getLogger().warning(
+                            Lang.get("debug_ticket_section_missing")
+                                    .replace("%value%", key));
+                }
                 continue;
             }
 
-            String name = ticketSection.getString("name", "Unnamed");
+            // Namen, Beschreibung, Button-Text – mit Lang-Fallback
+            String name = ticketSection.getString("name", Lang.get("ticket_default_name"));
             String description = ticketSection.getString("description", "");
-            String buttonName = ticketSection.getString("button_name", "Create Ticket");
+            String buttonName = ticketSection.getString("button_name",
+                    Lang.get("ticket_default_button_name"));
+
             String categoryId = ticketSection.getString("ticketkategorie");
             List<String> supporterRoles = ticketSection.getStringList("supporter_roles");
 
-            // 🔥 HIER: litebans aus config lesen
+            // litebans-hook aus config lesen (beide Schreibweisen unterstützen)
             boolean litebansHook = ticketSection.getBoolean("litebanshook",
                     ticketSection.getBoolean("litebans-hook", false));
 
@@ -61,12 +75,15 @@ public class TicketManager {
                         List<String> questionLines = questionSection.getStringList(qKey + ".questions");
                         questions.put(index, new TicketQuestion(inputLimit, questionLines));
                     } catch (NumberFormatException ex) {
-                        plugin.getLogger().warning("Ungültiger Fragenindex in TicketTyp '" + key + "': " + qKey);
+                        // Konfigurationsfehler → klares Log mit Lang
+                        plugin.getLogger().warning(
+                                Lang.get("ticket_invalid_question_index")
+                                        .replace("%ticket%", key)
+                                        .replace("%index%", qKey));
                     }
                 }
             }
 
-            // 🔥 HIER: boolean an den Typ durchreichen
             TicketType ticketType = new TicketType(
                     key,
                     name,
@@ -78,6 +95,13 @@ public class TicketManager {
                     litebansHook
             );
             ticketTypes.put(key, ticketType);
+
+            // Debug-Log pro geladenem Tickettyp
+            if (isDebug()) {
+                plugin.getLogger().info(
+                        Lang.get("debug_ticket_type_loaded")
+                                .replace("%value%", key));
+            }
         }
     }
 
@@ -142,5 +166,9 @@ public class TicketManager {
 
     public Collection<TicketType> getTicketTypes() {
         return ticketTypes.values();
+    }
+
+    private boolean isDebug() {
+        return plugin.getConfig().getBoolean("debug", false);
     }
 }

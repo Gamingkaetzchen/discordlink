@@ -167,7 +167,7 @@ role_sync_removed: ✖ Spieler %name% wurde aus Gruppe %group% entfernt.
 role_sync_skip: ⏭ Kein Rollenwechsel nötig für %name%.
 role_sync_start: 🔁 Starte Discord → Minecraft Rollensynchronisation für %name%.
 setup_description: Führt Discord-Setup durch
-setup_option_type_description: linking oder info
+setup_option_type_description: "linking, info, playerlist, regel, multiticket"
 show_players_button: Spielerlist
 sqlite_init_error: §c❌ Die SQLite-Datenbank konnte nicht initialisiert werden.
 sync_added: ✅ [Sync] Gruppe '%group%' HINZUGEFÜGT.
@@ -255,5 +255,104 @@ embit_command_description: "Öffnet ein Menü zum Erstellen eines Embeds"
 ticket_alert_message: "§6[Ticket] §e%user% hat ein neues Ticket vom Typ §7%ticket% §eeröffnet!"
 ticket_alert_join: "§e📬 Es sind derzeit noch offene Tickets vorhanden!"
 not_your_setup: "❌ Dieses Setup gehört nicht dir, %user%."
+ticket_panel_title: "📩 Support Ticket"
+ticket_panel_description: "Wenn du ein Problem hast, erstelle bitte ein Ticket!"
+
+ticket_panel_category_label: "📁 Kategorie"
+ticket_panel_category_value: "{category}"
+
+ticket_panel_roles_label: "🛠 Supporter-Rollen"
+ticket_panel_roles_value: "{roles}"
+
+ticket_panel_questions_label: "❓ Fragen"
+ticket_panel_questions_value: "{count}"
+
+ticket_panel_button: "📨 Create a Ticket"
+# setup regel
+setup_rule_invalid_or_empty: "❌ rules.yml ist ungültig oder leer."
+setup_rule_no_channel: "❌ Fehler: Kein Channel verfügbar."
+
+# setup multiticket
+setup_multiticket_no_channel: "⚠ Bitte einen Zielkanal angeben: `/setup multiticket` + Channel auswählen."
+setup_multiticket_system_unavailable: "❌ Ticket-System nicht verfügbar."
+setup_multiticket_no_types: "⚠ Es wurden noch keine Ticket-Typen in der config.yml definiert."
+setup_multiticket_placeholder: "Wähle bis zu 5 Ticket-Arten …"
+setup_multiticket_title: "Multi-Ticket Setup"
+setup_multiticket_description: "Wähle jetzt die Ticket-Arten aus.\nZielkanal: %channel%"
+debug_setup_multiticket_started: "[Debug] /setup multiticket von %user% für Channel %channel% gestartet."
+# Fallbacks für Ticket-Namen/Button, falls in der config.yml etwas fehlt
+ticket_default_name: "Unbenanntes Ticket"
+ticket_default_button_name: "Create Ticket"
+
+# Konfig-Fehler beim Parsen der Fragen
+ticket_invalid_question_index: "Ungültiger Fragenindex in TicketTyp '%ticket%': %index%"
+
+# Debug-Meldungen für Ticket-Config
+debug_ticket_no_config: "[Debug] Keine Ticket-Konfiguration unter 'tickets' gefunden."
+debug_ticket_section_missing: "[Debug] Ticket-Sektion '%value%' konnte nicht geladen werden."
+# debug_ticket_type_loaded hast du schon:
+# debug_ticket_type_loaded: "[Debug] Tickettyp erfolgreich geladen: %value%"
+# Add-User Menü
+ticket_add_user_select_placeholder: "Benutzer auswählen …"
+ticket_add_user_footer: "Ticket-System | Benutzer hinzufügen"
+ticket_claimed_field_title: "🔒 Übernommen von"
+
+# Transkript / Schließen
+ticket_transcript_save_error: "⚠ Fehler beim Speichern des Transkripts: %error%"
+ticket_transcript_load_error: "⚠ Fehler beim Laden des Transkripts: %error%"
+ticket_closing_no_logchannel: "✅ Ticket geschlossen.\n⚠ Kein Log-Channel gefunden, Transkript nur lokal gespeichert."
+ticket_transcript_not_found: "❌ Transkript oder Log-Channel konnte nicht gefunden werden."
+ticket_transcript_temp_description: "Das Transkript wird in 5 Minuten gelöscht."
+debug_transcript_saved_path: "[Debug] Transkript gespeichert unter: %path%"
+ticket_unknown_name: "Unbekannt"
+multiticket_invalid_id: "❌ Ungültige MultiTicket-ID. Bitte `/setup multiticket` neu ausführen."
+multiticket_no_type_selected: "⚠ Bitte mindestens einen Ticket-Typ auswählen."
+multiticket_target_not_found: "❌ Zielkanal nicht gefunden."
+multiticket_category_none: "_keine Kategorie_"
+multiticket_roles_none: "_keine Rollen_"
+
+multiticket_embed_title: "📨 Support Ticket"
+multiticket_embed_description: "Wähle unten die passende Kategorie aus."
+multiticket_created_success: "✅ Multi-Ticket-Embed wurde in %channel% erstellt."
+
+debug_multiticket_embed_created: "[Debug] Multi-Ticket-Embed von %user% in #%channel% erstellt."
+
+# Playerlist-Setup
+setup_playerlist_sent: "✅ Playerlist-Embed wurde gesendet."
+setup_playerlist_title: "👥 Online-Spieler"
+setup_playerlist_description: "Hier siehst du die aktuelle Liste aller Online-Spieler."
+playerlist_footer: "Wird automatisch aktualisiert"
+
+
+playerlist_empty: "Keine Spieler online."
+debug_setup_playerlist_started: "[Debug] Playerlist-Embed gestartet in Channel %channel%."
+
+
+#litebans
+ticket_field_litebans: "LiteBans"
+# LiteBans – Werte
+litebans_value_yes: "**JA**"
+litebans_value_no: "nein"
+
+# LiteBans – Übersichtslinien
 ticket_litebans_no_link: "Spieler nicht verlinkt – keine Abfrage möglich"
 ticket_litebans_none: "Keine aktiven Strafen gefunden"
+litebans_ban_line: "• Ban: {value}"
+litebans_mute_line: "• Mute: {value}"
+litebans_warns_header: "• Warns ({count}):"
+litebans_warns_none: "• Warns: keine"
+
+# LiteBans – Detailzeilen
+litebans_reason_line: "  • Grund: {reason}"
+litebans_duration_perm: "  • Dauer: permanent"
+litebans_expires_in: "  • Läuft ab in: {time}"
+litebans_expired: "  • Läuft ab: abgelaufen"
+
+# LiteBans – Einzelne Warnzeile
+litebans_warn_entry: "  {number}️⃣ {text}"
+
+# LiteBans – Duration Formatierung
+litebans_duration_days_hours: "{days}d {hours}h"
+litebans_duration_hours_minutes: "{hours}h {minutes}m"
+litebans_duration_minutes: "{minutes}m"
+litebans_duration_seconds: "{seconds}s"

@@ -293,3 +293,30 @@ features:
 info:
   allowed-roles:
     - "0000000000000000000"
+
+    
+playerlist:
+  enabled: true
+
+  # Standard: false, true, true
+  show-rank: false        # LuckPerms-Gruppe anzeigen?
+  show-alias: true        # Alias aus playerlist.rank-aliases?
+  show-name: true         # Spielername anzeigen?
+
+  # Zeile pro Spieler – Placeholder:
+  # {rank} = LP-Gruppe, {alias} = Alias aus rank-aliases, {name} = Spielername
+  format: "{alias} {name}"
+
+  # Titel + Beschreibung des Embeds
+  title: "👥 Online-Spieler"
+  description: "Aktuell sind {count} Spieler online:"
+
+  # Wenn niemand online ist:
+  empty: "Niemand ist online 😴"
+
+  # Aliasnamen pro LuckPerms-Gruppe
+  rank-aliases:
+    default: ""
+    vip: "⭐ VIP"
+    mod: "🛡 Mod"
+    admin: "⚔ Admin"

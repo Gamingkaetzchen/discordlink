@@ -12,6 +12,8 @@ import de.gamingkaetzchen.synccord.database.DatabaseManager;
 import de.gamingkaetzchen.synccord.discord.DiscordBot;
 import de.gamingkaetzchen.synccord.discord.InfoUpdaterOffline;
 import de.gamingkaetzchen.synccord.listener.DiscordJoinLeaveForwardListener;
+import de.gamingkaetzchen.synccord.listener.MinecraftChatListener;
+import de.gamingkaetzchen.synccord.listener.PlayerActivityListener;
 import de.gamingkaetzchen.synccord.listener.RoleSyncJoinListener;
 import de.gamingkaetzchen.synccord.listener.TicketJoinAlertListener;
 import de.gamingkaetzchen.synccord.tickets.TicketManager;
@@ -38,7 +40,7 @@ public class Synccord extends JavaPlugin {
         Lang.init();
 
         // bStats starten
-        Metrics metrics = new Metrics(this, 26581);
+        new Metrics(this, 26581);
 
         // Datenbankverbindung initialisieren
         DatabaseManager.init();
@@ -49,11 +51,15 @@ public class Synccord extends JavaPlugin {
         // Befehle registrieren
         getCommand("unlinkdiscord").setExecutor(new UnlinkDiscordCommand());
         getCommand("dcfind").setExecutor(new DcFindCommand());
-        getServer().getPluginManager().registerEvents(new TicketJoinAlertListener(), this);
 
-        // Event-Listener
+        // Bukkit-Listener
+        getServer().getPluginManager().registerEvents(new TicketJoinAlertListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerActivityListener(), this);
         Bukkit.getPluginManager().registerEvents(new RoleSyncJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new DiscordJoinLeaveForwardListener(), this);
+        Bukkit.getPluginManager().registerEvents(new MinecraftChatListener(), this);
+
+        // rules.yml anlegen, falls nicht vorhanden
         File ruleFile = new File(getDataFolder(), "rules.yml");
         if (!ruleFile.exists()) {
             saveResource("rules.yml", false);
@@ -65,7 +71,7 @@ public class Synccord extends JavaPlugin {
         } catch (IllegalStateException e) {
             getLogger().warning("⚠ LuckPerms nicht verfügbar!");
         }
-        // litebans
+
         // LiteBans-Debug
         if (Bukkit.getPluginManager().getPlugin("LiteBans") != null) {
             getLogger().info("[Synccord] LiteBans gefunden – Ticket-LiteBans-Hook ist AKTIV.");

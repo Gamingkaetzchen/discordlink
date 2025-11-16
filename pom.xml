@@ -6,7 +6,7 @@
 
     <groupId>de.gamingkaetzchen</groupId>
     <artifactId>synccord</artifactId>
-    <version>0.3.0 beta</version>
+    <version>0.3.2</version>
     <name>Synccord</name>
 
     <properties>
@@ -28,10 +28,6 @@
         <repository>
             <id>luckperms</id>
             <url>https://repo.lucko.me/</url>
-        </repository>
-        <repository>
-            <id>jda-repo</id>
-            <url>https://m2.dv8tion.net/releases</url>
         </repository>
 
     </repositories>

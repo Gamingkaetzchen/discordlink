@@ -53,9 +53,10 @@ public class TicketButtonListener extends ListenerAdapter {
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         String id = event.getComponentId();
 
+        // ========================== USER HINZUFÜGEN ==========================
         if (id.equals("ticket:add_user")) {
             EntitySelectMenu menu = EntitySelectMenu.create("ticket:add_user_select", SelectTarget.USER)
-                    .setPlaceholder("Benutzer auswählen …")
+                    .setPlaceholder(Lang.get("ticket_add_user_select"))
                     .setMinValues(1)
                     .setMaxValues(1)
                     .build();
@@ -63,13 +64,18 @@ public class TicketButtonListener extends ListenerAdapter {
             EmbedBuilder embed = new EmbedBuilder()
                     .setColor(Color.YELLOW)
                     .setDescription(Lang.get("ticket_add_user_select"))
-                    .setFooter("Ticket-System | Benutzer hinzufügen", event.getJDA().getSelfUser().getEffectiveAvatarUrl())
+                    .setFooter("Ticket-System | Benutzer hinzufügen",
+                            event.getJDA().getSelfUser().getEffectiveAvatarUrl())
                     .setTimestamp(Instant.now());
 
-            event.replyEmbeds(embed.build()).addActionRow(menu).setEphemeral(true).queue();
+            event.replyEmbeds(embed.build())
+                    .addActionRow(menu)
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
+        // ========================== CLAIM ==========================
         if (id.equals("ticket:claim")) {
             Member claimer = event.getMember();
             if (claimer == null) {
@@ -96,7 +102,8 @@ public class TicketButtonListener extends ListenerAdapter {
 
                         message.editMessageEmbeds(builder.build()).queue();
                         channel.sendMessageEmbeds(new EmbedBuilder()
-                                .setDescription(Lang.get("ticket_claimed_broadcast").replace("%user%", claimer.getAsMention()))
+                                .setDescription(Lang.get("ticket_claimed_broadcast")
+                                        .replace("%user%", claimer.getAsMention()))
                                 .setColor(Color.ORANGE)
                                 .build()).queue();
 
@@ -109,6 +116,7 @@ public class TicketButtonListener extends ListenerAdapter {
             return;
         }
 
+        // ========================== CLOSE BUTTON ==========================
         if (id.equals("ticket:close")) {
             String channelId = event.getChannel().getId();
             EmbedBuilder embed = new EmbedBuilder()
@@ -118,9 +126,13 @@ public class TicketButtonListener extends ListenerAdapter {
 
             event.replyEmbeds(embed.build())
                     .addActionRow(
-                            Button.danger("ticket:confirm_close:" + channelId, Lang.get("ticket_close_confirm_yes")),
-                            Button.secondary("ticket:cancel_close:" + channelId, Lang.get("ticket_close_confirm_no"))
-                    ).setEphemeral(true).queue();
+                            Button.danger("ticket:confirm_close:" + channelId,
+                                    Lang.get("ticket_close_confirm_yes")),
+                            Button.secondary("ticket:cancel_close:" + channelId,
+                                    Lang.get("ticket_close_confirm_no"))
+                    )
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -161,65 +173,85 @@ public class TicketButtonListener extends ListenerAdapter {
 
             event.deferReply(true).queue();
 
-            TextChannel finalLogChannel = logChannel;
+            // alles, was im Lambda verwendet wird, effektiv final machen
+            final TextChannel finalTicketChannel = ticketChannel;
+            final TextChannel finalLogChannel = logChannel;
+            final TicketType finalType = type;
+            final String finalLogChannelId = logChannelId; // <-- NEU: für Debug im Lambda
 
-            ticketChannel.getHistory().retrievePast(100).queue(messages -> {
+            finalTicketChannel.getHistory().retrievePast(100).queue(messages -> {
                 StringBuilder transcript = new StringBuilder();
 
                 for (int i = messages.size() - 1; i >= 0; i--) {
                     Message msg = messages.get(i);
-                    transcript.append("[").append(msg.getTimeCreated()).append("] ")
-                            .append(msg.getAuthor().getName()).append(": ")
-                            .append(msg.getContentDisplay()).append("\n");
+                    transcript.append("[")
+                            .append(msg.getTimeCreated())
+                            .append("] ")
+                            .append(msg.getAuthor().getName())
+                            .append(": ")
+                            .append(msg.getContentDisplay())
+                            .append("\n");
                 }
 
+                File dir = new File("ticket", finalType.getId());
+                dir.mkdirs();
+
+                File file = new File(dir, finalTicketChannel.getId() + ".txt");
                 try {
-                    File dir = new File("ticket", type.getId());
-                    dir.mkdirs();
-
-                    File file = new File(dir, channelId + ".txt");
                     Files.write(file.toPath(), transcript.toString().getBytes(StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    replyEmbed(event,
+                            Lang.get("ticket_transcript_save_error")
+                                    .replace("{error}", e.getMessage()),
+                            Color.RED);
+                    return;
+                }
 
-                    // nur senden, wenn wir wirklich einen Channel haben
-                    if (finalLogChannel != null) {
+                // nur senden, wenn wir wirklich einen Channel haben
+                if (finalLogChannel != null) {
+                    try {
                         ByteArrayInputStream input = new ByteArrayInputStream(Files.readAllBytes(file.toPath()));
                         FileUpload upload = FileUpload.fromData(input, "transcript.txt");
 
                         EmbedBuilder embed = new EmbedBuilder()
-                                .setTitle("📁 Transkript für Ticket")
-                                .setDescription("Ticket `" + ticketChannel.getName() + "` wurde geschlossen.")
+                                .setTitle(Lang.get("ticket_transcript_title"))
+                                .setDescription(
+                                        Lang.get("ticket_transcript_description")
+                                                .replace("{ticket}", finalTicketChannel.getName())
+                                )
                                 .setColor(Color.DARK_GRAY)
                                 .setTimestamp(Instant.now());
 
                         finalLogChannel.sendMessageEmbeds(embed.build())
                                 .addFiles(upload)
                                 .queue();
-                    } else {
-                        // debug ausgeben, warum nicht
-                        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-                            Synccord.getInstance().getLogger().info("[Debug] Kein Log-Channel gefunden für Ticket-Typ " + type.getId()
-                                    + " (config tickets." + type.getId() + ".log-channel-id oder tickets.log_channel_id prüfen)");
-                        }
+                    } catch (IOException e) {
+                        replyEmbed(event,
+                                Lang.get("ticket_transcript_load_error")
+                                        .replace("{error}", e.getMessage()),
+                                Color.RED);
+                        return;
                     }
-
-                    Synccord.debug("[Debug] Transkript gespeichert unter: " + file.getAbsolutePath());
-
-                } catch (IOException e) {
-                    replyEmbed(event, "⚠ Fehler beim Speichern des Transkripts: " + e.getMessage(), Color.RED);
-                    return;
+                } else {
+                    if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+                        Synccord.getInstance().getLogger().info(
+                                Lang.get("debug_transcript_logchannel_not_found")
+                                        .replace("%id%", String.valueOf(finalLogChannelId))
+                        );
+                    }
                 }
 
-                ticketChannel.sendMessageEmbeds(new EmbedBuilder()
+                finalTicketChannel.sendMessageEmbeds(new EmbedBuilder()
                         .setDescription(Lang.get("ticket_closing_broadcast"))
                         .setColor(Color.RED)
                         .build()).queue();
 
-                ticketChannel.delete().queueAfter(5, TimeUnit.SECONDS);
+                finalTicketChannel.delete().queueAfter(5, TimeUnit.SECONDS);
 
                 // user feedback
                 if (finalLogChannel == null) {
                     event.getHook().sendMessageEmbeds(new EmbedBuilder()
-                            .setDescription("✅ Ticket geschlossen.\n⚠ Kein Log-Channel gefunden, Transkript nur gespeichert.")
+                            .setDescription(Lang.get("ticket_closed_no_logchannel"))
                             .setColor(Color.YELLOW)
                             .build()).setEphemeral(true).queue();
                 } else {
@@ -276,18 +308,20 @@ public class TicketButtonListener extends ListenerAdapter {
                 return;
             }
 
+            final TextChannel finalLogChannel2 = logChannel;
+            final File fileToDelete = foundFile;
+
             try {
-                ByteArrayInputStream input = new ByteArrayInputStream(Files.readAllBytes(foundFile.toPath()));
+                ByteArrayInputStream input = new ByteArrayInputStream(Files.readAllBytes(fileToDelete.toPath()));
                 FileUpload file = FileUpload.fromData(input, "transcript.txt");
 
                 EmbedBuilder embed = new EmbedBuilder()
-                        .setTitle("📁 Transkript für Ticket")
-                        .setDescription("Das Transkript wird in 5 Minuten gelöscht.")
+                        .setTitle(Lang.get("ticket_transcript_title"))
+                        .setDescription(Lang.get("ticket_transcript_temp_description"))
                         .setColor(Color.DARK_GRAY)
                         .setTimestamp(Instant.now());
 
-                File fileToDelete = foundFile;
-                logChannel.sendMessageEmbeds(embed.build())
+                finalLogChannel2.sendMessageEmbeds(embed.build())
                         .addFiles(file)
                         .queue(msg -> {
                             msg.delete().queueAfter(5, TimeUnit.MINUTES);
@@ -296,11 +330,15 @@ public class TicketButtonListener extends ListenerAdapter {
 
                 replyEmbed(event, Lang.get("ticket_transcript_sent"), Color.GREEN);
             } catch (IOException e) {
-                replyEmbed(event, "⚠ Fehler beim Laden des Transkripts: " + e.getMessage(), Color.RED);
+                replyEmbed(event,
+                        Lang.get("ticket_transcript_load_error")
+                                .replace("{error}", e.getMessage()),
+                        Color.RED);
             }
             return;
         }
 
+        // ========================== CLOSE ABBRECHEN ==========================
         if (id.startsWith("ticket:cancel_close:")) {
             replyEmbed(event, Lang.get("ticket_close_cancelled"), Color.GRAY);
             return;
@@ -319,7 +357,10 @@ public class TicketButtonListener extends ListenerAdapter {
             Modal.Builder modal = Modal.create("ticketmodal:" + type.getId(), type.getName());
             for (Map.Entry<Integer, TicketQuestion> entry : type.getQuestions().entrySet()) {
                 TicketQuestion tq = entry.getValue();
-                TextInput input = TextInput.create("q" + entry.getKey(), String.join(" ", tq.getQuestions()), TextInputStyle.PARAGRAPH)
+                TextInput input = TextInput.create(
+                        "q" + entry.getKey(),
+                        String.join(" ", tq.getQuestions()),
+                        TextInputStyle.PARAGRAPH)
                         .setRequired(true)
                         .setMaxLength(tq.getInputLimit())
                         .build();
@@ -360,8 +401,13 @@ public class TicketButtonListener extends ListenerAdapter {
             channel.upsertPermissionOverride(target)
                     .setAllowed(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND)
                     .queue(
-                            success -> replyEmbed(event, Lang.get("ticket_user_added").replace("%user%", target.getAsMention()), Color.GREEN),
-                            error -> replyEmbed(event, Lang.get("ticket_user_add_error").replace("%error%", error.getMessage()), Color.RED)
+                            success -> replyEmbed(event,
+                                    Lang.get("ticket_user_added").replace("%user%", target.getAsMention()),
+                                    Color.GREEN),
+                            error -> replyEmbed(event,
+                                    Lang.get("ticket_user_add_error")
+                                            .replace("%error%", error.getMessage()),
+                                    Color.RED)
                     );
         } else {
             replyEmbed(event, Lang.get("ticket_channel_no_permissions"), Color.RED);
@@ -384,7 +430,7 @@ public class TicketButtonListener extends ListenerAdapter {
             logChannel = event.getGuild().getTextChannelById(id);
         }
 
-        // 2. fallback über die globale JDA (falls event.getGuild() == null oder channel in cache anders)
+        // 2. fallback über die globale JDA
         if (logChannel == null) {
             DiscordBot bot = Synccord.getInstance().getDiscordBot();
             if (bot != null && bot.getJDA() != null) {
@@ -393,18 +439,33 @@ public class TicketButtonListener extends ListenerAdapter {
         }
 
         if (logChannel == null && Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info("[Debug] Konnte Log-Channel mit ID '" + id + "' nicht finden.");
+            Synccord.getInstance().getLogger().info(
+                    Lang.get("debug_transcript_logchannel_not_found").replace("%id%", id));
         }
 
         return logChannel;
     }
 
     private void replyEmbed(ButtonInteractionEvent event, String message, Color color) {
-        event.replyEmbeds(new EmbedBuilder().setDescription(message).setColor(color).setTimestamp(Instant.now()).build()).setEphemeral(true).queue();
+        event.replyEmbeds(
+                new EmbedBuilder()
+                        .setDescription(message)
+                        .setColor(color)
+                        .setTimestamp(Instant.now())
+                        .build())
+                .setEphemeral(true)
+                .queue();
     }
 
     private void replyEmbed(EntitySelectInteractionEvent event, String message, Color color) {
-        event.replyEmbeds(new EmbedBuilder().setDescription(message).setColor(color).setTimestamp(Instant.now()).build()).setEphemeral(true).queue();
+        event.replyEmbeds(
+                new EmbedBuilder()
+                        .setDescription(message)
+                        .setColor(color)
+                        .setTimestamp(Instant.now())
+                        .build())
+                .setEphemeral(true)
+                .queue();
     }
 
     public TicketType getTypeByChannel(TextChannel channel) {

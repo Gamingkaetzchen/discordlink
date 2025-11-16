@@ -6,6 +6,7 @@ import de.gamingkaetzchen.synccord.discord.commands.LinkMCCommand;
 import de.gamingkaetzchen.synccord.discord.commands.SetupCommand;
 import de.gamingkaetzchen.synccord.discord.commands.TicketSetupCommand;
 import de.gamingkaetzchen.synccord.discord.commands.UnlinkMCCommand;
+import de.gamingkaetzchen.synccord.discord.listener.DiscordChatListener;
 import de.gamingkaetzchen.synccord.discord.listener.EmbitListener;
 import de.gamingkaetzchen.synccord.discord.listener.MultiTicketSelectListener;
 import de.gamingkaetzchen.synccord.discord.listener.RuleAcceptListener;
@@ -51,7 +52,8 @@ public class DiscordBot {
                 new UnlinkMCCommand(),
                 new TicketButtonListener(ticketManager),
                 new TicketSetupCommand(ticketManager, jda),
-                new MultiTicketSelectListener() // <- NEU: reagiert auf das Dropdown vom multiticket
+                new MultiTicketSelectListener(),
+                new DiscordChatListener()
         );
 
         debug("debug_discord_ready");
