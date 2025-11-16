@@ -1,4 +1,4 @@
-package de.gamingkaetzchen.synccord.discord;
+package de.gamingkaetzchen.synccord.discord.util;
 
 import java.util.Map;
 import java.util.UUID;

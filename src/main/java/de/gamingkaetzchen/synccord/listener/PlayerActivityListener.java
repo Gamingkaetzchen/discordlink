@@ -27,6 +27,12 @@ public class PlayerActivityListener implements Listener {
                 () -> PlayerListUpdater.refreshNow(), // Runnable, eindeutig
                 10L // ~0,5 Sekunden
         );
+
+        plugin.getServer().getScheduler().runTaskLater(
+                plugin,
+                PlayerListUpdater::refreshNow,
+                10L
+        );
     }
 
     @EventHandler
@@ -34,6 +40,11 @@ public class PlayerActivityListener implements Listener {
         plugin.getServer().getScheduler().runTaskLater(
                 plugin,
                 () -> PlayerListUpdater.refreshNow(), // Runnable, eindeutig
+                10L
+        );
+        plugin.getServer().getScheduler().runTaskLater(
+                plugin,
+                PlayerListUpdater::refreshNow,
                 10L
         );
     }

@@ -96,16 +96,29 @@ public class SetupCommand extends ListenerAdapter {
 
         // ====================== /setup playerlist ======================
         if (type.equalsIgnoreCase("playerlist")) {
-            // hübsches Embed mit aktuellem Online-Stand bauen
-            EmbedBuilder embed = PlayerListUpdater.buildPlayerListEmbed(guildIconUrl);
             MessageChannel channel = event.getChannel();
 
-            channel.sendMessageEmbeds(embed.build())
-                    .submit()
-                    .thenAccept(msg -> {
-                        // Auto-Update starten (Timer) + Join/Quit Listener triggert zusätzlich refreshNow()
-                        PlayerListUpdater.startAutoUpdate(channel, msg);
-                    });
+            var embed = new EmbedBuilder()
+                    .setTitle(Lang.get("setup_playerlist_title"))
+                    .setDescription(Lang.get("setup_playerlist_description"))
+                    .setColor(Color.CYAN);
+
+            if (guildIconUrl != null) {
+                embed.setThumbnail(guildIconUrl);
+                embed.setFooter(Lang.get("playerlist_footer"), guildIconUrl);
+            }
+
+            channel.sendMessageEmbeds(embed.build()).queue(msg -> {
+                // WICHTIG: hier merken wir uns die Nachricht
+                PlayerListUpdater.registerBaseMessage(msg);
+
+                if (Synccord.getInstance().isDebug()) {
+                    Synccord.getInstance().getLogger().info(
+                            Lang.get("debug_setup_playerlist_started")
+                                    .replace("%channel%", channel.getId())
+                    );
+                }
+            });
 
             event.reply(Lang.get("setup_playerlist_sent")).setEphemeral(true).queue();
             return;

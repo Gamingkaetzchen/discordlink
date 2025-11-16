@@ -8,6 +8,8 @@ import de.gamingkaetzchen.synccord.discord.commands.TicketSetupCommand;
 import de.gamingkaetzchen.synccord.discord.commands.UnlinkMCCommand;
 import de.gamingkaetzchen.synccord.discord.listener.DiscordChatListener;
 import de.gamingkaetzchen.synccord.discord.listener.EmbitListener;
+import de.gamingkaetzchen.synccord.discord.listener.InfoButtonListener;
+import de.gamingkaetzchen.synccord.discord.listener.LinkHandler;
 import de.gamingkaetzchen.synccord.discord.listener.MultiTicketSelectListener;
 import de.gamingkaetzchen.synccord.discord.listener.RuleAcceptListener;
 import de.gamingkaetzchen.synccord.discord.listener.TicketButtonListener;
@@ -45,7 +47,7 @@ public class DiscordBot {
                 new EmbitCommand(),
                 new EmbitListener(),
                 new RuleAcceptListener(),
-                new SetupCommand(), // <- hier drin ist jetzt /setup multiticket
+                new SetupCommand(), // /setup linking, info, playerlist, regel, multiticket
                 new LinkHandler(),
                 new InfoButtonListener(),
                 new LinkMCCommand(),
@@ -53,7 +55,7 @@ public class DiscordBot {
                 new TicketButtonListener(ticketManager),
                 new TicketSetupCommand(ticketManager, jda),
                 new MultiTicketSelectListener(),
-                new DiscordChatListener()
+                new DiscordChatListener() // Discord → MC Chatbridge
         );
 
         debug("debug_discord_ready");
@@ -66,10 +68,10 @@ public class DiscordBot {
         debug("debug_registering_slash_commands");
 
         jda.updateCommands().addCommands(
-                // /setup kriegt jetzt optional den channel, weil multiticket ihn braucht
+                // /setup mit optionalem Channel (für multiticket & playerlist)
                 Commands.slash("setup", Lang.get("setup_description"))
                         .addOption(OptionType.STRING, "type", Lang.get("setup_option_type_description"), true, true)
-                        .addOption(OptionType.CHANNEL, "channel", "Zielkanal (für multiticket)", false),
+                        .addOption(OptionType.CHANNEL, "channel", "Zielkanal (für multiticket/playerlist)", false),
                 Commands.slash("linkmc", Lang.get("linkmc_description"))
                         .addOption(OptionType.STRING, "uuid", Lang.get("linkmc_option_uuid"), true)
                         .addOption(OptionType.STRING, "discordid", Lang.get("linkmc_option_discordid"), true),
@@ -84,7 +86,6 @@ public class DiscordBot {
                 // dein Embit-Command
                 EmbitCommand.getCommandData()
         ).queue();
-
     }
 
     public void shutdown() {

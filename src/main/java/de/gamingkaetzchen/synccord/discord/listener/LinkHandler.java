@@ -1,4 +1,4 @@
-package de.gamingkaetzchen.synccord.discord;
+package de.gamingkaetzchen.synccord.discord.listener;
 
 import java.util.UUID;
 
@@ -6,6 +6,8 @@ import org.bukkit.Bukkit;
 
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.database.DatabaseManager;
+import de.gamingkaetzchen.synccord.discord.LinkManager;
+import de.gamingkaetzchen.synccord.discord.util.RoleSyncUtil;
 import de.gamingkaetzchen.synccord.util.Lang;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;

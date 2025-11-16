@@ -1,4 +1,4 @@
-package de.gamingkaetzchen.synccord.discord;
+package de.gamingkaetzchen.synccord.discord.listener;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -41,7 +41,6 @@ public class Synccord extends JavaPlugin {
 
         // bStats starten
         new Metrics(this, 26581);
-
         // Datenbankverbindung initialisieren
         DatabaseManager.init();
 

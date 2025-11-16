@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.discord.LinkManager;
-import de.gamingkaetzchen.synccord.discord.RoleSyncUtil;
+import de.gamingkaetzchen.synccord.discord.util.RoleSyncUtil;
 import de.gamingkaetzchen.synccord.util.Lang;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
