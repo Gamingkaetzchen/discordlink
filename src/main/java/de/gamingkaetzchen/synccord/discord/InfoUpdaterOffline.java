@@ -17,14 +17,14 @@ public class InfoUpdaterOffline {
         String messageId = InfoUpdater.getLastMessageId();
 
         if (channelId == null || messageId == null) {
-            debugLog(Lang.get("debug_offline_no_saved_message"));
+            debug("debug_offline_no_saved_message");
             return;
         }
 
         MessageChannel channel = Synccord.getInstance().getDiscordBot().getJDA()
                 .getChannelById(MessageChannel.class, channelId);
         if (channel == null) {
-            debugLog(Lang.get("debug_offline_channel_not_found").replace("%id%", channelId));
+            debug("debug_offline_channel_not_found", "%id%", channelId);
             return;
         }
 
@@ -41,18 +41,32 @@ public class InfoUpdaterOffline {
         try {
             Message msg = channel.retrieveMessageById(messageId).complete();
             msg.editMessageEmbeds(embed.build())
-                    .setActionRow(Button.primary("show_players", "🔍 " + Lang.get("show_players_button")).asDisabled())
+                    .setActionRow(
+                            Button.primary("show_players", "🔍 " + Lang.get("show_players_button"))
+                                    .asDisabled()
+                    )
                     .complete();
-            debugLog(Lang.get("debug_offline_embed_replaced"));
+
+            debug("debug_offline_embed_replaced");
         } catch (Exception e) {
             Synccord.getInstance().getLogger().warning(Lang.get("debug_offline_replace_failed"));
             e.printStackTrace();
         }
     }
 
-    private static void debugLog(String msg) {
+    private static void debug(String key) {
         if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info("🪲 DEBUG | " + msg);
+            Synccord.getInstance()
+                    .getLogger()
+                    .info("🪲 DEBUG | " + Lang.get(key));
+        }
+    }
+
+    private static void debug(String key, String placeholder, String value) {
+        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+            Synccord.getInstance()
+                    .getLogger()
+                    .info("🪲 DEBUG | " + Lang.get(key).replace(placeholder, value));
         }
     }
 }

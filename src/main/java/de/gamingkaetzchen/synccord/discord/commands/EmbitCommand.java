@@ -21,32 +21,69 @@ public class EmbitCommand extends ListenerAdapter {
         }
 
         Member member = event.getMember();
+
+        // Kein Member = keine Berechtigung
         if (member == null || !member.hasPermission(Permission.ADMINISTRATOR)) {
+
+            // Debug: keine Berechtigung
+            if (Synccord.getInstance().isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_dcfind_no_permission")
+                                .replace("%sender%", event.getUser().getName())
+                );
+            }
+
             event.reply(Lang.get("no_permission")).setEphemeral(true).queue();
             return;
         }
 
-        // Debug-Ausgabe
+        // Debug: SlashCommand wurde ausgeführt
         if (Synccord.getInstance().isDebug()) {
             Synccord.getInstance().getLogger().info(Lang.get("debug_embit_opened"));
         }
 
-        // Modal-Felder mit Langfile-Support
-        TextInput title = TextInput.create("title", Lang.get("embit_modal_input_title"), TextInputStyle.SHORT)
-                .setRequired(true).setMaxLength(100).build();
+        // Modal-Felder – komplett über Langfile gesteuert
+        TextInput title = TextInput.create(
+                "title",
+                Lang.get("embit_modal_input_title"),
+                TextInputStyle.SHORT)
+                .setRequired(true)
+                .setMaxLength(100)
+                .build();
 
-        TextInput content = TextInput.create("content", Lang.get("embit_modal_input_content"), TextInputStyle.PARAGRAPH)
-                .setRequired(true).setMaxLength(4000).build();
+        TextInput content = TextInput.create(
+                "content",
+                Lang.get("embit_modal_input_content"),
+                TextInputStyle.PARAGRAPH)
+                .setRequired(true)
+                .setMaxLength(4000)
+                .build();
 
-        TextInput image = TextInput.create("image", Lang.get("embit_modal_input_image"), TextInputStyle.SHORT)
-                .setRequired(false).setMaxLength(400).build();
+        TextInput image = TextInput.create(
+                "image",
+                Lang.get("embit_modal_input_image"),
+                TextInputStyle.SHORT)
+                .setRequired(false)
+                .setMaxLength(400)
+                .build();
 
-        TextInput footer = TextInput.create("footer", Lang.get("embit_modal_input_footer"), TextInputStyle.SHORT)
-                .setRequired(false).setMaxLength(200).build();
+        TextInput footer = TextInput.create(
+                "footer",
+                Lang.get("embit_modal_input_footer"),
+                TextInputStyle.SHORT)
+                .setRequired(false)
+                .setMaxLength(200)
+                .build();
 
-        TextInput color = TextInput.create("color", Lang.get("embit_modal_input_color"), TextInputStyle.SHORT)
-                .setRequired(false).setMaxLength(7).build();
+        TextInput color = TextInput.create(
+                "color",
+                Lang.get("embit_modal_input_color"),
+                TextInputStyle.SHORT)
+                .setRequired(false)
+                .setMaxLength(7)
+                .build();
 
+        // Modal erstellen (Titel ebenfalls aus Langfile)
         Modal modal = Modal.create("embit_modal", Lang.get("embit_modal_title"))
                 .addActionRow(title)
                 .addActionRow(content)

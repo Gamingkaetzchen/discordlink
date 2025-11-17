@@ -38,12 +38,28 @@ public class SetupCommand extends ListenerAdapter {
 
         Member member = event.getMember();
         if (member == null || !member.hasPermission(Permission.ADMINISTRATOR)) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_dcfind_no_permission")
+                                .replace("%sender%", event.getUser().getName())
+                );
+            }
+
             event.reply(Lang.get("no_permission")).setEphemeral(true).queue();
             return;
         }
 
         var option = event.getOption("type");
         if (option == null) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_dcfind_wrong_usage")
+                                .replace("%sender%", event.getUser().getName())
+                );
+            }
+
             event.reply(Lang.get("invalid_type")).setEphemeral(true).queue();
             return;
         }
@@ -236,6 +252,12 @@ public class SetupCommand extends ListenerAdapter {
         }
 
         // wenn keiner der bekannten Typen
+        if (isDebug()) {
+            Synccord.getInstance().getLogger().info(
+                    Lang.get("debug_dcfind_wrong_usage")
+                            .replace("%sender%", event.getUser().getName())
+            );
+        }
         event.reply(Lang.get("invalid_type")).setEphemeral(true).queue();
     }
 

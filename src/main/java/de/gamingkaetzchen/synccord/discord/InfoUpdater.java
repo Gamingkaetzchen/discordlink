@@ -59,13 +59,23 @@ public class InfoUpdater {
                 },
                 failure -> {
                     debug("debug_info_message_not_found_creating_new");
-                    EmbedBuilder embed = buildStatusEmbed(Synccord.getInstance().getDiscordBot().getJDA().getSelfUser().getAvatarUrl());
-                    channel.sendMessageEmbeds(embed.build()).setActionRow(
-                            Button.primary("show_players", "🔍 " + Lang.get("show_players_button"))
-                    ).queue(sentMsg -> {
-                        debug("debug_info_message_sent");
-                        startAutoUpdate(channel, sentMsg);
-                    });
+                    String iconUrl = Synccord.getInstance()
+                            .getDiscordBot()
+                            .getJDA()
+                            .getSelfUser()
+                            .getAvatarUrl();
+
+                    EmbedBuilder embed = buildStatusEmbed(iconUrl);
+                    channel.sendMessageEmbeds(embed.build())
+                            .setActionRow(
+                                    Button.primary(
+                                            "show_players",
+                                            "🔍 " + Lang.get("show_players_button"))
+                            )
+                            .queue(sentMsg -> {
+                                debug("debug_info_message_sent");
+                                startAutoUpdate(channel, sentMsg);
+                            });
                 }
         );
     }
@@ -94,19 +104,27 @@ public class InfoUpdater {
                 }
 
                 try {
-                    String iconUrl = Synccord.getInstance().getDiscordBot().getJDA().getSelfUser().getAvatarUrl();
+                    String iconUrl = Synccord.getInstance()
+                            .getDiscordBot()
+                            .getJDA()
+                            .getSelfUser()
+                            .getAvatarUrl();
+
                     EmbedBuilder embed = buildStatusEmbed(iconUrl);
 
-                    lastMessage.editMessageEmbeds(embed.build()).setActionRow(
-                            Button.primary("show_players", "🔍 " + Lang.get("show_players_button"))
-                    ).queue(
-                            success -> debug("debug_info_embed_updated"),
-                            error -> {
-                                Bukkit.getLogger().warning(Lang.get("info_embed_error"));
-                                debug("debug_info_embed_update_error", "%error%", error.getMessage());
-                            }
-                    );
+                    lastMessage.editMessageEmbeds(embed.build())
+                            .setActionRow(
+                                    Button.primary("show_players", "🔍 " + Lang.get("show_players_button"))
+                            )
+                            .queue(
+                                    success -> debug("debug_info_embed_updated"),
+                                    error -> {
+                                        Bukkit.getLogger().warning(Lang.get("info_embed_error"));
+                                        debug("debug_info_embed_update_error", "%error%", error.getMessage());
+                                    }
+                            );
                 } catch (Exception e) {
+                    // Lang-Key ist bereits ein Debugtext
                     Bukkit.getLogger().warning(Lang.get("debug_info_embed_update_exception"));
                     e.printStackTrace();
                 }
@@ -165,13 +183,17 @@ public class InfoUpdater {
 
     private static void debug(String key) {
         if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info(Lang.get(key));
+            Synccord.getInstance()
+                    .getLogger()
+                    .info("🪲 DEBUG | " + Lang.get(key));
         }
     }
 
     private static void debug(String key, String placeholder, String value) {
         if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info(Lang.get(key).replace(placeholder, value));
+            Synccord.getInstance()
+                    .getLogger()
+                    .info("🪲 DEBUG | " + Lang.get(key).replace(placeholder, value));
         }
     }
 

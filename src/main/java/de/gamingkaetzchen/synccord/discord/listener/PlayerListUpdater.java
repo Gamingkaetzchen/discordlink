@@ -32,6 +32,11 @@ public class PlayerListUpdater {
         Synccord plugin = Synccord.getInstance();
         File file = new File(plugin.getDataFolder(), "playerlist_state.yml");
         if (!file.exists()) {
+            if (isDebug()) {
+                plugin.getLogger().info(
+                        Lang.get("debug_playerlist_state_missing")
+                );
+            }
             return;
         }
 
@@ -39,8 +44,12 @@ public class PlayerListUpdater {
         channelId = cfg.getString("channel-id");
         messageId = cfg.getString("message-id");
 
-        if (plugin.isDebug()) {
-            plugin.getLogger().info("[Debug] Playerlist-State geladen: channel=" + channelId + ", message=" + messageId);
+        if (isDebug()) {
+            plugin.getLogger().info(
+                    Lang.get("debug_playerlist_state_loaded")
+                            .replace("%channel%", String.valueOf(channelId))
+                            .replace("%message%", String.valueOf(messageId))
+            );
         }
     }
 
@@ -50,8 +59,12 @@ public class PlayerListUpdater {
 
         saveState();
 
-        if (Synccord.getInstance().isDebug()) {
-            Synccord.getInstance().getLogger().info("[Debug] Playerlist-Basisnachricht registriert: " + channelId + " / " + messageId);
+        if (isDebug()) {
+            Synccord.getInstance().getLogger().info(
+                    Lang.get("debug_playerlist_registered")
+                            .replace("%channel%", channelId)
+                            .replace("%message%", messageId)
+            );
         }
 
         refreshNow();
@@ -65,9 +78,18 @@ public class PlayerListUpdater {
         cfg.set("message-id", messageId);
         try {
             cfg.save(file);
+
+            if (isDebug()) {
+                plugin.getLogger().info(
+                        Lang.get("debug_playerlist_state_saved")
+                                .replace("%path%", file.getAbsolutePath())
+                );
+            }
         } catch (IOException e) {
-            plugin.getLogger().warning("[Synccord] Konnte playerlist_state.yml nicht speichern!");
-            e.printStackTrace();
+            plugin.getLogger().warning(Lang.get("playerlist_state_save_error"));
+            if (isDebug()) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -75,23 +97,42 @@ public class PlayerListUpdater {
         Synccord plugin = Synccord.getInstance();
 
         if (!plugin.getConfig().getBoolean("playerlist.enabled", false)) {
+            if (isDebug()) {
+                plugin.getLogger().info(Lang.get("debug_playerlist_disabled"));
+            }
             return;
         }
         if (jda == null || channelId == null || messageId == null) {
+            if (isDebug()) {
+                plugin.getLogger().info(Lang.get("debug_playerlist_missing_state"));
+            }
             return;
         }
 
         TextChannel channel = jda.getTextChannelById(channelId);
         if (channel == null) {
+            if (isDebug()) {
+                plugin.getLogger().warning(
+                        Lang.get("debug_playerlist_channel_not_found")
+                                .replace("%channel%", channelId)
+                );
+            }
             return;
         }
 
         channel.retrieveMessageById(messageId).queue(message -> {
             EmbedBuilder embed = buildPlayerListEmbed();
             message.editMessageEmbeds(embed.build()).queue();
+
+            if (isDebug()) {
+                plugin.getLogger().info(Lang.get("debug_playerlist_updated"));
+            }
         }, failure -> {
-            if (plugin.isDebug()) {
-                plugin.getLogger().warning("[Debug] Konnte Playerlist-Message nicht laden: " + failure.getMessage());
+            if (isDebug()) {
+                plugin.getLogger().warning(
+                        Lang.get("debug_playerlist_message_load_failed")
+                                .replace("%error%", String.valueOf(failure.getMessage()))
+                );
             }
         });
     }
@@ -99,6 +140,21 @@ public class PlayerListUpdater {
     private static EmbedBuilder buildPlayerListEmbed() {
         Synccord plugin = Synccord.getInstance();
         var cfg = plugin.getConfig().getConfigurationSection("playerlist");
+
+        if (cfg == null) {
+            // Fallback, falls Sektion fehlt
+            String fallbackTitle = "👥 Online-Spieler";
+            String fallbackDescription = "Aktuell sind 0 Spieler online:";
+            String fallbackEmpty = "Niemand ist online 😴";
+
+            if (isDebug()) {
+                plugin.getLogger().warning(Lang.get("debug_playerlist_section_missing"));
+            }
+
+            return new EmbedBuilder()
+                    .setTitle(fallbackTitle)
+                    .setDescription(fallbackDescription + "\n\n" + fallbackEmpty);
+        }
 
         String title = cfg.getString("title", "👥 Online-Spieler");
         String descriptionTemplate = cfg.getString("description", "Aktuell sind {count} Spieler online:");
@@ -171,13 +227,15 @@ public class PlayerListUpdater {
         if (jda != null && !jda.getGuilds().isEmpty()) {
             guildIconUrl = jda.getGuilds().get(0).getIconUrl();
         }
+        eb.setFooter(Lang.get("playerlist_footer"), guildIconUrl);
         if (guildIconUrl != null) {
             eb.setThumbnail(guildIconUrl);
-            eb.setFooter(Lang.get("playerlist_footer"), guildIconUrl);
-        } else {
-            eb.setFooter(Lang.get("playerlist_footer"), guildIconUrl);
         }
 
         return eb;
+    }
+
+    private static boolean isDebug() {
+        return Synccord.getInstance().getConfig().getBoolean("debug", false);
     }
 }

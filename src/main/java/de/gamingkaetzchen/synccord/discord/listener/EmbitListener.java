@@ -30,13 +30,17 @@ public class EmbitListener extends ListenerAdapter {
             color = Color.decode(colorHex);
         } catch (NumberFormatException e) {
             color = Color.decode("#2ECC71"); // Fallback-Farbe
-            if (Synccord.getInstance().isDebug()) {
-                Synccord.getInstance().getLogger().warning("[Debug] Ungültiger Hexcode '" + colorHex + "', Standardfarbe wird verwendet.");
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().warning(
+                        Lang.get("debug_embit_invalid_color")
+                                .replace("%color%", colorHex)
+                );
             }
         }
 
         // Debug-Ausgabe
-        if (Synccord.getInstance().isDebug()) {
+        if (isDebug()) {
             Synccord.getInstance().getLogger().info(
                     Lang.get("debug_embit_submitted")
                             .replace("%title%", title)
@@ -62,15 +66,19 @@ public class EmbitListener extends ListenerAdapter {
 
             event.replyEmbeds(embed.build()).queue();
 
-            if (Synccord.getInstance().isDebug()) {
+            if (isDebug()) {
                 Synccord.getInstance().getLogger().info(Lang.get("embit_success"));
             }
 
         } catch (Exception e) {
             event.reply(Lang.get("embit_fail")).setEphemeral(true).queue();
-            if (Synccord.getInstance().isDebug()) {
+            if (isDebug()) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private boolean isDebug() {
+        return Synccord.getInstance().getConfig().getBoolean("debug", false);
     }
 }

@@ -28,6 +28,8 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         if (parts.length < 3) {
             event.reply(Lang.get("multiticket_invalid_id"))
                     .setEphemeral(true).queue();
+
+            debug(Lang.get("multiticket_invalid_id"));
             return;
         }
 
@@ -36,8 +38,12 @@ public class MultiTicketSelectListener extends ListenerAdapter {
 
         if (event.getUser().getIdLong() != ownerId) {
             // not_your_setup: "❌ Dieses Setup gehört nicht dir, %user%."
-            event.reply(Lang.get("not_your_setup").replace("%user%", event.getUser().getName()))
+            event.reply(Lang.get("not_your_setup")
+                    .replace("%user%", event.getUser().getName()))
                     .setEphemeral(true).queue();
+
+            debug(Lang.get("not_your_setup")
+                    .replace("%user%", event.getUser().getName()));
             return;
         }
 
@@ -48,6 +54,8 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         if (selected.isEmpty()) {
             event.reply(Lang.get("multiticket_no_type_selected"))
                     .setEphemeral(true).queue();
+
+            debug(Lang.get("multiticket_no_type_selected"));
             return;
         }
 
@@ -55,6 +63,8 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         if (target == null) {
             event.reply(Lang.get("multiticket_target_not_found"))
                     .setEphemeral(true).queue();
+
+            debug(Lang.get("multiticket_target_not_found"));
             return;
         }
 
@@ -117,20 +127,26 @@ public class MultiTicketSelectListener extends ListenerAdapter {
 
         target.sendMessageEmbeds(eb.build())
                 .setActionRow(buttons)
-                .queue(msg -> {
-                    event.reply(
-                            Lang.get("multiticket_created_success")
-                                    .replace("%channel%", target.getAsMention())
-                    )
-                            .setEphemeral(true).queue();
-                });
+                .queue(msg -> event.reply(
+                Lang.get("multiticket_created_success")
+                        .replace("%channel%", target.getAsMention()))
+                .setEphemeral(true).queue()
+                );
 
-        if (plugin.getConfig().getBoolean("debug", false)) {
-            plugin.getLogger().info(
-                    Lang.get("debug_multiticket_embed_created")
-                            .replace("%user%", event.getUser().getName())
-                            .replace("%channel%", target.getName())
-            );
+        debug(
+                Lang.get("debug_multiticket_embed_created")
+                        .replace("%user%", event.getUser().getName())
+                        .replace("%channel%", target.getName())
+        );
+    }
+
+    private boolean isDebug() {
+        return Synccord.getInstance().getConfig().getBoolean("debug", false);
+    }
+
+    private void debug(String msg) {
+        if (isDebug()) {
+            Synccord.getInstance().getLogger().info("🪲 DEBUG | " + msg);
         }
     }
 }

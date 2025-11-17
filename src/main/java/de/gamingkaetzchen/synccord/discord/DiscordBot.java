@@ -71,17 +71,19 @@ public class DiscordBot {
                 // /setup mit optionalem Channel (für multiticket & playerlist)
                 Commands.slash("setup", Lang.get("setup_description"))
                         .addOption(OptionType.STRING, "type", Lang.get("setup_option_type_description"), true, true)
-                        .addOption(OptionType.CHANNEL, "channel", "Zielkanal (für multiticket/playerlist)", false),
+                        .addOption(OptionType.CHANNEL, "channel", Lang.get("setup_option_channel_description"), false),
                 Commands.slash("linkmc", Lang.get("linkmc_description"))
                         .addOption(OptionType.STRING, "uuid", Lang.get("linkmc_option_uuid"), true)
                         .addOption(OptionType.STRING, "discordid", Lang.get("linkmc_option_discordid"), true),
                 Commands.slash("unlinkmc", Lang.get("unlinkmc_description"))
                         .addOption(OptionType.STRING, "uuid", Lang.get("unlinkmc_option_uuid"), true),
-                Commands.slash("ticket", "Ticket-System verwalten")
+                Commands.slash("ticket", Lang.get("ticket_command_description"))
                         .addSubcommands(
-                                new SubcommandData("setup", "Ticket-Buttons posten")
-                                        .addOption(OptionType.STRING, "type", "Tickettyp-ID aus config.yml", true, true)
-                                        .addOption(OptionType.CHANNEL, "channel", "Channel, in dem der Button gepostet werden soll", true)
+                                new SubcommandData("setup", Lang.get("ticket_subcommand_setup_description"))
+                                        .addOption(OptionType.STRING, "type",
+                                                Lang.get("ticket_option_type_description"), true, true)
+                                        .addOption(OptionType.CHANNEL, "channel",
+                                                Lang.get("ticket_option_channel_description"), true)
                         ),
                 // dein Embit-Command
                 EmbitCommand.getCommandData()

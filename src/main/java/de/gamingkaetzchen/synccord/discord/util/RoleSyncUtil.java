@@ -16,11 +16,15 @@ import net.luckperms.api.node.Node;
 public class RoleSyncUtil {
 
     public static void syncRolesToMinecraft(Member member, UUID uuid) {
+        // Start-Log mit Langfile
         debugLog(Lang.get("sync_start").replace("%uuid%", uuid.toString()));
 
-        ConfigurationSection discordSection = Synccord.getInstance().getConfig().getConfigurationSection("discord");
+        ConfigurationSection discordSection = Synccord.getInstance()
+                .getConfig()
+                .getConfigurationSection("discord");
         if (discordSection == null) {
-            Synccord.getInstance().getLogger().warning("⚠ 'discord' section not found in config.yml");
+            // Kein 'discord'-Block → gleiche Meldung wie bei fehlender Rollen-Config
+            Synccord.getInstance().getLogger().warning(Lang.get("sync_no_roles_config"));
             return;
         }
 
@@ -39,32 +43,45 @@ public class RoleSyncUtil {
         LuckPerms lp = Synccord.getInstance().getLuckPerms();
         User user = lp.getUserManager().getUser(uuid);
         if (user == null) {
-            Synccord.getInstance().getLogger().warning(Lang.get("sync_no_lp_user").replace("%uuid%", uuid.toString()));
+            Synccord.getInstance().getLogger().warning(
+                    Lang.get("sync_no_lp_user").replace("%uuid%", uuid.toString())
+            );
             return;
         }
 
+        // Debug: alle Discord-Rollen des Users
         debugLog(Lang.get("sync_discord_roles"));
         for (Role r : member.getRoles()) {
             debugLog(" - " + r.getName() + " (" + r.getId() + ")");
         }
 
+        // Mapping Discord-Rollen → LP-Gruppen
         for (Map.Entry<String, Object> entry : roleMap.entrySet()) {
             String roleId = entry.getKey();
             String groupName = String.valueOf(entry.getValue());
 
             Role role = member.getGuild().getRoleById(roleId);
             if (role == null) {
-                Synccord.getInstance().getLogger().warning(Lang.get("sync_role_not_found").replace("%role%", roleId));
+                Synccord.getInstance().getLogger().warning(
+                        Lang.get("sync_role_not_found").replace("%role%", roleId)
+                );
                 continue;
             }
 
             boolean hasDiscordRole = member.getRoles().contains(role);
-            boolean hasGroup = user.getNodes().stream().anyMatch(n -> n.getKey().equals("group." + groupName));
+            boolean hasGroup = user.getNodes().stream()
+                    .anyMatch(n -> n.getKey().equals("group." + groupName));
 
-            debugLog(Lang.get("sync_check")
-                    .replace("%role%", role.getName())
-                    .replace("%group%", groupName));
-            debugLog(" → " + Lang.get("sync_has_role") + ": " + hasDiscordRole + ", " + Lang.get("sync_has_group") + ": " + hasGroup);
+            // Check-Log mit Langkeys
+            debugLog(
+                    Lang.get("sync_check")
+                            .replace("%role%", role.getName())
+                            .replace("%group%", groupName)
+            );
+            debugLog(
+                    " → " + Lang.get("sync_has_role") + ": " + hasDiscordRole
+                    + ", " + Lang.get("sync_has_group") + ": " + hasGroup
+            );
 
             Node node = Node.builder("group." + groupName).build();
 

@@ -20,19 +20,27 @@ public class UnlinkDiscordCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        debugLog(Lang.get("debug_unlink_attempt")
+                .replace("%name%", sender.getName())
+                .replace("%uuid%", "n/a"));
+
         if (!sender.hasPermission("synccord.admin")) {
             sender.sendMessage(Lang.get("no_permission"));
+            debugLog(Lang.get("debug_dcfind_no_permission").replace("%sender%", sender.getName()));
             return true;
         }
 
         if (args.length != 1) {
             sender.sendMessage(Lang.get("unlink_usage"));
+            debugLog(Lang.get("debug_dcfind_wrong_usage").replace("%sender%", sender.getName()));
             return true;
         }
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
         if (target.getName() == null) {
             sender.sendMessage(Lang.get("unlink_never_seen"));
+            debugLog("[Debug] unlink_never_seen für " + args[0]);
             return true;
         }
 
@@ -51,12 +59,17 @@ public class UnlinkDiscordCommand implements CommandExecutor, TabCompleter {
         DatabaseManager.unlink(uuid);
         sender.sendMessage(Lang.get("unlink_success").replace("%name%", target.getName()));
 
-        debugLog(Lang.get("debug_unlink_success").replace("%uuid%", uuid.toString()));
+        debugLog(Lang.get("debug_unlink_success")
+                .replace("%uuid%", uuid.toString()));
+
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+
+        debugLog("[Debug] TabComplete /unlinkdiscord ausgeführt.");
+
         if (args.length == 1) {
             List<String> suggestions = new ArrayList<>();
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
@@ -68,6 +81,7 @@ public class UnlinkDiscordCommand implements CommandExecutor, TabCompleter {
             }
             return suggestions;
         }
+
         return Collections.emptyList();
     }
 

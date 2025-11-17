@@ -54,9 +54,14 @@ public class TicketButtonListener extends ListenerAdapter {
         String id = event.getComponentId();
 
         // ========================== USER HINZUFÜGEN ==========================
-        if (id.equals("ticket:add_user")) {
+        if ("ticket:add_user".equals(id)) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(Lang.get("debug_ticket_add_user_clicked"));
+            }
+
             EntitySelectMenu menu = EntitySelectMenu.create("ticket:add_user_select", SelectTarget.USER)
-                    .setPlaceholder(Lang.get("ticket_add_user_select"))
+                    .setPlaceholder(Lang.get("ticket_add_user_select_placeholder"))
                     .setMinValues(1)
                     .setMaxValues(1)
                     .build();
@@ -64,7 +69,7 @@ public class TicketButtonListener extends ListenerAdapter {
             EmbedBuilder embed = new EmbedBuilder()
                     .setColor(Color.YELLOW)
                     .setDescription(Lang.get("ticket_add_user_select"))
-                    .setFooter("Ticket-System | Benutzer hinzufügen",
+                    .setFooter(Lang.get("ticket_add_user_footer"),
                             event.getJDA().getSelfUser().getEffectiveAvatarUrl())
                     .setTimestamp(Instant.now());
 
@@ -76,7 +81,12 @@ public class TicketButtonListener extends ListenerAdapter {
         }
 
         // ========================== CLAIM ==========================
-        if (id.equals("ticket:claim")) {
+        if ("ticket:claim".equals(id)) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(Lang.get("debug_ticket_claim_clicked"));
+            }
+
             Member claimer = event.getMember();
             if (claimer == null) {
                 replyEmbed(event, Lang.get("ticket_no_user"), Color.RED);
@@ -89,7 +99,8 @@ public class TicketButtonListener extends ListenerAdapter {
                     if (!message.getEmbeds().isEmpty()) {
                         MessageEmbed oldEmbed = message.getEmbeds().get(0);
                         boolean alreadyClaimed = oldEmbed.getFields().stream()
-                                .anyMatch(field -> field.getName().contains("Übernommen von"));
+                                .anyMatch(field -> field.getName().equals(
+                                Lang.get("ticket_claimed_field_title")));
 
                         if (alreadyClaimed) {
                             replyEmbed(event, Lang.get("ticket_already_claimed"), Color.RED);
@@ -98,14 +109,19 @@ public class TicketButtonListener extends ListenerAdapter {
 
                         EmbedBuilder builder = new EmbedBuilder(oldEmbed)
                                 .setColor(Color.ORANGE)
-                                .addField("🔒 Übernommen von", claimer.getAsMention(), false);
+                                .addField(
+                                        Lang.get("ticket_claimed_field_title"),
+                                        claimer.getAsMention(),
+                                        false
+                                );
 
                         message.editMessageEmbeds(builder.build()).queue();
                         channel.sendMessageEmbeds(new EmbedBuilder()
                                 .setDescription(Lang.get("ticket_claimed_broadcast")
                                         .replace("%user%", claimer.getAsMention()))
                                 .setColor(Color.ORANGE)
-                                .build()).queue();
+                                .build())
+                                .queue();
 
                         replyEmbed(event, Lang.get("ticket_claimed_success"), Color.GREEN);
                         return;
@@ -117,7 +133,12 @@ public class TicketButtonListener extends ListenerAdapter {
         }
 
         // ========================== CLOSE BUTTON ==========================
-        if (id.equals("ticket:close")) {
+        if ("ticket:close".equals(id)) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(Lang.get("debug_ticket_close_clicked"));
+            }
+
             String channelId = event.getChannel().getId();
             EmbedBuilder embed = new EmbedBuilder()
                     .setColor(Color.RED)
@@ -138,16 +159,33 @@ public class TicketButtonListener extends ListenerAdapter {
 
         // ========================== TICKET SCHLIESSEN ==========================
         if (id.startsWith("ticket:confirm_close:")) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(Lang.get("debug_ticket_confirm_close"));
+            }
+
             String channelId = id.split(":")[2];
             TextChannel ticketChannel = event.getJDA().getTextChannelById(channelId);
             if (ticketChannel == null) {
                 replyEmbed(event, Lang.get("ticket_channel_not_found"), Color.RED);
+
+                if (isDebug()) {
+                    Synccord.getInstance().getLogger().info(
+                            Lang.get("debug_transcript_channel_invalid")
+                    );
+                }
                 return;
             }
 
             File configFile = new File("tickets", channelId + ".yml");
             if (!configFile.exists()) {
                 replyEmbed(event, Lang.get("ticket_type_not_found"), Color.RED);
+
+                if (isDebug()) {
+                    Synccord.getInstance().getLogger().info(
+                            Lang.get("debug_ticket_no_config")
+                    );
+                }
                 return;
             }
 
@@ -157,6 +195,13 @@ public class TicketButtonListener extends ListenerAdapter {
 
             if (typeId == null || type == null) {
                 replyEmbed(event, Lang.get("ticket_type_not_found"), Color.RED);
+
+                if (isDebug()) {
+                    Synccord.getInstance().getLogger().info(
+                            Lang.get("debug_ticket_type_not_found")
+                                    .replace("%type%", String.valueOf(typeId))
+                    );
+                }
                 return;
             }
 
@@ -177,7 +222,7 @@ public class TicketButtonListener extends ListenerAdapter {
             final TextChannel finalTicketChannel = ticketChannel;
             final TextChannel finalLogChannel = logChannel;
             final TicketType finalType = type;
-            final String finalLogChannelId = logChannelId; // <-- NEU: für Debug im Lambda
+            final String finalLogChannelId = logChannelId; // für Debug
 
             finalTicketChannel.getHistory().retrievePast(100).queue(messages -> {
                 StringBuilder transcript = new StringBuilder();
@@ -199,10 +244,17 @@ public class TicketButtonListener extends ListenerAdapter {
                 File file = new File(dir, finalTicketChannel.getId() + ".txt");
                 try {
                     Files.write(file.toPath(), transcript.toString().getBytes(StandardCharsets.UTF_8));
+
+                    if (isDebug()) {
+                        Synccord.getInstance().getLogger().info(
+                                Lang.get("debug_transcript_saved_path")
+                                        .replace("%path%", file.getAbsolutePath())
+                        );
+                    }
                 } catch (IOException e) {
                     replyEmbed(event,
                             Lang.get("ticket_transcript_save_error")
-                                    .replace("{error}", e.getMessage()),
+                                    .replace("%error%", e.getMessage()),
                             Color.RED);
                     return;
                 }
@@ -225,15 +277,21 @@ public class TicketButtonListener extends ListenerAdapter {
                         finalLogChannel.sendMessageEmbeds(embed.build())
                                 .addFiles(upload)
                                 .queue();
+
+                        if (isDebug()) {
+                            Synccord.getInstance().getLogger().info(
+                                    Lang.get("debug_transcript_sent")
+                            );
+                        }
                     } catch (IOException e) {
                         replyEmbed(event,
                                 Lang.get("ticket_transcript_load_error")
-                                        .replace("{error}", e.getMessage()),
+                                        .replace("%error%", e.getMessage()),
                                 Color.RED);
                         return;
                     }
                 } else {
-                    if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+                    if (isDebug()) {
                         Synccord.getInstance().getLogger().info(
                                 Lang.get("debug_transcript_logchannel_not_found")
                                         .replace("%id%", String.valueOf(finalLogChannelId))
@@ -244,21 +302,26 @@ public class TicketButtonListener extends ListenerAdapter {
                 finalTicketChannel.sendMessageEmbeds(new EmbedBuilder()
                         .setDescription(Lang.get("ticket_closing_broadcast"))
                         .setColor(Color.RED)
-                        .build()).queue();
+                        .build())
+                        .queue();
 
                 finalTicketChannel.delete().queueAfter(5, TimeUnit.SECONDS);
 
                 // user feedback
                 if (finalLogChannel == null) {
                     event.getHook().sendMessageEmbeds(new EmbedBuilder()
-                            .setDescription(Lang.get("ticket_closed_no_logchannel"))
+                            .setDescription(Lang.get("ticket_closing_no_logchannel"))
                             .setColor(Color.YELLOW)
-                            .build()).setEphemeral(true).queue();
+                            .build())
+                            .setEphemeral(true)
+                            .queue();
                 } else {
                     event.getHook().sendMessageEmbeds(new EmbedBuilder()
                             .setDescription(Lang.get("ticket_closing_success"))
                             .setColor(Color.GREEN)
-                            .build()).setEphemeral(true).queue();
+                            .build())
+                            .setEphemeral(true)
+                            .queue();
                 }
             });
             return;
@@ -294,11 +357,14 @@ public class TicketButtonListener extends ListenerAdapter {
             File foundFile = null;
 
             if (ticketDir.exists()) {
-                for (File subDir : ticketDir.listFiles()) {
-                    File file = new File(subDir, channelId + ".txt");
-                    if (file.exists()) {
-                        foundFile = file;
-                        break;
+                File[] subDirs = ticketDir.listFiles();
+                if (subDirs != null) {
+                    for (File subDir : subDirs) {
+                        File file = new File(subDir, channelId + ".txt");
+                        if (file.exists()) {
+                            foundFile = file;
+                            break;
+                        }
                     }
                 }
             }
@@ -329,10 +395,16 @@ public class TicketButtonListener extends ListenerAdapter {
                         });
 
                 replyEmbed(event, Lang.get("ticket_transcript_sent"), Color.GREEN);
+
+                if (isDebug()) {
+                    Synccord.getInstance().getLogger().info(
+                            Lang.get("debug_transcript_sent")
+                    );
+                }
             } catch (IOException e) {
                 replyEmbed(event,
                         Lang.get("ticket_transcript_load_error")
-                                .replace("{error}", e.getMessage()),
+                                .replace("%error%", e.getMessage()),
                         Color.RED);
             }
             return;
@@ -340,18 +412,30 @@ public class TicketButtonListener extends ListenerAdapter {
 
         // ========================== CLOSE ABBRECHEN ==========================
         if (id.startsWith("ticket:cancel_close:")) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(Lang.get("debug_ticket_cancel_close"));
+            }
+
             replyEmbed(event, Lang.get("ticket_close_cancelled"), Color.GRAY);
             return;
         }
 
         // ========================== Ticket-Button (Ticket erstellen) ==========================
         String[] idParts = id.split(":");
-        if (idParts.length == 2 && idParts[0].equals("ticket")) {
+        if (idParts.length == 2 && "ticket".equals(idParts[0])) {
             String ticketId = idParts[1];
             TicketType type = ticketManager.getTicketTypeById(ticketId);
             if (type == null) {
                 replyEmbed(event, Lang.get("ticket_type_not_found"), Color.RED);
                 return;
+            }
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_ticket_modal_opened")
+                                .replace("%ticket_id%", ticketId)
+                );
             }
 
             Modal.Builder modal = Modal.create("ticketmodal:" + type.getId(), type.getName());
@@ -373,7 +457,7 @@ public class TicketButtonListener extends ListenerAdapter {
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         String[] idParts = event.getModalId().split(":");
-        if (idParts.length != 2 || !idParts[0].equals("ticketmodal")) {
+        if (idParts.length != 2 || !"ticketmodal".equals(idParts[0])) {
             return;
         }
 
@@ -388,11 +472,17 @@ public class TicketButtonListener extends ListenerAdapter {
 
     @Override
     public void onEntitySelectInteraction(@NotNull EntitySelectInteractionEvent event) {
-        if (!event.getComponentId().equals("ticket:add_user_select")) {
+        if (!"ticket:add_user_select".equals(event.getComponentId())) {
             return;
         }
         if (event.getMentions().getMembers().isEmpty()) {
             replyEmbed(event, Lang.get("ticket_user_select_none"), Color.GRAY);
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_ticket_user_select_empty")
+                );
+            }
             return;
         }
 
@@ -401,13 +491,25 @@ public class TicketButtonListener extends ListenerAdapter {
             channel.upsertPermissionOverride(target)
                     .setAllowed(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND)
                     .queue(
-                            success -> replyEmbed(event,
-                                    Lang.get("ticket_user_added").replace("%user%", target.getAsMention()),
-                                    Color.GREEN),
-                            error -> replyEmbed(event,
-                                    Lang.get("ticket_user_add_error")
-                                            .replace("%error%", error.getMessage()),
-                                    Color.RED)
+                            success -> {
+                                replyEmbed(event,
+                                        Lang.get("ticket_user_added")
+                                                .replace("%user%", target.getAsMention()),
+                                        Color.GREEN);
+
+                                if (isDebug()) {
+                                    Synccord.getInstance().getLogger().info(
+                                            Lang.get("debug_ticket_user_add")
+                                                    .replace("%user%", target.getUser().getAsTag())
+                                    );
+                                }
+                            },
+                            error -> {
+                                replyEmbed(event,
+                                        Lang.get("ticket_user_add_error")
+                                                .replace("%error%", error.getMessage()),
+                                        Color.RED);
+                            }
                     );
         } else {
             replyEmbed(event, Lang.get("ticket_channel_no_permissions"), Color.RED);
@@ -438,7 +540,7 @@ public class TicketButtonListener extends ListenerAdapter {
             }
         }
 
-        if (logChannel == null && Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+        if (logChannel == null && isDebug()) {
             Synccord.getInstance().getLogger().info(
                     Lang.get("debug_transcript_logchannel_not_found").replace("%id%", id));
         }
@@ -492,5 +594,9 @@ public class TicketButtonListener extends ListenerAdapter {
         }
 
         return ticketManager.getTicketTypeById(typeId);
+    }
+
+    private boolean isDebug() {
+        return Synccord.getInstance().getConfig().getBoolean("debug", false);
     }
 }

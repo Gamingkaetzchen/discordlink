@@ -41,7 +41,7 @@ public class TicketChannelCreator {
         String categoryId = type.getCategoryId();
         if (categoryId == null || categoryId.isBlank()) {
             event.reply(Lang.get("ticket_create_no_category")).setEphemeral(true).queue();
-            debug("debug_ticket_no_category", type.getId());
+            debug("debug_ticket_no_category", categoryId != null ? categoryId : "null");
             return;
         }
 
@@ -171,8 +171,13 @@ public class TicketChannelCreator {
                     try {
                         config.save(file);
                     } catch (IOException e) {
-                        Synccord.getInstance().getLogger().warning("[Ticket] Fehler beim Speichern von " + file.getName());
-                        e.printStackTrace();
+                        Synccord.getInstance().getLogger().warning(
+                                Lang.get("ticket_save_error")
+                                        .replace("%file%", file.getName())
+                        );
+                        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+                            e.printStackTrace();
+                        }
                     }
 
                     event.reply(Lang.get("ticket_created_user_message")).setEphemeral(true).queue();
@@ -201,7 +206,7 @@ public class TicketChannelCreator {
 
         if (Bukkit.getPluginManager().getPlugin("LiteBans") == null) {
             if (debug) {
-                log.info("[Synccord-LiteBans] LiteBans-Plugin nicht gefunden.");
+                log.info(Lang.get("debug_litebans_not_found"));
             }
             return null;
         }
@@ -247,19 +252,22 @@ public class TicketChannelCreator {
                 }
             } catch (NoSuchMethodException e) {
                 if (debug) {
-                    log.info("[Synccord-LiteBans] Methode getWarning(UUID, String, String) nicht gefunden.");
+                    log.info(Lang.get("debug_litebans_no_warning_method"));
                 }
             }
 
         } catch (Throwable t) {
             if (debug) {
-                log.warning("[Synccord-LiteBans] Fehler beim LiteBans-Zugriff: " + t.getMessage());
+                log.warning(
+                        Lang.get("debug_litebans_error")
+                                .replace("%error%", String.valueOf(t.getMessage()))
+                );
                 t.printStackTrace();
             }
             return null;
         }
 
-        // Text bauen – jetzt komplett über Langfile
+        // Text bauen – komplett über Langfile
         StringBuilder sb = new StringBuilder();
 
         String yes = Lang.get("litebans_value_yes");   // z.B. **JA**
@@ -367,7 +375,7 @@ public class TicketChannelCreator {
                 ).append("\n");
             } else {
                 if (debug) {
-                    log.info("[Synccord-LiteBans] keine passende Zeit gefunden, zeige permanent an.");
+                    log.info(Lang.get("debug_litebans_no_time"));
                 }
                 sb.append(Lang.get("litebans_duration_perm")).append("\n");
             }
@@ -435,11 +443,13 @@ public class TicketChannelCreator {
 
     private void debug(String key, String value) {
         if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info("[Debug] " + Lang.get(key)
-                    .replace("%value%", value)
-                    .replace("%ticket%", value)
-                    .replace("%channel%", value)
-                    .replace("%role%", value));
+            Synccord.getInstance().getLogger().info(
+                    "[Debug] " + Lang.get(key)
+                            .replace("%value%", value)
+                            .replace("%ticket%", value)
+                            .replace("%channel%", value)
+                            .replace("%role%", value)
+            );
         }
     }
 
@@ -478,5 +488,4 @@ public class TicketChannelCreator {
         }
         return null;
     }
-
 }

@@ -14,15 +14,16 @@ public class RuleAcceptListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        if (!event.getComponentId().equals("rule_accept_button")) {
+        if (!"rule_accept_button".equals(event.getComponentId())) {
             return;
         }
 
-        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info(Lang.get("debug_rule_accept_clicked"));
-        }
+        debug(Lang.get("debug_rule_accept_clicked"));
 
-        TextInput input = TextInput.create("keyword", Lang.get("setup_rule_modal_input"), TextInputStyle.SHORT)
+        TextInput input = TextInput.create(
+                "keyword",
+                Lang.get("setup_rule_modal_input"),
+                TextInputStyle.SHORT)
                 .setRequired(true)
                 .setMinLength(3)
                 .setMaxLength(20)
@@ -37,7 +38,7 @@ public class RuleAcceptListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(ModalInteractionEvent event) {
-        if (!event.getModalId().equals("rule_accept_modal")) {
+        if (!"rule_accept_modal".equals(event.getModalId())) {
             return;
         }
 
@@ -45,32 +46,38 @@ public class RuleAcceptListener extends ListenerAdapter {
         String expected = Synccord.getInstance().getConfig().getString("rules.keyword");
         String roleId = Synccord.getInstance().getConfig().getString("rules.accept-role-id");
 
-        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-            Synccord.getInstance().getLogger().info(Lang.get("debug_rule_modal_received").replace("%input%", input));
-        }
+        debug(Lang.get("debug_rule_modal_received").replace("%input%", input));
 
         Member member = event.getMember();
         if (member == null) {
-            event.reply("❌ Fehler beim Verarbeiten deiner Eingabe.").setEphemeral(true).queue();
+            // eigene Lang-Message statt Hardcode
+            event.reply(Lang.get("setup_rule_no_member"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
         if (input.equalsIgnoreCase(expected)) {
-            if (roleId != null) {
+            if (roleId != null && member.getGuild().getRoleById(roleId) != null) {
                 member.getGuild().addRoleToMember(member, member.getGuild().getRoleById(roleId)).queue();
             }
 
             event.reply(Lang.get("setup_rule_success")).setEphemeral(true).queue();
+            debug(Lang.get("debug_rule_match"));
 
-            if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-                Synccord.getInstance().getLogger().info(Lang.get("debug_rule_match"));
-            }
         } else {
             event.reply(Lang.get("setup_rule_fail")).setEphemeral(true).queue();
+            debug(Lang.get("debug_rule_mismatch"));
+        }
+    }
 
-            if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
-                Synccord.getInstance().getLogger().info(Lang.get("debug_rule_mismatch"));
-            }
+    private boolean isDebug() {
+        return Synccord.getInstance().getConfig().getBoolean("debug", false);
+    }
+
+    private void debug(String msg) {
+        if (isDebug()) {
+            Synccord.getInstance().getLogger().info("🪲 DEBUG | " + msg);
         }
     }
 }

@@ -17,7 +17,16 @@ public class LinkMCCommand extends ListenerAdapter {
             return;
         }
 
+        // Permissioncheck
         if (event.getMember() == null || !event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_dcfind_no_permission")
+                                .replace("%sender%", event.getUser().getName())
+                );
+            }
+
             event.reply(Lang.get("linkmc_no_permission")).setEphemeral(true).queue();
             return;
         }
@@ -26,6 +35,14 @@ public class LinkMCCommand extends ListenerAdapter {
         var discordOption = event.getOption("discordid");
 
         if (uuidOption == null || discordOption == null) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_dcfind_wrong_usage")
+                                .replace("%sender%", event.getUser().getName())
+                );
+            }
+
             event.reply(Lang.get("linkmc_missing_args")).setEphemeral(true).queue();
             return;
         }
@@ -44,6 +61,7 @@ public class LinkMCCommand extends ListenerAdapter {
         try {
             UUID uuid = UUID.fromString(uuidStr);
 
+            // einfache Discord-ID-Validierung (17–20 Ziffern)
             if (!discordId.matches("\\d{17,20}")) {
                 event.reply(Lang.get("linkmc_invalid_discordid")).setEphemeral(true).queue();
                 return;

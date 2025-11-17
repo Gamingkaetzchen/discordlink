@@ -1,5 +1,10 @@
 package de.gamingkaetzchen.synccord.discord.commands;
 
+import java.awt.Color;
+import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.tickets.TicketManager;
 import de.gamingkaetzchen.synccord.tickets.TicketType;
@@ -10,17 +15,12 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.commands.Command.Choice;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-
-import java.awt.*;
-import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class TicketSetupCommand extends ListenerAdapter {
 
@@ -29,14 +29,26 @@ public class TicketSetupCommand extends ListenerAdapter {
     public TicketSetupCommand(TicketManager ticketManager, JDA jda) {
         this.ticketManager = ticketManager;
 
-        OptionData typeOption = new OptionData(OptionType.STRING, "type", "Tickettyp-ID aus config.yml", true)
-                .setAutoComplete(true);
+        // Lang-Support für Beschreibungen
+        OptionData typeOption = new OptionData(
+                OptionType.STRING,
+                "type",
+                Lang.get("ticket_setup_option_type"), // z.B. "Tickettyp-ID aus config.yml"
+                true
+        ).setAutoComplete(true);
 
-        OptionData channelOption = new OptionData(OptionType.CHANNEL, "channel", "Channel, in dem der Button gepostet werden soll", true);
+        OptionData channelOption = new OptionData(
+                OptionType.CHANNEL,
+                "channel",
+                Lang.get("ticket_setup_option_channel"), // z.B. "Channel, in dem der Button gepostet werden soll"
+                true
+        );
 
         jda.upsertCommand(
-                Commands.slash("ticket", "Ticket-System verwalten")
-                        .addSubcommands(new SubcommandData("setup", "Ticket-Buttons posten")
+                Commands.slash("ticket", Lang.get("ticket_command_description")) // z.B. "Ticket-System verwalten"
+                        .addSubcommands(new SubcommandData(
+                                "setup",
+                                Lang.get("ticket_setup_sub_description")) // z.B. "Ticket-Buttons posten"
                                 .addOptions(typeOption, channelOption)
                         )
         ).queue();
@@ -69,11 +81,24 @@ public class TicketSetupCommand extends ListenerAdapter {
                     .setTitle("📨 " + type.getName())
                     .setDescription(type.getDescription())
                     .setColor(getColorForTicketType(type.getId()))
-                    .addField("🧾 Kategorie", type.getCategoryId() != null ? "<#" + type.getCategoryId() + ">" : "Keine", true)
-                    .addField("👥 Supporter-Rollen", formatRoles(type.getSupporterRoles()), true)
-                    .addField("❓ Fragen", String.valueOf(type.getQuestions().size()), true)
-                    .setFooter("Ticket-System | Synccord", event.getJDA().getSelfUser().getEffectiveAvatarUrl())
-                    .setThumbnail(event.getGuild().getIconUrl())
+                    .addField(
+                            Lang.get("ticket_panel_category_label"),
+                            type.getCategoryId() != null
+                            ? "<#" + type.getCategoryId() + ">"
+                            : Lang.get("multiticket_category_none"),
+                            true)
+                    .addField(
+                            Lang.get("ticket_panel_roles_label"),
+                            formatRoles(type.getSupporterRoles()),
+                            true)
+                    .addField(
+                            Lang.get("ticket_panel_questions_label"),
+                            String.valueOf(type.getQuestions().size()),
+                            true)
+                    .setFooter(
+                            Lang.get("ticket_embed_footer"),
+                            event.getJDA().getSelfUser().getEffectiveAvatarUrl())
+                    .setThumbnail(event.getGuild() != null ? event.getGuild().getIconUrl() : null)
                     .setTimestamp(Instant.now());
 
             Button button = Button.primary("ticket:" + type.getId(), type.getButtonName());
@@ -85,7 +110,13 @@ public class TicketSetupCommand extends ListenerAdapter {
                     .replace("%type%", ticketId)
                     .replace("%channel%", channel.getName()));
         } catch (Exception e) {
-            event.getHook().sendMessage("❌ Fehler beim Erstellen: " + e.getMessage()).setEphemeral(true).queue();
+            String msg = e.getMessage() != null ? e.getMessage() : "null";
+
+            event.getHook().sendMessage(
+                    Lang.get("ticket_setup_error").replace("%error%", msg)
+            ).setEphemeral(true).queue();
+
+            debugLog(Lang.get("ticket_setup_error").replace("%error%", msg));
             e.printStackTrace();
         }
     }
@@ -93,8 +124,8 @@ public class TicketSetupCommand extends ListenerAdapter {
     @Override
     public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
         if (!event.getName().equals("ticket")
-                || !event.getSubcommandName().equals("setup")
-                || !event.getFocusedOption().getName().equals("type")) {
+                || !"setup".equals(event.getSubcommandName())
+                || !"type".equals(event.getFocusedOption().getName())) {
             return;
         }
 
@@ -109,7 +140,7 @@ public class TicketSetupCommand extends ListenerAdapter {
 
     private String formatRoles(List<String> roles) {
         if (roles == null || roles.isEmpty()) {
-            return "Keine";
+            return Lang.get("multiticket_roles_none"); // "_keine Rollen_"
         }
         return roles.stream()
                 .map(r -> "<@&" + r + ">")

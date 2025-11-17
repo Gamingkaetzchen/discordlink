@@ -49,10 +49,10 @@ public class PlayerListUpdater {
         messageId = message.getId();
         saveState();
 
-        if (Synccord.getInstance().isDebug()) {
-            Synccord.getInstance().getLogger().info(
-                    "[Debug] Playerlist base message saved: channel=" + channelId + ", message=" + messageId);
-        }
+        debug("debug_playerlist_base_saved",
+                "%channel%", channelId,
+                "%message%", messageId
+        );
 
         // Direkt beim Setup einmal aktualisieren
         refreshNow();
@@ -66,41 +66,30 @@ public class PlayerListUpdater {
         Synccord plugin = Synccord.getInstance();
 
         if (!plugin.getConfig().getBoolean("playerlist.enabled", true)) {
-            if (plugin.isDebug()) {
-                plugin.getLogger().info("[Debug] Playerlist disabled in config (playerlist.enabled = false).");
-            }
+            debug("debug_playerlist_disabled");
             return;
         }
 
         if (channelId == null || messageId == null) {
-            if (plugin.isDebug()) {
-                plugin.getLogger().info("[Debug] No playerlist state found (channelId/messageId is null). "
-                        + "Run /setup playerlist first.");
-            }
+            debug("debug_playerlist_no_state");
             return;
         }
 
         DiscordBot bot = plugin.getDiscordBot();
         if (bot == null) {
-            if (plugin.isDebug()) {
-                plugin.getLogger().info("[Debug] DiscordBot is null – cannot update playerlist.");
-            }
+            debug("debug_playerlist_bot_null");
             return;
         }
 
         JDA jda = bot.getJDA();
         if (jda == null) {
-            if (plugin.isDebug()) {
-                plugin.getLogger().info("[Debug] JDA is null – cannot update playerlist.");
-            }
+            debug("debug_playerlist_jda_null");
             return;
         }
 
         MessageChannel channel = jda.getChannelById(MessageChannel.class, channelId);
         if (channel == null) {
-            if (plugin.isDebug()) {
-                plugin.getLogger().info("[Debug] Playerlist channel not found for ID " + channelId);
-            }
+            debug("debug_playerlist_channel_not_found", "%id%", channelId);
             return;
         }
 
@@ -110,14 +99,9 @@ public class PlayerListUpdater {
         // Nachricht bearbeiten
         channel.retrieveMessageById(messageId).queue(msg -> {
             msg.editMessageEmbeds(embed.build()).queue();
-
-            if (plugin.isDebug()) {
-                plugin.getLogger().info("[Debug] Playerlist embed updated.");
-            }
+            debug("debug_playerlist_updated");
         }, failure -> {
-            if (plugin.isDebug()) {
-                plugin.getLogger().warning("[Debug] Could not edit playerlist message: " + failure.getMessage());
-            }
+            debug("debug_playerlist_edit_failed", "%error%", failure.getMessage());
         });
     }
 
@@ -185,8 +169,8 @@ public class PlayerListUpdater {
 
         String guildId = plugin.getConfig().getString("discord.guild-id");
         String iconUrl = null;
-        if (guildId != null && !guildId.isBlank()) {
-            var guild = Synccord.getInstance().getDiscordBot().getJDA().getGuildById(guildId);
+        if (guildId != null && !guildId.isBlank() && plugin.getDiscordBot() != null) {
+            var guild = plugin.getDiscordBot().getJDA().getGuildById(guildId);
             if (guild != null) {
                 iconUrl = guild.getIconUrl();
             }
@@ -218,9 +202,10 @@ public class PlayerListUpdater {
         channelId = yml.getString("channel-id");
         messageId = yml.getString("message-id");
 
-        if (plugin.isDebug()) {
-            plugin.getLogger().info("[Debug] Loaded playerlist state: channel=" + channelId + ", message=" + messageId);
-        }
+        debug("debug_playerlist_state_loaded",
+                "%channel%", channelId != null ? channelId : "null",
+                "%message%", messageId != null ? messageId : "null"
+        );
     }
 
     private static void saveState() {
@@ -233,9 +218,40 @@ public class PlayerListUpdater {
 
         try {
             yml.save(file);
+            debug("debug_playerlist_state_saved");
         } catch (IOException e) {
+            debug("debug_playerlist_state_save_failed");
             plugin.getLogger().warning("[Synccord] Could not save playerlist-state.yml");
             e.printStackTrace();
+        }
+    }
+
+    // ===================== DEBUG-HELPER =====================
+    private static boolean isDebug() {
+        return Synccord.getInstance().getConfig().getBoolean("debug", false);
+    }
+
+    private static void debug(String key) {
+        if (isDebug()) {
+            Synccord.getInstance().getLogger().info(Lang.get(key));
+        }
+    }
+
+    private static void debug(String key, String placeholder, String value) {
+        if (isDebug()) {
+            Synccord.getInstance().getLogger().info(
+                    Lang.get(key).replace(placeholder, value)
+            );
+        }
+    }
+
+    private static void debug(String key, String p1, String v1, String p2, String v2) {
+        if (isDebug()) {
+            Synccord.getInstance().getLogger().info(
+                    Lang.get(key)
+                            .replace(p1, v1)
+                            .replace(p2, v2)
+            );
         }
     }
 }

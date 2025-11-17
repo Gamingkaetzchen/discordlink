@@ -20,13 +20,22 @@ public class DcFindCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        debugLog(Lang.get("debug_dcfind_command_received")
+                .replace("%sender%", sender.getName())
+                .replace("%args%", args.length > 0 ? String.join(" ", args) : "(no args)"));
+
         if (!sender.hasPermission("synccord.admin")) {
             sender.sendMessage(Lang.get("no_permission"));
+            debugLog(Lang.get("debug_dcfind_no_permission")
+                    .replace("%sender%", sender.getName()));
             return true;
         }
 
         if (args.length != 1) {
             sender.sendMessage(Lang.get("dcfind_usage"));
+            debugLog(Lang.get("debug_dcfind_wrong_usage")
+                    .replace("%sender%", sender.getName()));
             return true;
         }
 
@@ -39,6 +48,9 @@ public class DcFindCommand implements CommandExecutor {
 
         if (!DatabaseManager.isLinked(uuid)) {
             sender.sendMessage(Lang.get("dcfind_not_found").replace("%name%", args[0]));
+            debugLog(Lang.get("debug_dcfind_not_linked")
+                    .replace("%name%", args[0])
+                    .replace("%uuid%", uuid.toString()));
             return true;
         }
 
@@ -56,15 +68,23 @@ public class DcFindCommand implements CommandExecutor {
 
         jda.retrieveUserById(discordId).queue(
                 (User user) -> {
+                    String playerName = player.getName() != null ? player.getName() : Lang.get("unknown_player_name");
+
                     sender.sendMessage(Lang.get("dcfind_success")
-                            .replace("%name%", player.getName() != null ? player.getName() : "???")
+                            .replace("%name%", playerName)
                             .replace("%id%", discordId)
                             .replace("%tag%", user.getAsTag()));
 
-                    debugLog(Lang.get("debug_dcfind_tag").replace("%tag%", user.getAsTag()));
+                    debugLog(Lang.get("debug_dcfind_tag")
+                            .replace("%tag%", user.getAsTag())
+                            .replace("%name%", playerName)
+                            .replace("%id%", discordId));
                 },
                 (error) -> {
                     sender.sendMessage(Lang.get("dcfind_user_unknown").replace("%id%", discordId));
+                    debugLog(Lang.get("debug_dcfind_user_unknown_error")
+                            .replace("%id%", discordId)
+                            .replace("%error%", error.getMessage() != null ? error.getMessage() : "null"));
                 }
         );
 

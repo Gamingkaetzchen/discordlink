@@ -19,12 +19,28 @@ public class UnlinkMCCommand extends ListenerAdapter {
 
         // Admin-Prüfung
         if (event.getMember() == null || !event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_dcfind_no_permission")
+                                .replace("%sender%", event.getUser().getName())
+                );
+            }
+
             event.reply(Lang.get("no_permission")).setEphemeral(true).queue();
             return;
         }
 
         var uuidOption = event.getOption("uuid");
         if (uuidOption == null) {
+
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().info(
+                        Lang.get("debug_dcfind_wrong_usage")
+                                .replace("%sender%", event.getUser().getName())
+                );
+            }
+
             event.reply(Lang.get("unlinkmc_missing_uuid")).setEphemeral(true).queue();
             return;
         }
@@ -39,7 +55,9 @@ public class UnlinkMCCommand extends ListenerAdapter {
                             Lang.get("debug_unlinkmc_not_linked").replace("%uuid%", uuidStr));
                 }
 
-                event.reply(Lang.get("unlinkmc_not_linked").replace("%uuid%", uuidStr)).setEphemeral(true).queue();
+                event.reply(Lang.get("unlinkmc_not_linked").replace("%uuid%", uuidStr))
+                        .setEphemeral(true)
+                        .queue();
                 return;
             }
 
@@ -50,7 +68,9 @@ public class UnlinkMCCommand extends ListenerAdapter {
                         Lang.get("debug_unlinkmc_success").replace("%uuid%", uuid.toString()));
             }
 
-            event.reply(Lang.get("unlinkmc_success").replace("%uuid%", uuid.toString())).setEphemeral(true).queue();
+            event.reply(Lang.get("unlinkmc_success").replace("%uuid%", uuid.toString()))
+                    .setEphemeral(true)
+                    .queue();
 
         } catch (IllegalArgumentException e) {
             if (isDebug()) {

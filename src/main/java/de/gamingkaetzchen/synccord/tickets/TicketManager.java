@@ -22,7 +22,8 @@ public class TicketManager {
 
     private final JavaPlugin plugin;
     private final Map<String, TicketType> ticketTypes = new HashMap<>();
-    private final Map<Long, UUID> linkedPlayers = new HashMap<>(); // ✅ Discord-ID → Minecraft-UUID
+    // Discord-ID → Minecraft-UUID (nur Runtime-Mapping, DB macht Synccord separat)
+    private final Map<Long, UUID> linkedPlayers = new HashMap<>();
 
     public TicketManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -34,7 +35,6 @@ public class TicketManager {
 
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("tickets");
         if (section == null) {
-            // optionales Debug-Log, falls keine tickets-Sektion existiert
             if (isDebug()) {
                 plugin.getLogger().warning(Lang.get("debug_ticket_no_config"));
             }
@@ -44,24 +44,28 @@ public class TicketManager {
         for (String key : section.getKeys(false)) {
             ConfigurationSection ticketSection = section.getConfigurationSection(key);
             if (ticketSection == null) {
+                // Schlüssel wie "log_channel_id" etc. sind keine Sektionen → nur bei Debug melden
                 if (isDebug()) {
                     plugin.getLogger().warning(
                             Lang.get("debug_ticket_section_missing")
-                                    .replace("%value%", key));
+                                    .replace("%value%", key)
+                    );
                 }
                 continue;
             }
 
-            // Namen, Beschreibung, Button-Text – mit Lang-Fallback
+            // Name / Beschreibung / Button-Text mit Lang-Fallback
             String name = ticketSection.getString("name", Lang.get("ticket_default_name"));
             String description = ticketSection.getString("description", "");
-            String buttonName = ticketSection.getString("button_name",
-                    Lang.get("ticket_default_button_name"));
+            String buttonName = ticketSection.getString(
+                    "button_name",
+                    Lang.get("ticket_default_button_name")
+            );
 
             String categoryId = ticketSection.getString("ticketkategorie");
             List<String> supporterRoles = ticketSection.getStringList("supporter_roles");
 
-            // litebans-hook aus config lesen (beide Schreibweisen unterstützen)
+            // litebans-hook aus config lesen (beide Schreibweisen akzeptiert)
             boolean litebansHook = ticketSection.getBoolean("litebanshook",
                     ticketSection.getBoolean("litebans-hook", false));
 
@@ -75,11 +79,11 @@ public class TicketManager {
                         List<String> questionLines = questionSection.getStringList(qKey + ".questions");
                         questions.put(index, new TicketQuestion(inputLimit, questionLines));
                     } catch (NumberFormatException ex) {
-                        // Konfigurationsfehler → klares Log mit Lang
                         plugin.getLogger().warning(
                                 Lang.get("ticket_invalid_question_index")
                                         .replace("%ticket%", key)
-                                        .replace("%index%", qKey));
+                                        .replace("%index%", qKey)
+                        );
                     }
                 }
             }
@@ -96,11 +100,11 @@ public class TicketManager {
             );
             ticketTypes.put(key, ticketType);
 
-            // Debug-Log pro geladenem Tickettyp
             if (isDebug()) {
                 plugin.getLogger().info(
                         Lang.get("debug_ticket_type_loaded")
-                                .replace("%value%", key));
+                                .replace("%value%", key)
+                );
             }
         }
     }
@@ -115,7 +119,7 @@ public class TicketManager {
 
     public TicketType getTypeByChannel(TextChannel channel) {
         String name = channel.getName();
-        for (TicketType type : getTicketTypes()) {
+        for (TicketType type : ticketTypes.values()) {
             if (name.startsWith(type.getId() + "-")) {
                 return type;
             }
@@ -123,6 +127,10 @@ public class TicketManager {
         return null;
     }
 
+    /**
+     * Lädt den Tickettyp über die gespeicherte Datei im /tickets Ordner
+     * (channelId.yml → ticket_id).
+     */
     public TicketType getTypeByChannelId(String channelId) {
         File file = new File("tickets", channelId + ".yml");
         if (!file.exists()) {
@@ -138,6 +146,7 @@ public class TicketManager {
         return getTicketTypeById(typeId);
     }
 
+    // ===== Discord ↔ Online-Player Mapping (nur im RAM) =====
     public Optional<Player> getOnlinePlayer(long discordId) {
         UUID uuid = linkedPlayers.get(discordId);
         return uuid == null ? Optional.empty() : Optional.ofNullable(Bukkit.getPlayer(uuid));

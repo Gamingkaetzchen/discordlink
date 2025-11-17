@@ -41,24 +41,25 @@ public class Synccord extends JavaPlugin {
 
         // bStats starten
         new Metrics(this, 26581);
-        // Datenbankverbindung initialisieren
+
+        // Datenbank
         DatabaseManager.init();
 
-        // ✅ TicketManager initialisieren — VOR DiscordBot!
+        // TicketManager vor dem Bot!
         ticketManager = new TicketManager(this);
 
-        // Befehle registrieren
+        // Befehle
         getCommand("unlinkdiscord").setExecutor(new UnlinkDiscordCommand());
         getCommand("dcfind").setExecutor(new DcFindCommand());
 
-        // Bukkit-Listener
+        // Listener
         getServer().getPluginManager().registerEvents(new TicketJoinAlertListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerActivityListener(), this);
-        Bukkit.getPluginManager().registerEvents(new RoleSyncJoinListener(), this);
-        Bukkit.getPluginManager().registerEvents(new DiscordJoinLeaveForwardListener(), this);
-        Bukkit.getPluginManager().registerEvents(new MinecraftChatListener(), this);
+        getServer().getPluginManager().registerEvents(new RoleSyncJoinListener(), this);
+        getServer().getPluginManager().registerEvents(new DiscordJoinLeaveForwardListener(), this);
+        getServer().getPluginManager().registerEvents(new MinecraftChatListener(), this);
 
-        // rules.yml anlegen, falls nicht vorhanden
+        // rules.yml erzeugen
         File ruleFile = new File(getDataFolder(), "rules.yml");
         if (!ruleFile.exists()) {
             saveResource("rules.yml", false);
@@ -68,21 +69,21 @@ public class Synccord extends JavaPlugin {
         try {
             luckPerms = LuckPermsProvider.get();
         } catch (IllegalStateException e) {
-            getLogger().warning("⚠ LuckPerms nicht verfügbar!");
+            getLogger().warning(Lang.get("debug_luckperms_missing"));
         }
 
-        // LiteBans-Debug
+        // LiteBans Info
         if (Bukkit.getPluginManager().getPlugin("LiteBans") != null) {
-            getLogger().info("[Synccord] LiteBans gefunden – Ticket-LiteBans-Hook ist AKTIV.");
+            getLogger().info(Lang.get("debug_litebans_found"));
         } else {
-            getLogger().info("[Synccord] LiteBans NICHT gefunden – Tickets zeigen keine Strafen.");
+            getLogger().info(Lang.get("debug_litebans_not_found"));
         }
 
-        // ✅ Jetzt DiscordBot starten
+        // DiscordBot starten
         try {
             discordBot = new DiscordBot(getConfig().getString("discord.token"), ticketManager);
         } catch (Exception e) {
-            getLogger().severe("❌ Fehler beim Starten des Discord-Bots:");
+            getLogger().severe(Lang.get("error_discord_start"));
             e.printStackTrace();
             getServer().getPluginManager().disablePlugin(this);
         }
@@ -115,7 +116,9 @@ public class Synccord extends JavaPlugin {
 
     public static void debug(String message) {
         if (getInstance().isDebug()) {
-            getInstance().getLogger().info("§8[§3Debug§8] §7" + message);
+            getInstance().getLogger().info(
+                    Lang.get("debug_generic").replace("%msg%", message)
+            );
         }
     }
 

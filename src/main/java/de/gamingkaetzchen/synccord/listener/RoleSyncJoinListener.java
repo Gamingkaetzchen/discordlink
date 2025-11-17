@@ -9,9 +9,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import de.gamingkaetzchen.synccord.Synccord;
+import de.gamingkaetzchen.synccord.discord.DiscordBot;
 import de.gamingkaetzchen.synccord.discord.LinkManager;
 import de.gamingkaetzchen.synccord.discord.util.RoleSyncUtil;
 import de.gamingkaetzchen.synccord.util.Lang;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.kyori.adventure.text.Component;
@@ -43,19 +45,32 @@ public class RoleSyncJoinListener implements Listener {
             debugLog(Lang.get("debug_no_discord_id").replace("%name%", player.getName()));
             return;
         }
-
         String discordId = optionalDiscordId.get();
+
+        // Bot / JDA prüfen
+        DiscordBot bot = Synccord.getInstance().getDiscordBot();
+        if (bot == null) {
+            Synccord.getInstance().getLogger().warning(Lang.get("error_no_discord_bot"));
+            return;
+        }
+
+        JDA jda = bot.getJDA();
+        if (jda == null) {
+            Synccord.getInstance().getLogger().warning(Lang.get("error_no_jda_instance"));
+            return;
+        }
 
         // Guild-Objekt laden
         String guildId = Synccord.getInstance().getConfig().getString("discord.guild-id");
-        if (guildId == null) {
+        if (guildId == null || guildId.isEmpty()) {
             Synccord.getInstance().getLogger().warning(Lang.get("error_no_guild_id"));
             return;
         }
 
-        Guild guild = Synccord.getInstance().getDiscordBot().getJDA().getGuildById(guildId);
+        Guild guild = jda.getGuildById(guildId);
         if (guild == null) {
-            Synccord.getInstance().getLogger().warning(Lang.get("error_guild_not_found").replace("%id%", guildId));
+            Synccord.getInstance().getLogger()
+                    .warning(Lang.get("error_guild_not_found").replace("%id%", guildId));
             return;
         }
 
@@ -64,8 +79,10 @@ public class RoleSyncJoinListener implements Listener {
                 (Member member) -> {
                     debugLog(Lang.get("debug_sync_start").replace("%name%", player.getName()));
                     RoleSyncUtil.syncRolesToMinecraft(member, uuid);
+                    debugLog(Lang.get("debug_sync_done").replace("%name%", player.getName()));
                 },
-                (error) -> Synccord.getInstance().getLogger().warning(Lang.get("error_discord_member").replace("%msg%", error.getMessage()))
+                (error) -> Synccord.getInstance().getLogger().warning(
+                        Lang.get("error_discord_member").replace("%msg%", error.getMessage()))
         );
     }
 

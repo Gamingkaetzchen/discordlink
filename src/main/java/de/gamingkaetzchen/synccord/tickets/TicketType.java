@@ -1,7 +1,5 @@
 package de.gamingkaetzchen.synccord.tickets;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,17 +21,16 @@ public class TicketType {
     // pro Tickettyp konfigurierbar
     private final boolean litebansHook;
 
-    // altes Überbleibsel – bleibt drin, damit nichts anderes bricht
-    private final Map<String, TicketType> ticketTypes = new HashMap<>();
-
-    public TicketType(String id,
+    public TicketType(
+            String id,
             String name,
             String description,
             String buttonName,
             String categoryId,
             List<String> supporterRoles,
             Map<Integer, TicketQuestion> questions,
-            boolean litebansHook) {
+            boolean litebansHook
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -79,13 +76,12 @@ public class TicketType {
     public EmbedBuilder toFancyEmbed() {
         EmbedBuilder embed = new EmbedBuilder();
 
-        // Titel & Beschreibung jetzt komplett aus der Langfile
+        // Titel & globale Panel-Beschreibung aus Langfile
         embed.setTitle(Lang.get("ticket_panel_title"));
         embed.setDescription(Lang.get("ticket_panel_description"));
-
         embed.setColor(0x2F3136);
 
-        // Thumbnail + Footer: Bot-Avatar + Lang-Footer
+        // Bot-Avatar + Footer aus Langfile
         String botAvatar = null;
         if (Synccord.getInstance().getDiscordBot() != null
                 && Synccord.getInstance().getDiscordBot().getJDA() != null) {
@@ -96,6 +92,15 @@ public class TicketType {
             embed.setFooter(Lang.get("ticket_embed_footer"), botAvatar);
         } else {
             embed.setFooter(Lang.get("ticket_embed_footer"));
+        }
+
+        // ✅ Ticket-spezifische Beschreibung aus config.yml (falls gesetzt)
+        if (description != null && !description.isBlank()) {
+            embed.addField(
+                    Lang.get("ticket_panel_desc_label"), // neuer Lang-Key
+                    description,
+                    false
+            );
         }
 
         // Kategorie-Feld
@@ -131,11 +136,7 @@ public class TicketType {
                 true
         );
 
-        // LiteBans-Hinweis NICHT hier – das machst du später im Button-Listener pro Spieler
+        // LiteBans-Hinweis kommt wie gehabt im TicketChannelCreator dazu
         return embed;
-    }
-
-    public Collection<TicketType> getTicketTypes() {
-        return ticketTypes.values();
     }
 }
