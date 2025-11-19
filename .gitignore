@@ -31,3 +31,6 @@ Thumbs.db
 # Other build tools
 build/
 .gradle/
+src.zip
+pom.zip
+.gitignore

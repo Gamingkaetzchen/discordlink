@@ -3,13 +3,24 @@ package de.gamingkaetzchen.synccord.discord.listener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.util.Lang;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class DiscordChatListener extends ListenerAdapter {
+
+    private final Synccord plugin;
+    private final boolean papiEnabled;
+
+    public DiscordChatListener() {
+        this.plugin = Synccord.getInstance();
+        Plugin papi = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
+        this.papiEnabled = (papi != null && papi.isEnabled());
+    }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -68,9 +79,10 @@ public class DiscordChatListener extends ListenerAdapter {
             return;
         }
 
+        // Format aus config, Fallback per Lang
         String template = plugin.getConfig().getString(
                 "chat.format-to-minecraft",
-                "&9[DC] &7%user%: &f%message%"
+                Lang.get("chat_format_minecraft") // Fallback aus Lang
         );
 
         String formatted = template
@@ -87,7 +99,21 @@ public class DiscordChatListener extends ListenerAdapter {
         // Auf den Main-Thread
         Bukkit.getScheduler().runTask(plugin, () -> {
             for (Player p : Bukkit.getOnlinePlayers()) {
-                p.sendMessage(colored);
+                String toSend = colored;
+
+                // PlaceholderAPI pro Empfänger anwenden (falls installiert)
+                if (papiEnabled) {
+                    try {
+                        toSend = PlaceholderAPI.setPlaceholders(p, toSend);
+                    } catch (Exception ex) {
+                        debugLog(
+                                Lang.get("debug_discordchat_papi_error")
+                                        .replace("%error%", ex.getMessage() == null ? "null" : ex.getMessage())
+                        );
+                    }
+                }
+
+                p.sendMessage(toSend);
             }
         });
     }

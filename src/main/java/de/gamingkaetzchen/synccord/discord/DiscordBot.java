@@ -37,7 +37,8 @@ public class DiscordBot {
                         GatewayIntent.GUILD_MESSAGES,
                         GatewayIntent.GUILD_MEMBERS,
                         GatewayIntent.MESSAGE_CONTENT
-                );
+                )
+                .setAutoReconnect(false); // wichtig bei Plugin-Shutdowns
 
         this.jda = builder.build();
         jda.awaitReady();
@@ -93,7 +94,9 @@ public class DiscordBot {
     public void shutdown() {
         if (jda != null) {
             debug("debug_discord_shutdown");
-            jda.shutdown();
+            // Auto-Reconnect sicherheitshalber noch abdrehen
+            jda.getPresence().setIdle(true);
+            jda.shutdownNow(); // hart und sofort
         }
     }
 

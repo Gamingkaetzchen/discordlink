@@ -279,9 +279,10 @@ rules:
   keyword: "WEIHNACHTEN"
 
 chat:
-  format-to-discord: "<%player%> %message%"
-  format-to-minecraft: "&9[DC] &7%user%: &f%message%"
+  format-to-minecraft: "&7%statussys_prefix% %player%: %message%"
+  format-to-discord: "DISCORD %player% %message%"
   ignore-bots: true
+  block-mentions: true
 
 features:
   send-join: true

@@ -1,41 +1,353 @@
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃         Allgemein & Chat          ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+prefix: "§7[§bSynccord§7] §f"
 chat_format_discord: "<%player%> %message%"
+unknown_command: "❓ Unbekannter Befehl oder falsche Syntax."
+no_permission: "❌ Du hast keine Berechtigung dafür."
+no_console: "❌ Dieser Befehl ist nur für Spieler verfügbar."
+missing_key: "§c[Fehlender Sprachschlüssel: %key%]"
+unknown_player_name: "Unbekannt"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃        Serverstatus & Info        ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+server_start_message: "🟢 Der Minecraft-Server ist jetzt **online**."
+server_stop_message: "🔴 Der Minecraft-Server wurde **gestoppt**."
+
+info_embed_title: "📊 Serverstatus"
+info_embed_offline: "🚫 Der Minecraft-Server ist aktuell offline."
+info_embed_field_java: "Java IP"
+info_embed_field_bedrock: "Bedrock IP"
+info_embed_field_tps: "TPS"
+info_embed_field_mspt: "MSPT"
+info_embed_field_players: "Spieler online"
+info_embed_field_version: "Version"
+info_embed_footer: "Wird alle 60 Sekunden automatisch aktualisiert"
+info_embed_sent: "Info-Embed wurde gesendet."
+info_embed_error: "❌ Info-Embed konnte nicht aktualisiert werden."
+
+info_players_title: "Spielerlist"
+info_players_empty: "❌ Es sind aktuell keine Spieler online."
+info_sent: "✅ Info-Embed gesendet."
+
+footer_text: "Mady by Gamingkaetzchen"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃     Verknüpfung & Auth / Login    ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+how_to_link: "%prefix%Klicke in Discord auf den Button und gib den Code ein."
+not_linked: "%prefix%Du bist noch nicht mit Discord verknüpft."
+link_button: "Verknüpfen"
+
+login_kick_message: |-
+  <red><b>🔒 Du bist nicht mit Discord verknüpft!</b></red>
+  
+  
+    <gray>•</gray> <white>Dein Code: <green>%code%</green>
+  
+    <gray>•</gray> <white>Klicke im Discord auf <aqua>„Verknüpfen“</aqua> und gib diesen
+    Code ein.
+  
+    <gray>•</gray> <white>Discord beitreten: <blue>https://discord.gg/7tNXzZ6zms
+
+link_code: "%prefix%Dein Verknüpfungscode lautet: §a%code%"
+link_instruction: "%prefix%Klicke in Discord auf „Verknüpfen“ und gib diesen Code ein."
+link_reminder: "%prefix%Du bist noch nicht mit Discord verknüpft."
+
+link_embed_title: "🔗 Verknüpfe deinen Minecraft-Account"
+link_embed_description: "Klicke auf den Button unten und gib den Code ein, den du im Spiel erhalten hast."
+
+link_success: "✅ Du wurdest erfolgreich mit deinem Minecraft-Account verknüpft!"
+link_error: "❌ Fehler beim Verknüpfen."
+link_error_generic: "❌ Fehler beim Verknüpfen."
+link_error_invalid_code: "❌ Ungültiger Code. Hast du dich schon im Spiel eingeloggt?"
+link_invalid_code: "❌ Ungültiger Code. Hast du dich schon im Spiel eingeloggt?"
+link_already_linked: "❌ Dein Discord-Account ist bereits mit einem anderen Minecraft-Spieler verknüpft."
+link_error_already_linked: "❌ Dein Discord-Account ist bereits mit einem anderen Minecraft-Spieler verknüpft."
+
+link_modal_title: "🔗 Minecraft-Verknüpfung"
+link_modal_input_label: "Dein Minecraft-Code"
+link_modal_input_placeholder: "z.B. 4F6X9Q"
+
+link_manual_success: "✅ Der Spieler %name% wurde manuell mit Discord-ID %id% verknüpft."
+
+error_discord_start: "❌ Fehler beim Starten des Discord-Bots!"
+error_discord_member: "⚠ Fehler beim Abrufen des Discord-Mitglieds: %msg%"
+error_no_guild_id: "❌ Keine Guild-ID in der config.yml gefunden."
+error_guild_not_found: "⚠ Discord-Guild mit ID '%id%' nicht gefunden."
+error_no_discord_bot: "[Debug] DiscordBot ist null – RoleSync wird übersprungen."
+error_no_jda_instance: "[Debug] JDA-Instanz ist null – RoleSync wird übersprungen."
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃        /dcfind & Unlink-Befehle   ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 dcfind_not_found: "❌ Für %name% wurde keine Verknüpfung gefunden."
 dcfind_success: "✅ Spieler %name% ist verknüpft mit:\n\n  §aDiscord-ID: §f%id%\n\n  §aDiscord-Tag: §f%tag%\n\n  "
 dcfind_usage: "§7Verwendung: /dcfind <spielername>"
 dcfind_user_unknown: "❌ Discord-Benutzer konnte nicht gefunden werden. Discord-ID:  %id%"
-debug_button_click: "[Debug] Button 'show_players' wurde geklickt von: %user%"
-debug_button_no_permission: "[Debug] Keine Berechtigung für Button-Nutzung: %user%"
+
+unlink_usage: "§7Verwendung: /unlinkdiscord <spielername>"
+unlink_never_seen: "§cSpieler wurde nie auf dem Server gesehen."
+unlink_not_found: "❌ Für diesen Spieler existiert keine Verknüpfung."
+unlink_success: "✅ Die Verknüpfung von %name% wurde entfernt."
+
+unlinkmc_description: "Hebt die Verknüpfung eines Minecraft-Spielers auf."
+unlinkmc_invalid_uuid: "❌ Ungültige UUID."
+unlinkmc_missing_uuid: "❌ Fehlende UUID."
+unlinkmc_not_linked: "❌ Die UUID `%uuid%` ist nicht verknüpft."
+unlinkmc_option_uuid: "UUID des Minecraft-Spielers"
+unlinkmc_success: "✅ Die Verknüpfung für `%uuid%` wurde erfolgreich entfernt."
+
+linkmc_description: "Verknüpft einen Minecraft-Spieler mit einem Discord-Nutzer."
+linkmc_invalid_discordid: "❌ Ungültige Discord-ID."
+linkmc_invalid_uuid: "❌ Ungültige UUID."
+linkmc_missing_args: "❌ Fehlende UUID oder Discord-ID."
+linkmc_no_permission: "❌ Du hast keine Berechtigung für diesen Befehl."
+linkmc_option_discordid: "Discord-ID des Nutzers"
+linkmc_option_uuid: "UUID des Minecraft-Spielers"
+linkmc_success: "✅ Verknüpft:\n\n  - Minecraft UUID: `%uuid%`\n\n  - Discord-ID: `%discord%`\n\n  "
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃           Playerlist / Info       ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+playerlist_empty: "Keine Spieler online."
+playerlist_footer: "Wird automatisch aktualisiert"
+
+show_players_button: "Spielerlist"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃        Rollen-Sync & Gruppen      ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+role_sync_added: "✔ Spieler %name% wurde zur Gruppe %group% hinzugefügt."
+role_sync_removed: "✖ Spieler %name% wurde aus Gruppe %group% entfernt."
+role_sync_skip: "⏭ Kein Rollenwechsel nötig für %name%."
+role_sync_start: "🔁 Starte Discord → Minecraft Rollensynchronisation für %name%."
+
+sync_start: "🛠 [Sync] Starte Rollenabgleich Discord → Minecraft für UUID: %uuid%"
+sync_discord_roles: "📋 [Sync] Discord-Rollen des Nutzers:"
+sync_check: "🔄 [Sync] Prüfe: Discord-Rolle '%role%', Zielgruppe: '%group%'"
+sync_added: "✅ [Sync] Gruppe '%group%' HINZUGEFÜGT."
+sync_removed: "❎ [Sync] Gruppe '%group%' ENTFERNT."
+sync_no_change: "✔ [Sync] Keine Änderung nötig für '%group%'."
+sync_done: "✅ [Sync] Rollenabgleich abgeschlossen."
+sync_no_roles_config: "⚠ [Sync] Keine 'role-link' Konfiguration gefunden."
+sync_role_not_found: "❌ [Sync] Rolle mit ID %role% wurde nicht im Discord gefunden."
+sync_no_lp_user: "⚠ [Sync] Kein LuckPerms-User für UUID %uuid% gefunden."
+sync_has_group: "Hat Gruppe"
+sync_has_role: "Hat Discord-Rolle"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃             Ticketsystem          ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+ticket_alert_join: "§e📬 Es sind derzeit noch offene Tickets vorhanden!"
+ticket_alert_message: "§6[Ticket] §e%user% hat ein neues Ticket vom Typ §7%ticket% §eeröffnet!"
+
+ticket_button_add_user: "🧍 Benutzer hinzufügen"
+ticket_button_claim: "🔒 Claim"
+ticket_button_close: "❌ Close"
+
+ticket_channel_no_permissions: "❌ Dieser Channel erlaubt keine Berechtigungsänderungen."
+ticket_channel_not_found: "❌ Ticket- oder Logchannel nicht gefunden."
+
+ticket_claimed_broadcast: "🔒 Ticket wurde übernommen von %user%."
+ticket_claimed_field_title: "🔒 Übernommen von"
+ticket_claimed_success: "✅ Du hast das Ticket übernommen."
+
+ticket_closing_broadcast: "📁 Ticket wird geschlossen und geloggt..."
+ticket_closing_no_logchannel: "✅ Ticket geschlossen.\n⚠ Kein Log-Channel gefunden, Transkript nur lokal gespeichert."
+ticket_closing_success: "✅ Ticket wird geschlossen."
+ticket_close_cancelled: "🚫 Ticket bleibt geöffnet."
+ticket_close_confirm: "❗ Bist du sicher, dass du dieses Ticket schließen willst?"
+ticket_close_confirm_no: "❌ Abbrechen"
+ticket_close_confirm_yes: "✅ Ja, schließen"
+
+ticket_command_description: "Ticket-System verwalten"
+ticket_config_missing: "❌ Fehler: `tickets.log_channel_id` fehlt in der Config."
+ticket_create_category_not_found: "❌ Kategorie nicht gefunden!"
+ticket_create_no_category: "❌ Kategorie-ID ist ungültig oder fehlt!"
+ticket_created_embed_description: "Ein neues Ticket wurde erstellt!"
+ticket_created_user_message: "✅ Dein Ticket wurde erstellt!"
+
+ticket_default_button_name: "Create Ticket"
+ticket_default_name: "Unbenanntes Ticket"
+
+ticket_embed_footer: "Ticket-System | Synccord"
+
+ticket_field_answers: "Beantwortete Fragen"
+ticket_field_coordinates: "Koordinaten"
+ticket_field_litebans: "LiteBans"
+ticket_field_name: "Verlinkter Name"
+ticket_field_world: "Welt"
+
+ticket_invalid_question_index: "Ungültiger Fragenindex in TicketTyp '%ticket%': %index%"
+
+ticket_litebans_no_link: "Spieler nicht verlinkt – keine Abfrage möglich"
+ticket_litebans_none: "Keine aktiven Strafen gefunden"
+ticket_litebans_no_warning_method: "Keine Warns gefunden"
+
+ticket_message_not_found: "❌ Konnte die Ticketnachricht nicht finden."
+ticket_no_user: "❌ Fehler: Kein Benutzer."
+
+ticket_panel_button: "📨 Create a Ticket"
+ticket_panel_title: "📩 Support Ticket"
+ticket_panel_description: "Wenn du ein Problem hast, erstelle bitte ein Ticket!"
+ticket_panel_category_label: "📁 Kategorie"
+ticket_panel_category_value: "{category}"
+ticket_panel_desc_label: "📝 Beschreibung"
+ticket_panel_questions_label: "❓ Fragen"
+ticket_panel_questions_value: "{count}"
+ticket_panel_roles_label: "🛠 Supporter-Rollen"
+ticket_panel_roles_value: "{roles}"
+
+ticket_save_error: "[Debug] [Ticket] Fehler beim Speichern von %file%"
+ticket_setup_error: "❌ Fehler beim Erstellen: %error%"
+ticket_setup_sub_description: "Ticket-Buttons posten"
+ticket_setup_success: "❌ Erfolg!"
+ticket_subcommand_setup_description: "Ticket-Buttons posten"
+
+ticket_transcript_description: "Ein Ticket wurde geschlossen und das Transkript wurde gespeichert."
+ticket_transcript_load_error: "⚠ Fehler beim Laden des Transkripts: %error%"
+ticket_transcript_not_found: "❌ Transkript oder Log-Channel konnte nicht gefunden werden."
+ticket_transcript_save_error: "⚠ Fehler beim Speichern des Transkripts: %error%"
+ticket_transcript_temp_description: "Das Transkript wird in 5 Minuten gelöscht."
+ticket_transcript_title: "📄 Transkript gespeichert"
+
+ticket_type_not_found: "❌ Tickettyp nicht gefunden!"
+ticket_user_add_error: "❌ Fehler beim Hinzufügen: %error%"
+ticket_user_added: "✅ %user% wurde zum Ticket hinzugefügt."
+ticket_user_not_found: "❌ Der ausgewählte Benutzer konnte nicht gefunden werden."
+ticket_user_select_none: "❌ Kein gültiger Benutzer ausgewählt."
+
+multiticket_created_success: "✅ Multi-Ticket-Embed wurde in %channel% erstellt."
+multiticket_embed_title: "📨 Support Ticket"
+multiticket_embed_description: "Wähle unten die passende Kategorie aus."
+multiticket_invalid_id: "❌ Ungültige MultiTicket-ID. Bitte `/setup multiticket` neu ausführen."
+multiticket_no_type_selected: "⚠ Bitte mindestens einen Ticket-Typ auswählen."
+multiticket_roles_none: "_keine Rollen_"
+multiticket_category_none: "_keine Kategorie_"
+multiticket_target_not_found: "❌ Zielkanal nicht gefunden."
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃             /setup-Bereich        ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+setup_description: "Führt Discord-Setup durch"
+invalid_type: "❌ Ungültiger Setup-Typ."
+
+setup_multiticket_description: "Wähle jetzt die Ticket-Arten aus.\nZielkanal: %channel%"
+setup_multiticket_no_channel: "⚠ Bitte einen Zielkanal angeben: `/setup multiticket` + Channel auswählen."
+setup_multiticket_no_types: "⚠ Es wurden noch keine Ticket-Typen in der config.yml definiert."
+setup_multiticket_placeholder: "Wähle bis zu 5 Ticket-Arten …"
+setup_multiticket_system_unavailable: "❌ Ticket-System nicht verfügbar."
+setup_multiticket_title: "Multi-Ticket Setup"
+
+setup_option_channel_description: "Zielkanal (für multiticket/playerlist)"
+setup_option_type_description: "linking, info, playerlist, regel, multiticket"
+
+setup_playerlist_title: "👥 Online-Spieler"
+setup_playerlist_description: "Hier siehst du die aktuelle Liste aller Online-Spieler."
+setup_playerlist_sent: "✅ Playerlist-Embed wurde gesendet."
+
+setup_rule_embed_title: "📜 Server-Regeln"
+setup_rule_button: "✅ Bestätigen"
+setup_rule_fail: "❌ Falsches Codewort. Versuche es erneut!"
+setup_rule_invalid_or_empty: "❌ rules.yml ist ungültig oder leer."
+setup_rule_modal_input: "Bitte das Codewort eingeben"
+setup_rule_modal_title: "Codewort bestätigen"
+setup_rule_no_channel: "❌ Fehler: Kein Channel verfügbar."
+setup_rule_no_member: "❌ Fehler beim Verarbeiten deiner Eingabe."
+setup_rule_sent: "📜 Regeln wurden gesendet."
+setup_rule_success: "✅ Du hast die Regeln erfolgreich bestätigt!"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                SQLite / DB        ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+sqlite_init_error: "§c❌ Die SQLite-Datenbank konnte nicht initialisiert werden."
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃              Debug: Allgemein     ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+debug_generic: "[Debug] %msg%"
+debug_luckperms_missing: "[Debug] LuckPerms nicht verfügbar!"
+debug_litebans_error: "[Debug] Fehler beim LiteBans-Zugriff: %error%"
+debug_litebans_found: "[Debug] LiteBans gefunden – Ticket-LiteBans-Hook ist aktiv."
+debug_litebans_no_time: "[Debug] LiteBans: Keine passende Restzeit gefunden, behandle als permanent."
+debug_litebans_no_warning_method: "[Debug] LiteBans: Methode getWarning(UUID, String, String) nicht gefunden."
+debug_litebans_not_found: "[Debug] LiteBans-Plugin nicht gefunden."
+debug_registering_slash_commands: "[Debug] Slash-Befehle werden registriert..."
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃            Debug: Discord-Bot     ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+debug_discord_starting: "[Debug] Starte Discord-Bot mit Token..."
+debug_discord_ready: "[Debug] Discord-Bot ist bereit."
+debug_discord_shutdown: "[Debug] Discord-Bot wird heruntergefahren..."
+
+debug_offline_channel_not_found: "[Debug] Channel nicht gefunden: %id%"
+debug_offline_embed_replaced: "[Debug] Offline-Embed erfolgreich ersetzt."
+debug_offline_no_saved_message: "[Debug] Kein gespeicherter Channel oder Nachricht vorhanden – abbrechen."
+debug_offline_replace_failed: "[Debug] ❌ Offline-Embed konnte nicht ersetzt werden:"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃          Debug: Chat (MC→DC)      ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 debug_chat_bot_null: "[Debug] DiscordBot ist null – Chat kann nicht gesendet werden."
 debug_chat_channel_missing: "[Debug] Chat-Channel-ID fehlt (discord.chat-channel-id)."
 debug_chat_channel_not_found: "[Debug] Chat-Channel nicht gefunden: %id%"
 debug_chat_failed: "[Debug] Fehler beim Senden der Chatnachricht: %error%"
 debug_chat_forwarded: "[Debug] Chat an Discord gesendet (%player%)."
-debug_dcfind_command_received: "[Debug] /dcfind von %sender% ausgeführt (Args: %args%)"
-debug_dcfind_foundid: "[Debug] Discord-ID '%id%' gefunden"
-debug_dcfind_noid: "[Debug] Keine gespeicherte Discord-ID für UUID '%uuid%' gefunden"
-debug_dcfind_not_linked: "[Debug] Spieler %name% (%uuid%) ist nicht verlinkt."
-debug_dcfind_start: "[Debug] Suche nach Discord-ID für Spieler '%name%' mit UUID  '%uuid%'"
-debug_dcfind_tag: "[Debug] Benutzer-Tag lautet '%tag%'"
-debug_dcfind_user_unknown_error: "[Debug] Discord-User %id% konnte nicht geladen werden (Fehler: %error%)."
-debug_dcfind_wrong_usage: "[Debug] Falsche Nutzung von /dcfind durch %sender%."
+debug_chat_papi_error: "[Debug] Fehler beim Anwenden von PlaceholderAPI: %error%"
+debug_chat_mentions_blocked: "[Debug] Discord-Mentions aus Minecraft-Chat wurden blockiert."
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃         Debug: DiscordChat (DC→MC)┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+debug_discordchat_received: "[Debug] Discord-Nachricht von %user% in Channel %channel% empfangen."
+debug_discordchat_ignored_bot: "[Debug] Nachricht von Bot %user% ignoriert."
+debug_discordchat_no_channel_config: "[Debug] Kein 'discord.chat-channel-id' in der Config gesetzt – Nachricht wird ignoriert."
+debug_discordchat_wrong_channel: "[Debug] Nachricht aus falschem Channel (%actual%), erwartet: %expected%."
+debug_discordchat_empty_message: "[Debug] Leere Discord-Nachricht ignoriert."
+debug_discordchat_blocked_command: "[Debug] Discord-Command unterdrückt: %message%."
+debug_discordchat_broadcast: "[Debug] Discord-Nachricht an Minecraft gesendet: %formatted%"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃     Debug: Join / Leave / Death   ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+debug_join_channel_missing: "[Debug] Join-Channel-ID fehlt in config.yml (discord.join-channel-id)."
+debug_join_discordbot_null: "[Debug] DiscordBot ist null, Join kann nicht weitergeleitet werden."
+debug_join_forward_disabled: "[Debug] Join-Weiterleitung deaktiviert (features.send-join = false)."
+debug_join_forwarded: "[Debug] Join an Discord weitergeleitet: %player%"
+debug_join_messages_empty: "[Debug] Keine Einträge in discord.join-messages."
+
+debug_leave_channel_missing: "[Debug] Leave-Channel-ID fehlt in config.yml (discord.leave-channel-id)."
+debug_leave_discordbot_null: "[Debug] DiscordBot ist null, Leave kann nicht weitergeleitet werden."
+debug_leave_forward_disabled: "[Debug] Leave-Weiterleitung deaktiviert (features.send-leave = false)."
+debug_leave_forwarded: "[Debug] Leave an Discord weitergeleitet: %player%"
+debug_leave_messages_empty: "[Debug] Keine Einträge in discord.leave-messages."
+
 debug_death_channel_missing: "[Debug] Death-Channel-ID fehlt (discord.chat-channel-id)."
 debug_death_discordbot_null: "[Debug] DiscordBot ist null, Death kann nicht weitergeleitet werden."
 debug_death_forward_disabled: "[Debug] Death-Weiterleitung deaktiviert (features.send-death = false)."
 debug_death_forwarded: "[Debug] Death an Discord weitergeleitet: %player%"
-debug_discord_ready: "[Debug] Discord-Bot ist bereit."
-debug_discord_shutdown: "[Debug] Discord-Bot wird heruntergefahren..."
-debug_discord_starting: "[Debug] Starte Discord-Bot mit Token..."
-debug_discordchat_blocked_command: "[Debug] Discord-Command unterdrückt: %message%."
-debug_discordchat_broadcast: "[Debug] Discord-Nachricht an Minecraft gesendet: %formatted%"
-debug_discordchat_empty_message: "[Debug] Leere Discord-Nachricht ignoriert."
-debug_discordchat_ignored_bot: "[Debug] Nachricht von Bot %user% ignoriert."
-debug_discordchat_no_channel_config: "[Debug] Kein 'discord.chat-channel-id' in der Config gesetzt – Nachricht wird ignoriert."
-debug_discordchat_received: "[Debug] Discord-Nachricht von %user% in Channel %channel% empfangen."
-debug_discordchat_wrong_channel: "[Debug] Nachricht aus falschem Channel (%actual%), erwartet: %expected%."
-debug_embit_invalid_color: "[Debug] Ungültiger Hexcode '%color%', Standardfarbe wird verwendet."
-debug_embit_opened: "[Debug] /embit wurde ausgeführt – Modal geöffnet."
-debug_embit_submitted: "[Debug] Modal-Daten empfangen: %title% / %content% / %image% / %footer% / %color%"
-debug_generic: "[Debug] %msg%"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃         Debug: Info-Embed         ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 debug_info_autoupdate_disabled: "[Debug] Auto-Update deaktiviert – Task wird abgebrochen."
 debug_info_channel_not_found: "[Debug] Gespeicherter Channel nicht mehr verfügbar."
 debug_info_embed_update_error: "[Debug] Fehler beim Embed-Update: %error%"
@@ -51,43 +363,11 @@ debug_info_state_save_failed: "[Debug] ⚠ Konnte Status-Embed nicht speichern."
 debug_info_state_saved: "[Debug] Status-Datei gespeichert."
 debug_info_try_recover: "[Debug] Versuche bestehende Status-Message zu laden..."
 debug_info_update_interval: "[Debug] Update-Intervall: %interval% Sekunden"
-debug_join_channel_missing: "[Debug] Join-Channel-ID fehlt in config.yml (discord.join-channel-id)."
-debug_join_discordbot_null: "[Debug] DiscordBot ist null, Join kann nicht weitergeleitet werden."
-debug_join_forward_disabled: "[Debug] Join-Weiterleitung deaktiviert (features.send-join = false)."
-debug_join_forwarded: "[Debug] Join an Discord weitergeleitet: %player%"
-debug_join_messages_empty: "[Debug] Keine Einträge in discord.join-messages."
-debug_kick_unlinked: "[Debug] ⛔ Spieler %name% wurde gekickt – nicht verknüpft."
-debug_leave_channel_missing: "[Debug] Leave-Channel-ID fehlt in config.yml (discord.leave-channel-id)."
-debug_leave_discordbot_null: "[Debug] DiscordBot ist null, Leave kann nicht weitergeleitet werden."
-debug_leave_forward_disabled: "[Debug] Leave-Weiterleitung deaktiviert (features.send-leave = false)."
-debug_leave_forwarded: "[Debug] Leave an Discord weitergeleitet: %player%"
-debug_leave_messages_empty: "[Debug] Keine Einträge in discord.leave-messages."
-debug_link_already_linked: "[Debug] Discord-Account %id% ist bereits verknüpft."
-debug_link_code_expired: "[Debug] Code abgelaufen oder ungültig: %code% für UUID:  %uuid%"
-debug_link_code_generated: "[Debug] Neuer Code generiert für %uuid%: %code% (gültig  für %minutes% Minuten)"
-debug_link_code_not_found: "[Debug] Kein UUID gefunden für Code: %code%"
-debug_link_code_received: "[Debug] Code empfangen von %id%: %code%"
-debug_link_code_still_valid: "[Debug] Benutzer %uuid% verwendet noch gültigen Code:  %code%"
-debug_link_code_valid: "[Debug] Gültiger Code erkannt: %code% → UUID: %uuid%"
-debug_link_invalid_code: "[Debug] Ungültiger Verknüpfungscode: %code%"
-debug_link_modal_opened: "[Debug] Linking-Modal geöffnet von %user%"
-debug_link_stored: "[Debug] Verknüpft: UUID %uuid% mit Discord-ID %id%"
-debug_link_success: "[Debug] Verknüpfung erfolgreich: %uuid% ↔ %id%"
-debug_linkmc_invalid_uuid: "[Debug] Ungültige UUID eingegeben: %uuid%"
-debug_linkmc_received: "[Debug] SlashCommand /linkmc → uuid=%uuid%, discordId=%discord%"
-debug_linkmc_success: "[Debug] Manuelle Verknüpfung gespeichert: %uuid% → %discord%"
-debug_litebans_error: "[Debug] Fehler beim LiteBans-Zugriff: %error%"
-debug_litebans_found: "[Debug] LiteBans gefunden – Ticket-LiteBans-Hook ist aktiv."
-debug_litebans_no_time: "[Debug] LiteBans: Keine passende Restzeit gefunden, behandle als permanent."
-debug_litebans_no_warning_method: "[Debug] LiteBans: Methode getWarning(UUID, String, String) nicht gefunden."
-debug_litebans_not_found: "[Debug] LiteBans-Plugin nicht gefunden."
-debug_luckperms_missing: "[Debug] LuckPerms nicht verfügbar!"
-debug_multiticket_embed_created: "[Debug] Multi-Ticket-Embed von %user% in #%channel% erstellt."
-debug_no_discord_id: "[Debug] ⚠ Spieler %name% ist verknüpft, aber keine Discord-ID gefunden."
-debug_offline_channel_not_found: "[Debug] Channel nicht gefunden: %id%"
-debug_offline_embed_replaced: "[Debug] Offline-Embed erfolgreich ersetzt."
-debug_offline_no_saved_message: "[Debug] Kein gespeicherter Channel oder Nachricht vorhanden – abbrechen."
-debug_offline_replace_failed: "[Debug] ❌ Offline-Embed konnte nicht ersetzt werden:"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃         Debug: Playerlist         ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 debug_playerlist_base_saved: "[Debug] Playerlist-Basisnachricht gespeichert: channel=%channel%, message=%message%"
 debug_playerlist_bot_null: "[Debug] DiscordBot ist null – Playerlist kann nicht aktualisiert werden."
 debug_playerlist_channel_not_found: "[Debug] Playerlist-Channel mit ID %channel% wurde nicht gefunden."
@@ -108,18 +388,34 @@ debug_playerlist_state_missing: "[Debug] playerlist_state.yml nicht gefunden –
 debug_playerlist_state_save_failed: "[Debug] Playerlist-State konnte nicht gespeichert werden."
 debug_playerlist_state_saved: "[Debug] Playerlist-State gespeichert unter: %path%."
 debug_playerlist_updated: "[Debug] Playerlist-Embed erfolgreich aktualisiert."
-debug_registering_slash_commands: "[Debug] Slash-Befehle werden registriert..."
-debug_rule_accept_clicked: "[Debug] Bestätigungsbutton wurde geklickt."
-debug_rule_match: "[Debug] Codewort korrekt – Rolle wird vergeben."
-debug_rule_mismatch: "[Debug] Codewort falsch – keine Rolle vergeben."
-debug_rule_modal_received: "[Debug] Modal-Eingabe erhalten: %input%"
-debug_setup_autocomplete: "[Debug] AutoComplete für /setup type ausgelöst."
-debug_setup_info_started: "[Debug] Info-Embed wurde gestartet mit Auto-Update."
-debug_setup_linking_sent: "[Debug] Verknüpfungs-Embed wurde gesendet."
-debug_setup_multiticket_started: "[Debug] /setup multiticket von %user% für Channel %channel% gestartet."
-debug_setup_playerlist_started: "[Debug] Playerlist-Embed gestartet in Channel %channel%."
-debug_setup_regel_sent: "[Debug] Regel-Embeds erfolgreich gesendet."
-debug_setup_used: "[Debug] /setup verwendet mit Typ: %type%"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃         Debug: Linking / Codes    ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+debug_link_already_linked: "[Debug] Discord-Account %id% ist bereits verknüpft."
+debug_link_code_expired: "[Debug] Code abgelaufen oder ungültig: %code% für UUID:  %uuid%"
+debug_link_code_generated: "[Debug] Neuer Code generiert für %uuid%: %code% (gültig  für %minutes% Minuten)"
+debug_link_code_not_found: "[Debug] Kein UUID gefunden für Code: %code%"
+debug_link_code_received: "[Debug] Code empfangen von %id%: %code%"
+debug_link_code_still_valid: "[Debug] Benutzer %uuid% verwendet noch gültigen Code:  %code%"
+debug_link_code_valid: "[Debug] Gültiger Code erkannt: %code% → UUID: %uuid%"
+debug_link_invalid_code: "[Debug] Ungültiger Verknüpfungscode: %code%"
+debug_link_modal_opened: "[Debug] Linking-Modal geöffnet von %user%"
+debug_link_stored: "[Debug] Verknüpft: UUID %uuid% mit Discord-ID %id%"
+debug_link_success: "[Debug] Verknüpfung erfolgreich: %uuid% ↔ %id%"
+
+debug_linkmc_invalid_uuid: "[Debug] Ungültige UUID eingegeben: %uuid%"
+debug_linkmc_received: "[Debug] SlashCommand /linkmc → uuid=%uuid%, discordId=%discord%"
+debug_linkmc_success: "[Debug] Manuelle Verknüpfung gespeichert: %uuid% → %discord%"
+
+debug_unlink_attempt: "[Debug] Unlink-Versuch für %name% (%uuid%)"
+debug_unlink_not_found: "[Debug] Keine Verknüpfung für UUID %uuid% gefunden."
+debug_unlink_success: "[Debug] Verknüpfung für UUID %uuid% entfernt."
+debug_unlinkmc_invalid_uuid: "[Debug] Ungültige UUID empfangen: %uuid%"
+debug_unlinkmc_not_linked: "[Debug] Keine Verknüpfung in DB für UUID %uuid%"
+debug_unlinkmc_success: "[Debug] Verknüpfung erfolgreich entfernt für UUID %uuid%"
+
 debug_sqlite_discord_not_found: "[Debug] Keine Discord-ID für %uuid% gefunden."
 debug_sqlite_found_discord: "[Debug] Discord-ID für %uuid%: %discord%"
 debug_sqlite_found_uuid: "[Debug] UUID für Discord-ID %discord% gefunden: %uuid%"
@@ -129,8 +425,11 @@ debug_sqlite_islinked: "[Debug] isLinked(%uuid%) = %linked%"
 debug_sqlite_link_deleted: "[Debug] Verknüpfung gelöscht: %uuid%"
 debug_sqlite_link_saved: "[Debug] Verknüpfung gespeichert: %uuid% → %discord%"
 debug_sqlite_uuid_not_found: "[Debug] Keine UUID für Discord-ID %discord% gefunden."
-debug_sync_done: "Rollen-Sync für %name% abgeschlossen."
-debug_sync_start: "[Debug] 🔁 Starte Discord → Minecraft Rollensync für %name%"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃       Debug: Tickets / Multiticket┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 debug_ticket_add_user_clicked: "[Debug] Ticket-Button 'Benutzer hinzufügen' wurde geklickt."
 debug_ticket_cancel_close: "[Debug] Schließen des Tickets wurde abgebrochen."
 debug_ticket_category_not_found: "Kategorie mit ID %value% nicht gefunden."
@@ -151,206 +450,67 @@ debug_ticket_type_loaded: "[Debug] Tickettyp erfolgreich geladen: %value%"
 debug_ticket_type_not_found: "[Debug] Tickettyp %type% nicht gefunden."
 debug_ticket_user_add: "[Debug] %user% wurde dem Ticket hinzugefügt."
 debug_ticket_user_select_empty: "[Debug] Kein Benutzer zum Hinzufügen ausgewählt."
+
+debug_multiticket_embed_created: "[Debug] Multi-Ticket-Embed von %user% in #%channel% erstellt."
+debug_multiticket_type_not_found: "[Debug] Tickettyp %type% nicht gefunden." # (falls du ihn irgendwann nutzt)
+
 debug_transcript_channel_invalid: "Kanal ist kein TextChannel – Transkript kann nicht erstellt werden."
 debug_transcript_logchannel_not_found: "Transkript-Logchannel mit ID %id% wurde nicht gefunden."
 debug_transcript_saved_path: "[Debug] Transkript gespeichert unter: %path%"
 debug_transcript_sent: "Transkript wurde erfolgreich an"
-debug_unlink_attempt: "[Debug] Unlink-Versuch für %name% (%uuid%)"
-debug_unlink_not_found: "[Debug] Keine Verknüpfung für UUID %uuid% gefunden."
-debug_unlink_success: "[Debug] Verknüpfung für UUID %uuid% entfernt."
-debug_unlinkmc_invalid_uuid: "[Debug] Ungültige UUID empfangen: %uuid%"
-debug_unlinkmc_not_linked: "[Debug] Keine Verknüpfung in DB für UUID %uuid%"
-debug_unlinkmc_success: "[Debug] Verknüpfung erfolgreich entfernt für UUID %uuid%"
+
 debug_userselect_not_found: "Benutzer mit ID %user% konnte nicht gefunden werden."
 debug_userselect_success: "Benutzer %user% wurde erfolgreich zum Ticket hinzugefügt."
-error_discord_member: "⚠ Fehler beim Abrufen des Discord-Mitglieds: %msg%"
-error_discord_start: "❌ Fehler beim Starten des Discord-Bots!"
-error_guild_not_found: "⚠ Discord-Guild mit ID '%id%' nicht gefunden."
-error_no_discord_bot: "[Debug] DiscordBot ist null – RoleSync wird übersprungen."
-error_no_guild_id: "❌ Keine Guild-ID in der config.yml gefunden."
-error_no_jda_instance: "[Debug] JDA-Instanz ist null – RoleSync wird übersprungen."
-footer_text: "Mady by Gamingkaetzchen"
-how_to_link: "%prefix%Klicke in Discord auf den Button und gib den Code ein."
-info_embed_error: "❌ Info-Embed konnte nicht aktualisiert werden."
-info_embed_field_bedrock: "Bedrock IP"
-info_embed_field_java: "Java IP"
-info_embed_field_mspt: "MSPT"
-info_embed_field_players: "Spieler online"
-info_embed_field_tps: "TPS"
-info_embed_field_version: "Version"
-info_embed_footer: "Wird alle 60 Sekunden automatisch aktualisiert"
-info_embed_offline: "🚫 Der Minecraft-Server ist aktuell offline."
-info_embed_sent: "Info-Embed wurde gesendet."
-info_embed_title: "📊 Serverstatus"
-info_players_empty: "❌ Es sind aktuell keine Spieler online."
-info_players_title: "Spielerlist"
-info_sent: "✅ Info-Embed gesendet."
-invalid_type: "❌ Ungültiger Setup-Typ."
-link_already_linked: "❌ Dein Discord-Account ist bereits mit einem anderen Minecraft-Spieler verknüpft."
-link_button: "Verknüpfen"
-link_code: "%prefix%Dein Verknüpfungscode lautet: §a%code%"
-link_embed_description: "Klicke auf den Button unten und gib den Code ein, den du im Spiel erhalten hast."
-link_embed_title: "🔗 Verknüpfe deinen Minecraft-Account"
-link_error: "❌ Fehler beim Verknüpfen."
-link_error_already_linked: "❌ Dein Discord-Account ist bereits mit einem anderen Minecraft-Spieler verknüpft."
-link_error_generic: "❌ Fehler beim Verknüpfen."
-link_error_invalid_code: "❌ Ungültiger Code. Hast du dich schon im Spiel eingeloggt?"
-link_instruction: "%prefix%Klicke in Discord auf „Verknüpfen“ und gib diesen Code ein."
-link_invalid_code: "❌ Ungültiger Code. Hast du dich schon im Spiel eingeloggt?"
-link_manual_success: "✅ Der Spieler %name% wurde manuell mit Discord-ID %id% verknüpft."
-link_modal_input_label: "Dein Minecraft-Code"
-link_modal_input_placeholder: "z.B. 4F6X9Q"
-link_modal_title: "🔗 Minecraft-Verknüpfung"
-link_reminder: "%prefix%Du bist noch nicht mit Discord verknüpft."
-link_success: "✅ Du wurdest erfolgreich mit deinem Minecraft-Account verknüpft!"
-linkmc_description: "Verknüpft einen Minecraft-Spieler mit einem Discord-Nutzer."
-linkmc_invalid_discordid: "❌ Ungültige Discord-ID."
-linkmc_invalid_uuid: "❌ Ungültige UUID."
-linkmc_missing_args: "❌ Fehlende UUID oder Discord-ID."
-linkmc_no_permission: "❌ Du hast keine Berechtigung für diesen Befehl."
-linkmc_option_discordid: "Discord-ID des Nutzers"
-linkmc_option_uuid: "UUID des Minecraft-Spielers"
-linkmc_success: "✅ Verknüpft:\n\n  - Minecraft UUID: `%uuid%`\n\n  - Discord-ID: `%discord%`\n\n  "
-login_kick_message: |-
-  <red><b>🔒 Du bist nicht mit Discord verknüpft!</b></red>
-  
-  
-    <gray>•</gray> <white>Dein Code: <green>%code%</green>
-  
-    <gray>•</gray> <white>Klicke im Discord auf <aqua>„Verknüpfen“</aqua> und gib diesen
-    Code ein.
-  
-    <gray>•</gray> <white>Discord beitreten: <blue>https://discord.gg/7tNXzZ6zms
-missing_key: "§c[Fehlender Sprachschlüssel: %key%]"
-multiticket_category_none: "_keine Kategorie_"
-multiticket_created_success: "✅ Multi-Ticket-Embed wurde in %channel% erstellt."
-multiticket_embed_description: "Wähle unten die passende Kategorie aus."
-multiticket_embed_title: "📨 Support Ticket"
-multiticket_invalid_id: "❌ Ungültige MultiTicket-ID. Bitte `/setup multiticket` neu ausführen."
-multiticket_no_type_selected: "⚠ Bitte mindestens einen Ticket-Typ auswählen."
-multiticket_roles_none: "_keine Rollen_"
-multiticket_target_not_found: "❌ Zielkanal nicht gefunden."
-no_console: "❌ Dieser Befehl ist nur für Spieler verfügbar."
-no_permission: "❌ Du hast keine Berechtigung dafür."
-not_linked: "%prefix%Du bist noch nicht mit Discord verknüpft."
-playerlist_empty: "Keine Spieler online."
-playerlist_footer: "Wird automatisch aktualisiert"
-prefix: "§7[§bSynccord§7] §f"
-role_sync_added: "✔ Spieler %name% wurde zur Gruppe %group% hinzugefügt."
-role_sync_removed: "✖ Spieler %name% wurde aus Gruppe %group% entfernt."
-role_sync_skip: "⏭ Kein Rollenwechsel nötig für %name%."
-role_sync_start: "🔁 Starte Discord → Minecraft Rollensynchronisation für %name%."
-setup_description: "Führt Discord-Setup durch"
-setup_multiticket_description: "Wähle jetzt die Ticket-Arten aus.\nZielkanal: %channel%"
-setup_multiticket_no_channel: "⚠ Bitte einen Zielkanal angeben: `/setup multiticket` + Channel auswählen."
-setup_multiticket_no_types: "⚠ Es wurden noch keine Ticket-Typen in der config.yml definiert."
-setup_multiticket_placeholder: "Wähle bis zu 5 Ticket-Arten …"
-setup_multiticket_system_unavailable: "❌ Ticket-System nicht verfügbar."
-setup_multiticket_title: "Multi-Ticket Setup"
-setup_option_channel_description: "Zielkanal (für multiticket/playerlist)"
-setup_option_type_description: "linking, info, playerlist, regel, multiticket"
-setup_playerlist_description: "Hier siehst du die aktuelle Liste aller Online-Spieler."
-setup_playerlist_sent: "✅ Playerlist-Embed wurde gesendet."
-setup_playerlist_title: "👥 Online-Spieler"
-setup_rule_button: "✅ Bestätigen"
-setup_rule_embed_title: "📜 Server-Regeln"
-setup_rule_fail: "❌ Falsches Codewort. Versuche es erneut!"
-setup_rule_invalid_or_empty: "❌ rules.yml ist ungültig oder leer."
-setup_rule_modal_input: "Bitte das Codewort eingeben"
-setup_rule_modal_title: "Codewort bestätigen"
-setup_rule_no_channel: "❌ Fehler: Kein Channel verfügbar."
-setup_rule_no_member: "❌ Fehler beim Verarbeiten deiner Eingabe."
-setup_rule_sent: "📜 Regeln wurden gesendet."
-setup_rule_success: "✅ Du hast die Regeln erfolgreich bestätigt!"
-show_players_button: "Spielerlist"
-sqlite_init_error: "§c❌ Die SQLite-Datenbank konnte nicht initialisiert werden."
-sync_added: "✅ [Sync] Gruppe '%group%' HINZUGEFÜGT."
-sync_check: "🔄 [Sync] Prüfe: Discord-Rolle '%role%', Zielgruppe: '%group%'"
-sync_discord_roles: "📋 [Sync] Discord-Rollen des Nutzers:"
-sync_done: "✅ [Sync] Rollenabgleich abgeschlossen."
-sync_has_group: "Hat Gruppe"
-sync_has_role: "Hat Discord-Rolle"
-sync_no_change: "✔ [Sync] Keine Änderung nötig für '%group%'."
-sync_no_lp_user: "⚠ [Sync] Kein LuckPerms-User für UUID %uuid% gefunden."
-sync_no_roles_config: "⚠ [Sync] Keine 'role-link' Konfiguration gefunden."
-sync_removed: "❎ [Sync] Gruppe '%group%' ENTFERNT."
-sync_role_not_found: "❌ [Sync] Rolle mit ID %role% wurde nicht im Discord gefunden."
-sync_start: "🛠 [Sync] Starte Rollenabgleich Discord → Minecraft für UUID: %uuid%"
-ticket_add_user_footer: "Ticket-System | Benutzer hinzufügen"
-ticket_add_user_select: "👤 Wähle den Benutzer, den du zum Ticket hinzufügen möchtest:"
-ticket_add_user_select_placeholder: "Benutzer auswählen …"
-ticket_alert_join: "§e📬 Es sind derzeit noch offene Tickets vorhanden!"
-ticket_alert_message: "§6[Ticket] §e%user% hat ein neues Ticket vom Typ §7%ticket% §eeröffnet!"
-ticket_button_add_user: "🧍 Benutzer hinzufügen"
-ticket_button_claim: "🔒 Claim"
-ticket_button_close: "❌ Close"
-ticket_channel_no_permissions: "❌ Dieser Channel erlaubt keine Berechtigungsänderungen."
-ticket_channel_not_found: "❌ Ticket- oder Logchannel nicht gefunden."
-ticket_claimed_broadcast: "🔒 Ticket wurde übernommen von %user%."
-ticket_claimed_field_title: "🔒 Übernommen von"
-ticket_claimed_success: "✅ Du hast das Ticket übernommen."
-ticket_closing_broadcast: "📁 Ticket wird geschlossen und geloggt..."
-ticket_closing_no_logchannel: "✅ Ticket geschlossen.\n⚠ Kein Log-Channel gefunden, Transkript nur lokal gespeichert."
-ticket_closing_success: "✅ Ticket wird geschlossen."
-ticket_close_cancelled: "🚫 Ticket bleibt geöffnet."
-ticket_close_confirm: "❗ Bist du sicher, dass du dieses Ticket schließen willst?"
-ticket_close_confirm_no: "❌ Abbrechen"
-ticket_close_confirm_yes: "✅ Ja, schließen"
-ticket_command_description: "Ticket-System verwalten"
-ticket_config_missing: "❌ Fehler: `tickets.log_channel_id` fehlt in der Config."
-ticket_create_category_not_found: "❌ Kategorie nicht gefunden!"
-ticket_create_no_category: "❌ Kategorie-ID ist ungültig oder fehlt!"
-ticket_created_embed_description: "Ein neues Ticket wurde erstellt!"
-ticket_created_user_message: "✅ Dein Ticket wurde erstellt!"
-ticket_default_button_name: "Create Ticket"
-ticket_default_name: "Unbenanntes Ticket"
-ticket_embed_footer: "Ticket-System | Synccord"
-ticket_field_answers: "Beantwortete Fragen"
-ticket_field_coordinates: "Koordinaten"
-ticket_field_litebans: "LiteBans"
-ticket_field_name: "Verlinkter Name"
-ticket_field_world: "Welt"
-ticket_invalid_question_index: "Ungültiger Fragenindex in TicketTyp '%ticket%': %index%"
-ticket_litebans_no_link: "Spieler nicht verlinkt – keine Abfrage möglich"
-ticket_litebans_none: "Keine aktiven Strafen gefunden"
-ticket_litebans_no_warning_method: "Keine Warns gefunden"
-ticket_message_not_found: "❌ Konnte die Ticketnachricht nicht finden."
-ticket_no_user: "❌ Fehler: Kein Benutzer."
-ticket_panel_button: "📨 Create a Ticket"
-ticket_panel_category_label: "📁 Kategorie"
-ticket_panel_category_value: "{category}"
-ticket_panel_desc_label: "📝 Beschreibung"
-ticket_panel_description: "Wenn du ein Problem hast, erstelle bitte ein Ticket!"
-ticket_panel_questions_label: "❓ Fragen"
-ticket_panel_questions_value: "{count}"
-ticket_panel_roles_label: "🛠 Supporter-Rollen"
-ticket_panel_roles_value: "{roles}"
-ticket_panel_title: "📩 Support Ticket"
-ticket_save_error: "[Debug] [Ticket] Fehler beim Speichern von %file%"
-ticket_setup_error: "❌ Fehler beim Erstellen: %error%"
-ticket_setup_sub_description: "Ticket-Buttons posten"
-ticket_setup_success: "❌ Erfolg!"
-ticket_subcommand_setup_description: "Ticket-Buttons posten"
-ticket_transcript_description: "Ein Ticket wurde geschlossen und das Transkript wurde gespeichert."
-ticket_transcript_load_error: "⚠ Fehler beim Laden des Transkripts: %error%"
-ticket_transcript_not_found: "❌ Transkript oder Log-Channel konnte nicht gefunden werden."
-ticket_transcript_save_error: "⚠ Fehler beim Speichern des Transkripts: %error%"
-ticket_transcript_temp_description: "Das Transkript wird in 5 Minuten gelöscht."
-ticket_transcript_title: "📄 Transkript gespeichert"
-ticket_type_not_found: "❌ Tickettyp nicht gefunden!"
-ticket_user_add_error: "❌ Fehler beim Hinzufügen: %error%"
-ticket_user_added: "✅ %user% wurde zum Ticket hinzugefügt."
-ticket_user_not_found: "❌ Der ausgewählte Benutzer konnte nicht gefunden werden."
-ticket_user_select_none: "❌ Kein gültiger Benutzer ausgewählt."
-unlink_never_seen: "§cSpieler wurde nie auf dem Server gesehen."
-unlink_not_found: "❌ Für diesen Spieler existiert keine Verknüpfung."
-unlink_success: "✅ Die Verknüpfung von %name% wurde entfernt."
-unlink_usage: "§7Verwendung: /unlinkdiscord <spielername>"
-unlinkmc_description: "Hebt die Verknüpfung eines Minecraft-Spielers auf."
-unlinkmc_invalid_uuid: "❌ Ungültige UUID."
-unlinkmc_missing_uuid: "❌ Fehlende UUID."
-unlinkmc_not_linked: "❌ Die UUID `%uuid%` ist nicht verknüpft."
-unlinkmc_option_uuid: "UUID des Minecraft-Spielers"
-unlinkmc_success: "✅ Die Verknüpfung für `%uuid%` wurde erfolgreich entfernt."
-unknown_command: "❓ Unbekannter Befehl oder falsche Syntax."
-unknown_player_name: "Unbekannt"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃          Debug: /setup & Regeln   ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+debug_setup_used: "[Debug] /setup verwendet mit Typ: %type%"
+debug_setup_autocomplete: "[Debug] AutoComplete für /setup type ausgelöst."
+debug_setup_info_started: "[Debug] Info-Embed wurde gestartet mit Auto-Update."
+debug_setup_linking_sent: "[Debug] Verknüpfungs-Embed wurde gesendet."
+debug_setup_multiticket_started: "[Debug] /setup multiticket von %user% für Channel %channel% gestartet."
+debug_setup_playerlist_started: "[Debug] Playerlist-Embed gestartet in Channel %channel%."
+debug_setup_regel_sent: "[Debug] Regel-Embeds erfolgreich gesendet."
+
+debug_rule_accept_clicked: "[Debug] Bestätigungsbutton wurde geklickt."
+debug_rule_match: "[Debug] Codewort korrekt – Rolle wird vergeben."
+debug_rule_mismatch: "[Debug] Codewort falsch – keine Rolle vergeben."
+debug_rule_modal_received: "[Debug] Modal-Eingabe erhalten: %input%"
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃            Debug: /dcfind         ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+debug_dcfind_command_received: "[Debug] /dcfind von %sender% ausgeführt (Args: %args%)"
+debug_dcfind_foundid: "[Debug] Discord-ID '%id%' gefunden"
+debug_dcfind_noid: "[Debug] Keine gespeicherte Discord-ID für UUID '%uuid%' gefunden"
+debug_dcfind_not_linked: "[Debug] Spieler %name% (%uuid%) ist nicht verlinkt."
+debug_dcfind_start: "[Debug] Suche nach Discord-ID für Spieler '%name%' mit UUID  '%uuid%'"
+debug_dcfind_tag: "[Debug] Benutzer-Tag lautet '%tag%'"
+debug_dcfind_user_unknown_error: "[Debug] Discord-User %id% konnte nicht geladen werden (Fehler: %error%)."
+debug_dcfind_wrong_usage: "[Debug] Falsche Nutzung von /dcfind durch %sender%."
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃            Debug: Buttons/Embeds  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+debug_button_click: "[Debug] Button 'show_players' wurde geklickt von: %user%"
+debug_button_no_permission: "[Debug] Keine Berechtigung für Button-Nutzung: %user%"
+
+debug_embit_invalid_color: "[Debug] Ungültiger Hexcode '%color%', Standardfarbe wird verwendet."
+debug_embit_opened: "[Debug] /embit wurde ausgeführt – Modal geöffnet."
+debug_embit_submitted: "[Debug] Modal-Daten empfangen: %title% / %content% / %image% / %footer% / %color%"
+
+
+
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃              NEU                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+
+discord_join_title: "Spieler beigetreten"
+discord_leave_title: "Spieler hat verlassen"

@@ -8,7 +8,7 @@ description: Verlinkt Minecraft-Spieler mit Discord und synchronisiert Rollen.
 # LuckPerms ist eine Hard-Dependency (weil du Rollen synchronisierst),
 # LiteBans dagegen nur optional – daher softdepend.
 depend: [LuckPerms]
-softdepend: [LiteBans]
+softdepend: [LiteBans, PlaceholderAPI]
 
 commands:
   unlinkdiscord:

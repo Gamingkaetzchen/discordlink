@@ -82,17 +82,53 @@ public class Synccord extends JavaPlugin {
         // DiscordBot starten
         try {
             discordBot = new DiscordBot(getConfig().getString("discord.token"), ticketManager);
+
+            // Start-Meldung mit kleiner Verzögerung schicken,
+            // damit JDA sicher ready ist
+            Bukkit.getScheduler().runTaskLater(this, () -> {
+                try {
+                    if (discordBot != null && discordBot.getJDA() != null) {
+                        String channelId = getConfig().getString("discord.chat-channel-id");
+                        if (channelId != null && !channelId.isEmpty()) {
+                            var channel = discordBot.getJDA().getTextChannelById(channelId);
+                            if (channel != null) {
+                                String startMsg = Lang.get("server_start_message");
+                                channel.sendMessage(startMsg).queue();
+                            } else {
+                                getLogger().warning("Konnte Start-Channel nicht finden (ID: " + channelId + ")");
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    getLogger().warning("Konnte Start-Meldung nicht an Discord senden: " + ex.getMessage());
+                }
+            }, 100L); // ~5 Sekunden nach Serverstart
+
         } catch (Exception e) {
             getLogger().severe(Lang.get("error_discord_start"));
             e.printStackTrace();
             getServer().getPluginManager().disablePlugin(this);
         }
+
     }
 
     @Override
     public void onDisable() {
         InfoUpdaterOffline.sendOfflineEmbedSync();
-
+        try {
+            if (discordBot != null && discordBot.getJDA() != null) {
+                String channelId = getConfig().getString("discord.chat-channel-id");
+                if (channelId != null && !channelId.isEmpty()) {
+                    var channel = discordBot.getJDA().getTextChannelById(channelId);
+                    if (channel != null) {
+                        String stopMsg = Lang.get("server_stop_message");
+                        channel.sendMessage(stopMsg).queue();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            getLogger().warning("Konnte Stop-Meldung nicht an Discord senden: " + e.getMessage());
+        }
         if (discordBot != null) {
             discordBot.shutdown();
         }
