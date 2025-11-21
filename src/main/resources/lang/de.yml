@@ -147,8 +147,8 @@ sync_has_role: "Hat Discord-Rolle"
 # ┃             Ticketsystem          ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-ticket_alert_join: "§e📬 Es sind derzeit noch offene Tickets vorhanden!"
-ticket_alert_message: "§6[Ticket] §e%user% hat ein neues Ticket vom Typ §7%ticket% §eeröffnet!"
+ticket_alert_join: "§e📬 Es sind derzeit %synccord_tickets_open% Tickets offen!"
+ticket_alert_message: "§6[Ticket] §e%user% hat ein neues Ticket vom Typ §7%ticket% §eeröffnet! (Aktuell: %synccord_tickets_open% offen)"
 
 ticket_button_add_user: "🧍 Benutzer hinzufügen"
 ticket_button_claim: "🔒 Claim"
@@ -161,7 +161,7 @@ ticket_claimed_broadcast: "🔒 Ticket wurde übernommen von %user%."
 ticket_claimed_field_title: "🔒 Übernommen von"
 ticket_claimed_success: "✅ Du hast das Ticket übernommen."
 
-ticket_closing_broadcast: "📁 Ticket wird geschlossen und geloggt..."
+ticket_closing_broadcast: "📁 Ticket wird geschlossen und geloggt... (Derzeit: %synccord_tickets_open% Tickets offen)"
 ticket_closing_no_logchannel: "✅ Ticket geschlossen.\n⚠ Kein Log-Channel gefunden, Transkript nur lokal gespeichert."
 ticket_closing_success: "✅ Ticket wird geschlossen."
 ticket_close_cancelled: "🚫 Ticket bleibt geöffnet."
@@ -174,12 +174,12 @@ ticket_config_missing: "❌ Fehler: `tickets.log_channel_id` fehlt in der Config
 ticket_create_category_not_found: "❌ Kategorie nicht gefunden!"
 ticket_create_no_category: "❌ Kategorie-ID ist ungültig oder fehlt!"
 ticket_created_embed_description: "Ein neues Ticket wurde erstellt!"
-ticket_created_user_message: "✅ Dein Ticket wurde erstellt!"
+ticket_created_user_message: "✅ Dein Ticket wurde erstellt! Du hast jetzt %synccord_tickets_user% Ticket(s)."
 
 ticket_default_button_name: "Create Ticket"
 ticket_default_name: "Unbenanntes Ticket"
 
-ticket_embed_footer: "Ticket-System | Synccord"
+ticket_embed_footer: "Ticket-System | %synccord_tickets_open% offene Tickets"
 
 ticket_field_answers: "Beantwortete Fragen"
 ticket_field_coordinates: "Koordinaten"
@@ -197,8 +197,8 @@ ticket_message_not_found: "❌ Konnte die Ticketnachricht nicht finden."
 ticket_no_user: "❌ Fehler: Kein Benutzer."
 
 ticket_panel_button: "📨 Create a Ticket"
-ticket_panel_title: "📩 Support Ticket"
-ticket_panel_description: "Wenn du ein Problem hast, erstelle bitte ein Ticket!"
+ticket_panel_title: "📩 Support Ticket (%synccord_tickets_open% offen)"
+ticket_panel_description: "Wenn du ein Problem hast, erstelle bitte ein Ticket!\nDerzeit sind %synccord_tickets_open% Tickets offen."
 ticket_panel_category_label: "📁 Kategorie"
 ticket_panel_category_value: "{category}"
 ticket_panel_desc_label: "📝 Beschreibung"
@@ -226,7 +226,7 @@ ticket_user_added: "✅ %user% wurde zum Ticket hinzugefügt."
 ticket_user_not_found: "❌ Der ausgewählte Benutzer konnte nicht gefunden werden."
 ticket_user_select_none: "❌ Kein gültiger Benutzer ausgewählt."
 
-multiticket_created_success: "✅ Multi-Ticket-Embed wurde in %channel% erstellt."
+multiticket_created_success: "✅ Multi-Ticket-Embed wurde in %channel% erstellt. (Aktuell: %synccord_tickets_open% offen)"
 multiticket_embed_title: "📨 Support Ticket"
 multiticket_embed_description: "Wähle unten die passende Kategorie aus."
 multiticket_invalid_id: "❌ Ungültige MultiTicket-ID. Bitte `/setup multiticket` neu ausführen."
@@ -503,14 +503,9 @@ debug_embit_invalid_color: "[Debug] Ungültiger Hexcode '%color%', Standardfarbe
 debug_embit_opened: "[Debug] /embit wurde ausgeführt – Modal geöffnet."
 debug_embit_submitted: "[Debug] Modal-Daten empfangen: %title% / %content% / %image% / %footer% / %color%"
 
-
-
-
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃              NEU                  ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-
 
 discord_join_title: "Spieler beigetreten"
 discord_leave_title: "Spieler hat verlassen"

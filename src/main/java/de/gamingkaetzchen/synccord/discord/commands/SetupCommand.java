@@ -72,6 +72,15 @@ public class SetupCommand extends ListenerAdapter {
                     Lang.get("debug_setup_used").replace("%type%", type));
         }
 
+        // Ziel-Channel bestimmen: entweder Option "channel" oder der aktuelle Channel
+        var channelOpt = event.getOption("channel");
+        MessageChannel baseChannel = event.getChannel();
+        MessageChannel overrideChannel = null;
+        if (channelOpt != null && channelOpt.getAsChannel() instanceof MessageChannel msgChannel) {
+            overrideChannel = msgChannel;
+        }
+        final MessageChannel targetChannel = overrideChannel != null ? overrideChannel : baseChannel;
+
         // ====================== /setup linking ======================
         if (type.equalsIgnoreCase("linking")) {
             EmbedBuilder embed = new EmbedBuilder()
@@ -94,7 +103,7 @@ public class SetupCommand extends ListenerAdapter {
         // ====================== /setup info ======================
         if (type.equalsIgnoreCase("info")) {
             EmbedBuilder embed = InfoUpdater.buildStatusEmbed(guildIconUrl);
-            MessageChannel channel = event.getChannel();
+            MessageChannel channel = targetChannel;
 
             channel.sendMessageEmbeds(embed.build())
                     .addActionRow(Button.primary("show_players", "🔍 " + Lang.get("show_players_button")))
@@ -112,7 +121,7 @@ public class SetupCommand extends ListenerAdapter {
 
         // ====================== /setup playerlist ======================
         if (type.equalsIgnoreCase("playerlist")) {
-            MessageChannel channel = event.getChannel();
+            MessageChannel channel = targetChannel;
 
             var embed = new EmbedBuilder()
                     .setTitle(Lang.get("setup_playerlist_title"))
@@ -168,7 +177,7 @@ public class SetupCommand extends ListenerAdapter {
             }
 
             event.deferReply().queue((InteractionHook hook) -> {
-                MessageChannel channel = event.getChannel();
+                MessageChannel channel = targetChannel;
                 if (channel == null) {
                     hook.sendMessage(Lang.get("setup_rule_no_channel")).setEphemeral(true).queue();
                     return;
@@ -195,8 +204,8 @@ public class SetupCommand extends ListenerAdapter {
 
         // ====================== /setup multiticket ======================
         if (type.equalsIgnoreCase("multiticket")) {
-            var channelOpt = event.getOption("channel");
-            if (channelOpt == null || !(channelOpt.getAsChannel() instanceof TextChannel targetChannel)) {
+            var channelOptMt = event.getOption("channel");
+            if (channelOptMt == null || !(channelOptMt.getAsChannel() instanceof TextChannel targetChannelMt)) {
                 event.reply(Lang.get("setup_multiticket_no_channel"))
                         .setEphemeral(true)
                         .queue();
@@ -221,7 +230,7 @@ public class SetupCommand extends ListenerAdapter {
             }
 
             StringSelectMenu.Builder menu = StringSelectMenu.create(
-                    "multiticket-select:" + event.getUser().getId() + ":" + targetChannel.getId())
+                    "multiticket-select:" + event.getUser().getId() + ":" + targetChannelMt.getId())
                     .setPlaceholder(Lang.get("setup_multiticket_placeholder"))
                     .setMinValues(1)
                     .setMaxValues(Math.min(5, allTypes.size()));
@@ -234,7 +243,7 @@ public class SetupCommand extends ListenerAdapter {
                     .setTitle(Lang.get("setup_multiticket_title"))
                     .setDescription(
                             Lang.get("setup_multiticket_description")
-                                    .replace("%channel%", targetChannel.getAsMention()))
+                                    .replace("%channel%", targetChannelMt.getAsMention()))
                     .setColor(Color.CYAN);
 
             event.replyEmbeds(embed.build())
@@ -246,7 +255,7 @@ public class SetupCommand extends ListenerAdapter {
                 Synccord.getInstance().getLogger().info(
                         Lang.get("debug_setup_multiticket_started")
                                 .replace("%user%", event.getUser().getName())
-                                .replace("%channel%", targetChannel.getId()));
+                                .replace("%channel%", targetChannelMt.getId()));
             }
             return;
         }

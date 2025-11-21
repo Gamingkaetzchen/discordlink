@@ -1,23 +1,37 @@
-⭐ Fazit
-
-🎯 Sende mir diese Dateien:
-
-Synccord.java
-
-DiscordBot.java
-
-MinecraftChatListener.java
-
-DiscordChatListener.java
-
-Lang.java
-
-config.yml oder lang/de.yml
-
-Optional:
-
-PlayerJoinListener.java
-
-InfoUpdater.java
-
-PlayerListUpdater.java
+| Placeholder          | Beschreibung                           |
+| -------------------- | -------------------------------------- |
+| `%discord_id%`       | Verknüpfte Discord-ID des Spielers     |
+| `%discord_tag%`      | Benutzername + Tag (z. B. `User#1234`) |
+| `%discord_username%` | Nur der Discord-Name                   |
+| `%discord_avatar%`   | Direktlink zum Avatar                  |
+| `%discord_linked%`   | `true/false`                           |
+| `%discord_status%`   | Linked, Not linked, Pending code       |
+| --------------------- | ------------------------------ |
+| `%discord_roles%`     | Liste aller Rollen             |
+| `%discord_role:<id>%` | Hat Rolle? → `true/false`      |
+| `%role_count%`        | Anzahl synchronisierter Rollen |
+| `%highest_role%`      | Höchste berechtigte Rolle      |
+| ------------------ | ----------------------------------------- |
+| `%discord_online%` | Anzahl online verknüpfter Spieler         |
+| `%linked_online%`  | Anzahl verknüpfter Spieler aktuell online |
+| -------------------- | ----------------------------------- |
+| `%sync_fail_reason%` | Grund bei fehlender Synchronisation |
+| `%last_linked%`      | Datum der Verlinkung                |
+| `%code_expire%`      | Ablaufzeit aktueller Link Codes     |
+| ----------------------- | ---------------------------------- |
+| `%tickets_open%`        | Anzahl offener Tickets             |
+| `%tickets_user%`        | Tickets des Spielers               |
+| `%ticket_support_role%` | Support-Rollennamen                |
+| `%last_ticket_time%`    | Wann letztes Ticket erstellt wurde |
+| ---------------- | ---------------------- |
+| `%tps%`          | TPS des Servers        |
+| `%mspt%`         | Millisekunden pro Tick |
+| `%online_count%` | Spieler online         |
+| `%max_players%`  | Max Slots              |
+| `%uptime%`       | Serverlaufzeit         |
+| `%ip_java%`      | Java-IP aus Config     |
+| `%ip_bedrock%`   | Bedrock-IP aus Config  |
+| --------------------------- | ------------------------ |
+| `%synccord_version%`        | Plugin-Version           |
+| `%status_embed_active%`     | InfoUpdater aktiv?       |
+| `%playerlist_embed_active%` | PlayerListUpdater aktiv? |

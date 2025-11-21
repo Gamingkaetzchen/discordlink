@@ -11,6 +11,7 @@ import de.gamingkaetzchen.synccord.commands.UnlinkDiscordCommand;
 import de.gamingkaetzchen.synccord.database.DatabaseManager;
 import de.gamingkaetzchen.synccord.discord.DiscordBot;
 import de.gamingkaetzchen.synccord.discord.InfoUpdaterOffline;
+import de.gamingkaetzchen.synccord.discord.PlayerListUpdater;
 import de.gamingkaetzchen.synccord.listener.DiscordJoinLeaveForwardListener;
 import de.gamingkaetzchen.synccord.listener.MinecraftChatListener;
 import de.gamingkaetzchen.synccord.listener.PlayerActivityListener;
@@ -29,12 +30,19 @@ public class Synccord extends JavaPlugin {
     private boolean debug;
     private TicketManager ticketManager;
 
+    // <-- neu: für %synccord_uptime%
+    private long startTimeMillis;
+
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
 
         this.debug = getConfig().getBoolean("debug", false);
+        this.startTimeMillis = System.currentTimeMillis();
+
+        // Playerlist-Status laden (channel + message aus playerlist-state.yml)
+        PlayerListUpdater.init();
 
         // Sprache laden
         Lang.init();
@@ -77,6 +85,18 @@ public class Synccord extends JavaPlugin {
             getLogger().info(Lang.get("debug_litebans_found"));
         } else {
             getLogger().info(Lang.get("debug_litebans_not_found"));
+        }
+
+        // PlaceholderAPI-Hook
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new de.gamingkaetzchen.synccord.placeholder.SynccordPlaceholder(this).register();
+            if (isDebug()) {
+                getLogger().info("[Synccord] PlaceholderAPI-Hook registriert.");
+            }
+        } else {
+            if (isDebug()) {
+                getLogger().info("[Synccord] PlaceholderAPI nicht gefunden – keine Synccord-Placeholders.");
+            }
         }
 
         // DiscordBot starten
@@ -161,4 +181,9 @@ public class Synccord extends JavaPlugin {
     public TicketManager getTicketManager() {
         return ticketManager;
     }
+
+    public long getStartTimeMillis() {
+        return startTimeMillis;
+    }
+
 }
