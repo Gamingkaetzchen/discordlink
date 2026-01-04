@@ -41,6 +41,11 @@ public class RoleSyncUtil {
         }
 
         LuckPerms lp = Synccord.getInstance().getLuckPerms();
+        if (lp == null) {
+            Synccord.getInstance().getLogger().warning(Lang.get("sync_no_lp_instance"));
+            return;
+        }
+
         User user = lp.getUserManager().getUser(uuid);
         if (user == null) {
             Synccord.getInstance().getLogger().warning(

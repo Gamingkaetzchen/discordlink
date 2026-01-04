@@ -29,8 +29,6 @@ public class DiscordChatListener extends ListenerAdapter {
             return;
         }
 
-        Synccord plugin = Synccord.getInstance();
-
         debugLog(
                 Lang.get("debug_discordchat_received")
                         .replace("%user%", event.getAuthor().getName())
@@ -82,7 +80,7 @@ public class DiscordChatListener extends ListenerAdapter {
         // Format aus config, Fallback per Lang
         String template = plugin.getConfig().getString(
                 "chat.format-to-minecraft",
-                Lang.get("chat_format_minecraft") // Fallback aus Lang
+                Lang.get("chat_format_minecraft")
         );
 
         String formatted = template

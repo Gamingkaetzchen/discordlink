@@ -1,5 +1,6 @@
 package de.gamingkaetzchen.synccord.tickets;
 
+import java.util.Collections;
 import java.util.List;
 
 import de.gamingkaetzchen.synccord.Synccord;
@@ -12,17 +13,18 @@ public class TicketQuestion {
 
     public TicketQuestion(int inputLimit, List<String> questions) {
 
-        // Debug-Ausgabe bei Erstellung
+        // Sicherheit: null vermeiden
+        this.questions = questions != null ? questions : Collections.emptyList();
+        this.inputLimit = Math.max(1, inputLimit); // Minimum 1 Zeichen erzwingen
+
+        // Debug-Ausgabe
         if (isDebug()) {
             Synccord.getInstance().getLogger().info(
                     Lang.get("debug_ticket_question_created")
-                            .replace("%limit%", String.valueOf(inputLimit))
-                            .replace("%questions%", questions.toString())
+                            .replace("%limit%", String.valueOf(this.inputLimit))
+                            .replace("%questions%", String.join(" | ", this.questions))
             );
         }
-
-        this.inputLimit = inputLimit;
-        this.questions = questions;
     }
 
     public int getInputLimit() {

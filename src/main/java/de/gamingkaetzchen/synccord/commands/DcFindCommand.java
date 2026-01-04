@@ -68,7 +68,9 @@ public class DcFindCommand implements CommandExecutor {
 
         jda.retrieveUserById(discordId).queue(
                 (User user) -> {
-                    String playerName = player.getName() != null ? player.getName() : Lang.get("unknown_player_name");
+                    String playerName = player.getName() != null
+                    ? player.getName()
+                    : Lang.get("unknown_player_name");
 
                     sender.sendMessage(Lang.get("dcfind_success")
                             .replace("%name%", playerName)

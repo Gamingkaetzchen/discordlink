@@ -21,6 +21,12 @@ public class InfoUpdaterOffline {
             return;
         }
 
+        if (Synccord.getInstance().getDiscordBot() == null
+                || Synccord.getInstance().getDiscordBot().getJDA() == null) {
+            debug("debug_offline_jda_null");
+            return;
+        }
+
         MessageChannel channel = Synccord.getInstance().getDiscordBot().getJDA()
                 .getChannelById(MessageChannel.class, channelId);
         if (channel == null) {

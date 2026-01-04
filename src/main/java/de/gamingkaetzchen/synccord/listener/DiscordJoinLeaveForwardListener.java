@@ -132,10 +132,12 @@ public class DiscordJoinLeaveForwardListener implements Listener {
         List<String> messages = plugin.getConfig().getStringList("discord.death-messages");
         String playerName = event.getEntity().getName();
 
-        // MC-Standardtext, z.B. "Nils wurde von Zombie getötet"
+        // MC-Standardtext
         String deathMessage = event.getDeathMessage();
         if (deathMessage == null || deathMessage.isEmpty()) {
-            deathMessage = playerName + " ist gestorben.";
+            // Lang-Fallback statt hartem Deutsch
+            deathMessage = Lang.get("discord_death_mc_fallback")
+                    .replace("%player%", playerName);
         }
 
         // Reason ohne Spielernamen (für {reason})
@@ -148,8 +150,8 @@ public class DiscordJoinLeaveForwardListener implements Listener {
         if (messages != null && !messages.isEmpty()) {
             raw = messages.get(random.nextInt(messages.size()));
         } else {
-            // Fallback: einfach den Vanilla-Text schicken
-            raw = "{player} ist gestorben: {reason}";
+            // Fallback-Template über Lang
+            raw = Lang.get("discord_death_fallback");
         }
 
         String msg = applyPlaceholders(
@@ -202,14 +204,14 @@ public class DiscordJoinLeaveForwardListener implements Listener {
 
     private void debug(String key) {
         if (isDebug()) {
-            Synccord.getInstance().getLogger().info(Lang.get(key));
+            Synccord.getInstance().getLogger().info("🪲 DEBUG | " + Lang.get(key));
         }
     }
 
     private void debug(String key, String placeholder, String value) {
         if (isDebug()) {
             Synccord.getInstance().getLogger().info(
-                    Lang.get(key).replace(placeholder, value)
+                    "🪲 DEBUG | " + Lang.get(key).replace(placeholder, value)
             );
         }
     }

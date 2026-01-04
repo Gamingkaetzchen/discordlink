@@ -20,11 +20,9 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
@@ -32,7 +30,7 @@ public class SetupCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.getName().equals("setup")) {
+        if (!"setup".equals(event.getName())) {
             return;
         }
 
@@ -46,7 +44,9 @@ public class SetupCommand extends ListenerAdapter {
                 );
             }
 
-            event.reply(Lang.get("no_permission")).setEphemeral(true).queue();
+            event.reply(Lang.get("no_permission"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -60,7 +60,9 @@ public class SetupCommand extends ListenerAdapter {
                 );
             }
 
-            event.reply(Lang.get("invalid_type")).setEphemeral(true).queue();
+            event.reply(Lang.get("invalid_type"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -107,7 +109,8 @@ public class SetupCommand extends ListenerAdapter {
 
             channel.sendMessageEmbeds(embed.build())
                     .addActionRow(Button.primary("show_players", "🔍 " + Lang.get("show_players_button")))
-                    .submit().thenAccept(msg -> {
+                    .submit()
+                    .thenAccept(msg -> {
                         InfoUpdater.startAutoUpdate(channel, msg);
 
                         if (isDebug()) {
@@ -115,7 +118,9 @@ public class SetupCommand extends ListenerAdapter {
                         }
                     });
 
-            event.reply(Lang.get("info_sent")).setEphemeral(true).queue();
+            event.reply(Lang.get("info_sent"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -145,7 +150,9 @@ public class SetupCommand extends ListenerAdapter {
                 }
             });
 
-            event.reply(Lang.get("setup_playerlist_sent")).setEphemeral(true).queue();
+            event.reply(Lang.get("setup_playerlist_sent"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -155,8 +162,11 @@ public class SetupCommand extends ListenerAdapter {
             YamlConfiguration rulesConfig = YamlConfiguration.loadConfiguration(ruleFile);
             List<MessageEmbed> embeds = new ArrayList<>();
 
-            if (!rulesConfig.contains("regeln") || rulesConfig.getConfigurationSection("regeln") == null) {
-                event.reply(Lang.get("setup_rule_invalid_or_empty")).setEphemeral(true).queue();
+            if (!rulesConfig.contains("regeln")
+                    || rulesConfig.getConfigurationSection("regeln") == null) {
+                event.reply(Lang.get("setup_rule_invalid_or_empty"))
+                        .setEphemeral(true)
+                        .queue();
                 return;
             }
 
@@ -179,7 +189,9 @@ public class SetupCommand extends ListenerAdapter {
             event.deferReply().queue((InteractionHook hook) -> {
                 MessageChannel channel = targetChannel;
                 if (channel == null) {
-                    hook.sendMessage(Lang.get("setup_rule_no_channel")).setEphemeral(true).queue();
+                    hook.sendMessage(Lang.get("setup_rule_no_channel"))
+                            .setEphemeral(true)
+                            .queue();
                     return;
                 }
 
@@ -193,7 +205,9 @@ public class SetupCommand extends ListenerAdapter {
                             .queue();
                 }
 
-                hook.sendMessage(Lang.get("setup_rule_sent")).setEphemeral(true).queue();
+                hook.sendMessage(Lang.get("setup_rule_sent"))
+                        .setEphemeral(true)
+                        .queue();
             });
 
             if (isDebug()) {
@@ -267,28 +281,9 @@ public class SetupCommand extends ListenerAdapter {
                             .replace("%sender%", event.getUser().getName())
             );
         }
-        event.reply(Lang.get("invalid_type")).setEphemeral(true).queue();
-    }
-
-    @Override
-    public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
-        if (!event.getName().equals("setup") || !event.getFocusedOption().getName().equals("type")) {
-            return;
-        }
-
-        List<Command.Choice> choices = List.of(
-                new Command.Choice("linking", "linking"),
-                new Command.Choice("info", "info"),
-                new Command.Choice("playerlist", "playerlist"),
-                new Command.Choice("regel", "regel"),
-                new Command.Choice("multiticket", "multiticket")
-        );
-
-        event.replyChoices(choices).queue();
-
-        if (isDebug()) {
-            Synccord.getInstance().getLogger().info(Lang.get("debug_setup_autocomplete"));
-        }
+        event.reply(Lang.get("invalid_type"))
+                .setEphemeral(true)
+                .queue();
     }
 
     private boolean isDebug() {

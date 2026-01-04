@@ -24,19 +24,19 @@ public class TicketJoinAlertListener implements Listener {
 
         // Optional: Feature-Toggle über config
         if (!plugin.getConfig().getBoolean("tickets.alert-on-join", true)) {
-            debug("[TicketJoinAlert] alerts disabled in config.");
+            debug(Lang.get("debug_ticket_alert_disabled"));
             return;
         }
 
         // Bot & JDA prüfen
         if (plugin.getDiscordBot() == null || plugin.getDiscordBot().getJDA() == null) {
-            debug("[TicketJoinAlert] DiscordBot/JDA is null, skipping alert check.");
+            debug(Lang.get("debug_ticket_alert_bot_null"));
             return;
         }
 
         String guildId = plugin.getConfig().getString("discord.guild-id");
         if (guildId == null || guildId.isEmpty()) {
-            debug("[TicketJoinAlert] No discord.guild-id configured.");
+            debug(Lang.get("debug_ticket_alert_no_guild_id"));
             return;
         }
 
@@ -45,7 +45,8 @@ public class TicketJoinAlertListener implements Listener {
             JDA jda = plugin.getDiscordBot().getJDA();
             Guild guild = jda.getGuildById(guildId);
             if (guild == null) {
-                debug("[TicketJoinAlert] Guild not found for id=" + guildId);
+                debug(Lang.get("debug_ticket_alert_guild_not_found")
+                        .replace("%id%", guildId));
                 return;
             }
 
@@ -55,10 +56,10 @@ public class TicketJoinAlertListener implements Listener {
             if (ticketExists) {
                 // Sync → Minecraft-Message
                 Bukkit.getScheduler().runTask(plugin, ()
-                        -> player.sendMessage(Lang.get("ticket_alert_join"))
+                        -> player.sendMessage(Lang.get(player, "ticket_alert_join"))
                 );
             } else {
-                debug("[TicketJoinAlert] No open ticket-* channels found.");
+                debug(Lang.get("debug_ticket_alert_no_open_tickets"));
             }
         });
     }

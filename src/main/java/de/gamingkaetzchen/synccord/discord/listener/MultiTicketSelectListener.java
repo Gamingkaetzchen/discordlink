@@ -27,7 +27,8 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         String[] parts = componentId.split(":");
         if (parts.length < 3) {
             event.reply(Lang.get("multiticket_invalid_id"))
-                    .setEphemeral(true).queue();
+                    .setEphemeral(true)
+                    .queue();
 
             debug(Lang.get("multiticket_invalid_id"));
             return;
@@ -37,13 +38,17 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         long targetChannelId = Long.parseLong(parts[2]);
 
         if (event.getUser().getIdLong() != ownerId) {
-            // not_your_setup: "❌ Dieses Setup gehört nicht dir, %user%."
-            event.reply(Lang.get("not_your_setup")
-                    .replace("%user%", event.getUser().getName()))
-                    .setEphemeral(true).queue();
+            event.reply(
+                    Lang.get("not_your_setup")
+                            .replace("%user%", event.getUser().getName())
+            )
+                    .setEphemeral(true)
+                    .queue();
 
-            debug(Lang.get("not_your_setup")
-                    .replace("%user%", event.getUser().getName()));
+            debug(
+                    Lang.get("not_your_setup")
+                            .replace("%user%", event.getUser().getName())
+            );
             return;
         }
 
@@ -53,7 +58,8 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         List<String> selected = event.getValues();
         if (selected.isEmpty()) {
             event.reply(Lang.get("multiticket_no_type_selected"))
-                    .setEphemeral(true).queue();
+                    .setEphemeral(true)
+                    .queue();
 
             debug(Lang.get("multiticket_no_type_selected"));
             return;
@@ -62,7 +68,8 @@ public class MultiTicketSelectListener extends ListenerAdapter {
         TextChannel target = event.getJDA().getTextChannelById(targetChannelId);
         if (target == null) {
             event.reply(Lang.get("multiticket_target_not_found"))
-                    .setEphemeral(true).queue();
+                    .setEphemeral(true)
+                    .queue();
 
             debug(Lang.get("multiticket_target_not_found"));
             return;
@@ -130,7 +137,8 @@ public class MultiTicketSelectListener extends ListenerAdapter {
                 .queue(msg -> event.reply(
                 Lang.get("multiticket_created_success")
                         .replace("%channel%", target.getAsMention()))
-                .setEphemeral(true).queue()
+                .setEphemeral(true)
+                .queue()
                 );
 
         debug(

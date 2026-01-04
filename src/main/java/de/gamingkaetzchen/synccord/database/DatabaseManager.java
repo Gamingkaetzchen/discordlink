@@ -1,7 +1,12 @@
 package de.gamingkaetzchen.synccord.database;
 
 import java.io.File;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -182,7 +187,8 @@ public class DatabaseManager {
 
             if (isDebug()) {
                 Synccord.getInstance().getLogger().info(
-                        Lang.get("debug_sqlite_link_deleted").replace("%uuid%", uuid.toString())
+                        Lang.get("debug_sqlite_link_deleted")
+                                .replace("%uuid%", uuid.toString())
                 );
             }
 

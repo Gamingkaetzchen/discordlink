@@ -27,7 +27,9 @@ public class LinkMCCommand extends ListenerAdapter {
                 );
             }
 
-            event.reply(Lang.get("linkmc_no_permission")).setEphemeral(true).queue();
+            event.reply(Lang.get("linkmc_no_permission"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -43,7 +45,9 @@ public class LinkMCCommand extends ListenerAdapter {
                 );
             }
 
-            event.reply(Lang.get("linkmc_missing_args")).setEphemeral(true).queue();
+            event.reply(Lang.get("linkmc_missing_args"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -63,7 +67,9 @@ public class LinkMCCommand extends ListenerAdapter {
 
             // einfache Discord-ID-Validierung (17–20 Ziffern)
             if (!discordId.matches("\\d{17,20}")) {
-                event.reply(Lang.get("linkmc_invalid_discordid")).setEphemeral(true).queue();
+                event.reply(Lang.get("linkmc_invalid_discordid"))
+                        .setEphemeral(true)
+                        .queue();
                 return;
             }
 
@@ -84,11 +90,14 @@ public class LinkMCCommand extends ListenerAdapter {
             ).setEphemeral(true).queue();
 
         } catch (IllegalArgumentException e) {
-            event.reply(Lang.get("linkmc_invalid_uuid")).setEphemeral(true).queue();
+            event.reply(Lang.get("linkmc_invalid_uuid"))
+                    .setEphemeral(true)
+                    .queue();
 
             if (isDebug()) {
                 Synccord.getInstance().getLogger().warning(
-                        Lang.get("debug_linkmc_invalid_uuid").replace("%uuid%", uuidStr)
+                        Lang.get("debug_linkmc_invalid_uuid")
+                                .replace("%uuid%", uuidStr)
                 );
             }
         }

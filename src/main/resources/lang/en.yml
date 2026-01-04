@@ -508,3 +508,7 @@ debug_embit_submitted: "[Debug] Modal data received: %title% / %content% / %imag
 
 discord_join_title: "Player joined"
 discord_leave_title: "Player left"
+playerlist_title: "👥 Online Players"
+playerlist_header: "Currently, {count} players are online:"
+playerlist_no_permission: "❌ You have no permission to do that."
+playerlist_error: "❌ Failed to update the player list."

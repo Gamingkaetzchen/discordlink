@@ -1,5 +1,7 @@
 package de.gamingkaetzchen.synccord.discord;
 
+import java.util.concurrent.RejectedExecutionException;
+
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.discord.commands.EmbitCommand;
 import de.gamingkaetzchen.synccord.discord.commands.LinkMCCommand;
@@ -15,8 +17,10 @@ import de.gamingkaetzchen.synccord.discord.listener.RuleAcceptListener;
 import de.gamingkaetzchen.synccord.discord.listener.TicketButtonListener;
 import de.gamingkaetzchen.synccord.tickets.TicketManager;
 import de.gamingkaetzchen.synccord.util.Lang;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -24,26 +28,36 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class DiscordBot {
 
-    private final JDA jda;
+    // nicht mehr final → damit Restart möglich wäre
+    private JDA jda;
     private final TicketManager ticketManager;
+    private final String token;
 
     public DiscordBot(String token, TicketManager ticketManager) throws Exception {
         this.ticketManager = ticketManager;
+        this.token = token;
 
         debug("debug_discord_starting");
+        connect(); // getrennt in eigene Methode
+    }
 
+    /**
+     * Baut die JDA, wartet auf READY, registriert Listener & Commands
+     */
+    private void connect() throws Exception {
         JDABuilder builder = JDABuilder.createDefault(token)
                 .enableIntents(
                         GatewayIntent.GUILD_MESSAGES,
                         GatewayIntent.GUILD_MEMBERS,
                         GatewayIntent.MESSAGE_CONTENT
                 )
-                .setAutoReconnect(false); // wichtig bei Plugin-Shutdowns
+                // wieder aktivieren – JDA versucht dann selbstständig reconnects
+                .setAutoReconnect(true);
 
         this.jda = builder.build();
         jda.awaitReady();
 
-        // alle Listener registrieren
+        // Listener registrieren
         jda.addEventListener(
                 new EmbitCommand(),
                 new EmbitListener(),
@@ -62,17 +76,34 @@ public class DiscordBot {
         debug("debug_discord_ready");
 
         registerCommands();
+
+        // Info-Embed wiederherstellen/neu erstellen
         InfoUpdater.recoverOrOffline(jda);
     }
 
     private void registerCommands() {
         debug("debug_registering_slash_commands");
 
+        // Option "type" für /setup – mit festen Choices
+        net.dv8tion.jda.api.interactions.commands.build.OptionData setupTypeOption
+                = new net.dv8tion.jda.api.interactions.commands.build.OptionData(
+                        OptionType.STRING,
+                        "type",
+                        Lang.get("setup_option_type_description"),
+                        true // required
+                )
+                        .addChoice("linking", "linking")
+                        .addChoice("info", "info")
+                        .addChoice("playerlist", "playerlist")
+                        .addChoice("regel", "regel")
+                        .addChoice("multiticket", "multiticket");
+
         jda.updateCommands().addCommands(
                 // /setup mit optionalem Channel (für multiticket & playerlist)
                 Commands.slash("setup", Lang.get("setup_description"))
-                        .addOption(OptionType.STRING, "type", Lang.get("setup_option_type_description"), true, true)
-                        .addOption(OptionType.CHANNEL, "channel", Lang.get("setup_option_channel_description"), false),
+                        .addOptions(setupTypeOption)
+                        .addOption(OptionType.CHANNEL, "channel",
+                                Lang.get("setup_option_channel_description"), false),
                 Commands.slash("linkmc", Lang.get("linkmc_description"))
                         .addOption(OptionType.STRING, "uuid", Lang.get("linkmc_option_uuid"), true)
                         .addOption(OptionType.STRING, "discordid", Lang.get("linkmc_option_discordid"), true),
@@ -91,12 +122,18 @@ public class DiscordBot {
         ).queue();
     }
 
+    /**
+     * Shutdown wird beim Plugin-Disable aufgerufen. Hier KEIN Restart – das
+     * Plugin fährt ja bewusst runter.
+     */
     public void shutdown() {
         if (jda != null) {
             debug("debug_discord_shutdown");
-            // Auto-Reconnect sicherheitshalber noch abdrehen
-            jda.getPresence().setIdle(true);
-            jda.shutdownNow(); // hart und sofort
+            try {
+                jda.getPresence().setIdle(true);
+            } catch (Exception ignored) {
+            }
+            jda.shutdownNow();
         }
     }
 
@@ -118,16 +155,54 @@ public class DiscordBot {
         }
     }
 
-    public void sendSimpleEmbed(String channelId, String title, String description, java.awt.Color color, String thumbnailUrl) {
+    /**
+     * Prüft, ob die JDA noch "lebendig" ist – hilfreich, wenn du irgendwann
+     * einen echten Restart implementieren willst.
+     */
+    public boolean isAlive() {
+        if (jda == null) {
+            return false;
+        }
+        JDA.Status status = jda.getStatus();
+        return status != JDA.Status.SHUTDOWN
+                && status != JDA.Status.SHUTTING_DOWN
+                && status != JDA.Status.DISCONNECTED;
+    }
+
+    /**
+     * Einfaches Embed senden – aber MIT Statuscheck und Fehler-Handling, damit
+     * keine RejectedExecutionException mehr fliegt.
+     */
+    public void sendSimpleEmbed(String channelId, String title, String description,
+            java.awt.Color color, String thumbnailUrl) {
+
         if (jda == null) {
             return;
         }
-        var channel = jda.getChannelById(net.dv8tion.jda.api.entities.channel.middleman.MessageChannel.class, channelId);
-        if (channel == null) {
+
+        JDA.Status status = jda.getStatus();
+        if (status == JDA.Status.SHUTTING_DOWN
+                || status == JDA.Status.SHUTDOWN
+                || status == JDA.Status.DISCONNECTED) {
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().warning(
+                        "[Synccord] JDA ist nicht verbunden – sendSimpleEmbed wird übersprungen."
+                );
+            }
             return;
         }
 
-        net.dv8tion.jda.api.EmbedBuilder eb = new net.dv8tion.jda.api.EmbedBuilder()
+        MessageChannel channel = jda.getChannelById(MessageChannel.class, channelId);
+        if (channel == null) {
+            if (isDebug()) {
+                Synccord.getInstance().getLogger().warning(
+                        "[Synccord] sendSimpleEmbed: Channel nicht gefunden: " + channelId
+                );
+            }
+            return;
+        }
+
+        EmbedBuilder eb = new EmbedBuilder()
                 .setTitle(title)
                 .setDescription(description)
                 .setColor(color);
@@ -136,7 +211,40 @@ public class DiscordBot {
             eb.setThumbnail(thumbnailUrl);
         }
 
-        channel.sendMessageEmbeds(eb.build()).queue();
+        try {
+            channel.sendMessageEmbeds(eb.build()).queue();
+        } catch (RejectedExecutionException ex) {
+            // Requester ist schon gestoppt → einfach nicht mehr senden
+            Synccord.getInstance().getLogger().warning(
+                    "[Synccord] Discord-Requester wurde gestoppt – Embed nicht gesendet: " + ex.getMessage()
+            );
+        } catch (Exception ex) {
+            Synccord.getInstance().getLogger().warning(
+                    "[Synccord] Fehler beim Senden eines Embeds: " + ex.getMessage()
+            );
+        }
     }
 
+    /**
+     * OPTIONAL: echter Restart, falls du ihn irgendwann aus einem Watchdog oder
+     * Command aufrufen willst.
+     *
+     * Aktuell **nicht benutzt**, aber vorbereitet.
+     */
+    public void restart() {
+        try {
+            if (jda != null) {
+                jda.shutdownNow();
+            }
+        } catch (Exception ignored) {
+        }
+
+        try {
+            connect();
+        } catch (Exception e) {
+            Synccord.getInstance().getLogger().severe(
+                    "[Synccord] Konnte Discord-Bot nach Restart nicht neu verbinden: " + e.getMessage()
+            );
+        }
+    }
 }

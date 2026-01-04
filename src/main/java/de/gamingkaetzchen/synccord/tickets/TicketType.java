@@ -1,5 +1,6 @@
 package de.gamingkaetzchen.synccord.tickets;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,12 +33,20 @@ public class TicketType {
             boolean litebansHook
     ) {
         this.id = id;
-        this.name = name;
-        this.description = description;
-        this.buttonName = buttonName;
+        this.name = name != null ? name : id;
+        this.description = description != null ? description : "";
+        this.buttonName = buttonName != null ? buttonName : id;
         this.categoryId = categoryId;
-        this.supporterRoles = supporterRoles;
-        this.questions = questions;
+
+        // null-sicher + unveränderlich im Runtime
+        this.supporterRoles = supporterRoles != null
+                ? List.copyOf(supporterRoles)
+                : Collections.emptyList();
+
+        this.questions = questions != null
+                ? Map.copyOf(questions)
+                : Collections.emptyMap();
+
         this.litebansHook = litebansHook;
     }
 
@@ -94,11 +103,11 @@ public class TicketType {
             embed.setFooter(Lang.get("ticket_embed_footer"));
         }
 
-        // ✅ Ticket-spezifische Beschreibung aus config.yml (falls gesetzt)
-        if (description != null && !description.isBlank()) {
+        // Ticket-spezifische Beschreibung aus config.yml (falls gesetzt)
+        if (!this.description.isBlank()) {
             embed.addField(
-                    Lang.get("ticket_panel_desc_label"), // neuer Lang-Key
-                    description,
+                    Lang.get("ticket_panel_desc_label"),
+                    this.description,
                     false
             );
         }
@@ -114,7 +123,7 @@ public class TicketType {
         }
 
         // Supporter-Rollen-Feld
-        if (supporterRoles != null && !supporterRoles.isEmpty()) {
+        if (!supporterRoles.isEmpty()) {
             String rolesFormatted = supporterRoles.stream()
                     .map(roleId -> "<@&" + roleId + ">")
                     .collect(Collectors.joining("\n"));
@@ -127,16 +136,15 @@ public class TicketType {
         }
 
         // Fragen-Feld
-        int questionCount = (questions != null) ? questions.size() : 0;
-        String questionCountStr = String.valueOf(questionCount);
-
+        int questionCount = questions.size();
         embed.addField(
                 Lang.get("ticket_panel_questions_label"),
-                Lang.get("ticket_panel_questions_value").replace("{count}", questionCountStr),
+                Lang.get("ticket_panel_questions_value")
+                        .replace("{count}", String.valueOf(questionCount)),
                 true
         );
 
-        // LiteBans-Hinweis kommt wie gehabt im TicketChannelCreator dazu
+        // LiteBans-Hinweis kommt im TicketChannelCreator dazu
         return embed;
     }
 }

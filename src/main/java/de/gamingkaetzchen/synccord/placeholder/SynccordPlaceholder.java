@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.discord.InfoUpdater;
 import de.gamingkaetzchen.synccord.discord.LinkManager;
+import de.gamingkaetzchen.synccord.util.Lang;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -96,10 +97,16 @@ public class SynccordPlaceholder extends PlaceholderExpansion {
                 return formatUptime();
 
             case "ip_java":
-                return plugin.getConfig().getString("discord.java-ip", "unknown");
+                return plugin.getConfig().getString(
+                        "discord.java-ip",
+                        Lang.get("placeholder_ip_unknown")
+                );
 
             case "ip_bedrock":
-                return plugin.getConfig().getString("discord.bedrock-ip", "unknown");
+                return plugin.getConfig().getString(
+                        "discord.bedrock-ip",
+                        Lang.get("placeholder_ip_unknown")
+                );
 
             case "synccord_version":
                 return plugin.getDescription().getVersion();
@@ -167,8 +174,12 @@ public class SynccordPlaceholder extends PlaceholderExpansion {
                 return discordId != null ? "true" : "false";
 
             case "discord_status":
-                // Erweiterbar, falls du irgendwann "pending code" etc. unterscheiden willst
-                return discordId == null ? "Not linked" : "Linked";
+                // Jetzt über Langfile
+                if (discordId == null) {
+                    return Lang.get("placeholder_discord_status_not_linked");
+                } else {
+                    return Lang.get("placeholder_discord_status_linked");
+                }
 
             // --- Name / Avatar ---
             case "discord_tag":
@@ -194,7 +205,7 @@ public class SynccordPlaceholder extends PlaceholderExpansion {
 
             case "highest_role":
                 if (member != null && !member.getRoles().isEmpty()) {
-                    // JDA sortiert Rollen i. d. R. nach Position (höchste zuerst)
+                    // höchste Rolle (i. d. R. erste in der Liste)
                     return member.getRoles().get(0).getName();
                 }
                 return "";
@@ -204,11 +215,9 @@ public class SynccordPlaceholder extends PlaceholderExpansion {
                 return "";
 
             case "last_linked":
-                // Wenn du willst, können wir in DatabaseManager noch getLinkedAt(UUID) ergänzen
                 return "";
 
             case "code_expire":
-                // Noch kein Ablaufdatum in der DB → leer
                 return "";
 
             // --- Tickets pro Spieler (noch kein Tracking in TicketManager) ---
@@ -246,14 +255,18 @@ public class SynccordPlaceholder extends PlaceholderExpansion {
             return opt.orElse(null);
         } catch (Exception ex) {
             if (plugin.isDebug()) {
-                plugin.getLogger().warning("[SynccordPlaceholder] getDiscordIdForPlayer failed: " + ex.getMessage());
+                plugin.getLogger().warning(
+                        Lang.get("debug_placeholder_discordid_failed")
+                                .replace("%error%", ex.getMessage() == null ? "null" : ex.getMessage())
+                );
             }
             return null;
         }
     }
 
     /**
-     * Prüft playerlist-state.yml auf gültige channel-id / message-id.
+     * Prüft playerlist-state.yml auf gültige channel-id / message-id. (Falls du
+     * auf playerlist.yml umgestellt hast, hier ggf. den Dateinamen anpassen.)
      */
     private boolean isPlayerlistActive() {
         File file = new File(plugin.getDataFolder(), "playerlist-state.yml");

@@ -7,6 +7,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.discord.PlayerListUpdater;
+import de.gamingkaetzchen.synccord.util.Lang;
 
 /**
  * Reagiert auf Join/Quit und aktualisiert die PlayerList-Embed.
@@ -26,8 +27,7 @@ public class PlayerActivityListener implements Listener {
             return;
         }
 
-        debug("debug_playerlist_schedule_join"
-                .replace("%player%", event.getPlayer().getName()));
+        debug("debug_playerlist_schedule_join", "%player%", event.getPlayer().getName());
 
         // kleiner Delay, damit LuckPerms / Daten etc. geladen sind
         plugin.getServer().getScheduler().runTaskLater(
@@ -44,8 +44,7 @@ public class PlayerActivityListener implements Listener {
             return;
         }
 
-        debug("debug_playerlist_schedule_quit"
-                .replace("%player%", event.getPlayer().getName()));
+        debug("debug_playerlist_schedule_quit", "%player%", event.getPlayer().getName());
 
         plugin.getServer().getScheduler().runTaskLater(
                 plugin,
@@ -62,9 +61,17 @@ public class PlayerActivityListener implements Listener {
         return plugin.getConfig().getBoolean("debug", false);
     }
 
-    private void debug(String msg) {
+    private void debug(String key) {
         if (isDebug()) {
-            plugin.getLogger().info("[Debug] " + msg);
+            plugin.getLogger().info("🪲 DEBUG | " + Lang.get(key));
+        }
+    }
+
+    private void debug(String key, String placeholder, String value) {
+        if (isDebug()) {
+            plugin.getLogger().info(
+                    "🪲 DEBUG | " + Lang.get(key).replace(placeholder, value)
+            );
         }
     }
 }

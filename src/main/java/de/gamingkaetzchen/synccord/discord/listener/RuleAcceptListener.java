@@ -50,7 +50,6 @@ public class RuleAcceptListener extends ListenerAdapter {
 
         Member member = event.getMember();
         if (member == null) {
-            // eigene Lang-Message statt Hardcode
             event.reply(Lang.get("setup_rule_no_member"))
                     .setEphemeral(true)
                     .queue();
@@ -59,14 +58,20 @@ public class RuleAcceptListener extends ListenerAdapter {
 
         if (input.equalsIgnoreCase(expected)) {
             if (roleId != null && member.getGuild().getRoleById(roleId) != null) {
-                member.getGuild().addRoleToMember(member, member.getGuild().getRoleById(roleId)).queue();
+                member.getGuild()
+                        .addRoleToMember(member, member.getGuild().getRoleById(roleId))
+                        .queue();
             }
 
-            event.reply(Lang.get("setup_rule_success")).setEphemeral(true).queue();
+            event.reply(Lang.get("setup_rule_success"))
+                    .setEphemeral(true)
+                    .queue();
             debug(Lang.get("debug_rule_match"));
 
         } else {
-            event.reply(Lang.get("setup_rule_fail")).setEphemeral(true).queue();
+            event.reply(Lang.get("setup_rule_fail"))
+                    .setEphemeral(true)
+                    .queue();
             debug(Lang.get("debug_rule_mismatch"));
         }
     }

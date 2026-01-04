@@ -13,7 +13,7 @@ public class UserSelectListener extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
-        if (!event.getComponentId().equals("ticket:add_user_select")) {
+        if (!"ticket:add_user_select".equals(event.getComponentId())) {
             return;
         }
 
@@ -23,6 +23,15 @@ public class UserSelectListener extends ListenerAdapter {
                     .setEphemeral(true)
                     .queue();
             debug("debug_userselect_not_found", "null-guild");
+            return;
+        }
+
+        // ausgewählten User aus dem Menü holen
+        if (event.getValues().isEmpty()) {
+            event.reply(Lang.get("ticket_user_not_found"))
+                    .setEphemeral(true)
+                    .queue();
+            debug("debug_userselect_not_found", "no-value");
             return;
         }
 
@@ -47,11 +56,11 @@ public class UserSelectListener extends ListenerAdapter {
             return;
         }
 
-        event.getChannel().asTextChannel().getManager().putPermissionOverride(
-                memberToAdd,
-                Permission.VIEW_CHANNEL.getRawValue() | Permission.MESSAGE_SEND.getRawValue(),
-                0
-        ).queue();
+        // Benutzer für den Ticket-Channel berechtigen
+        event.getChannel().asTextChannel()
+                .upsertPermissionOverride(memberToAdd)
+                .setAllowed(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND)
+                .queue();
 
         event.reply(
                 Lang.get("ticket_user_added")

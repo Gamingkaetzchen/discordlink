@@ -30,7 +30,8 @@ public class PlayerListUpdater {
         jda = jdaInstance;
 
         Synccord plugin = Synccord.getInstance();
-        File file = new File(plugin.getDataFolder(), "playerlist_state.yml");
+        // WICHTIG: Dateiname an SynccordPlaceholder.isPlayerlistActive() anpassen
+        File file = new File(plugin.getDataFolder(), "playerlist-state.yml");
         if (!file.exists()) {
             if (isDebug()) {
                 plugin.getLogger().info(
@@ -72,7 +73,8 @@ public class PlayerListUpdater {
 
     private static void saveState() {
         Synccord plugin = Synccord.getInstance();
-        File file = new File(plugin.getDataFolder(), "playerlist_state.yml");
+        // Hier ebenfalls der gleiche Dateiname
+        File file = new File(plugin.getDataFolder(), "playerlist-state.yml");
         YamlConfiguration cfg = new YamlConfiguration();
         cfg.set("channel-id", channelId);
         cfg.set("message-id", messageId);

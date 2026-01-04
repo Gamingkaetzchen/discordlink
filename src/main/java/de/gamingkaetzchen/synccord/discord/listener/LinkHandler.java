@@ -59,7 +59,9 @@ public class LinkHandler extends ListenerAdapter {
         }
 
         if (DatabaseManager.isDiscordLinked(member.getId())) {
-            event.reply(Lang.get("link_error_already_linked")).setEphemeral(true).queue();
+            event.reply(Lang.get("link_error_already_linked"))
+                    .setEphemeral(true)
+                    .queue();
 
             debugLog(
                     Lang.get("debug_link_already_linked")
@@ -79,7 +81,9 @@ public class LinkHandler extends ListenerAdapter {
         UUID uuid = LinkManager.getUUIDByCode(inputCode);
 
         if (uuid == null) {
-            event.reply(Lang.get("link_error_invalid_code")).setEphemeral(true).queue();
+            event.reply(Lang.get("link_error_invalid_code"))
+                    .setEphemeral(true)
+                    .queue();
 
             debugLog(
                     Lang.get("debug_link_invalid_code")
@@ -91,7 +95,6 @@ public class LinkHandler extends ListenerAdapter {
         LinkManager.link(uuid, member.getId());
 
         Bukkit.getScheduler().runTask(Synccord.getInstance(), () -> {
-            // nur noch über Lang + Debug
             debugLog(
                     Lang.get("debug_link_stored")
                             .replace("%uuid%", uuid.toString())
@@ -102,7 +105,9 @@ public class LinkHandler extends ListenerAdapter {
             RoleSyncUtil.syncRolesToMinecraft(member, uuid);
         });
 
-        event.reply(Lang.get("link_success")).setEphemeral(true).queue();
+        event.reply(Lang.get("link_success"))
+                .setEphemeral(true)
+                .queue();
 
         debugLog(
                 Lang.get("debug_link_success")

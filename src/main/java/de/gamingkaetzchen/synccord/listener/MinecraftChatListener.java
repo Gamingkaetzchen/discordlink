@@ -5,6 +5,7 @@ import java.util.Collections;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
@@ -25,10 +26,9 @@ public class MinecraftChatListener implements Listener {
         this.papiEnabled = Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent event) {
-
-        // Eventdaten sichern, da wir später im Main-Thread arbeiten
+        // Ab hier nur noch „fertige“ Nachrichten (MONITOR + ignoreCancelled)
         final Player player = event.getPlayer();
         final String rawMessage = event.getMessage();
 
@@ -57,9 +57,6 @@ public class MinecraftChatListener implements Listener {
 
             // ==============================
             // Format laden → Config (Priorität) → Lang (Fallback)
-            // Beispiel in config.yml:
-            // chat:
-            //   format-to-discord: "<%luckperms_prefix%%player_name%> %message%"
             // ==============================
             String format = plugin.getConfig().getString(
                     "chat.format-to-discord",
@@ -77,7 +74,8 @@ public class MinecraftChatListener implements Listener {
                 try {
                     content = PlaceholderAPI.setPlaceholders(player, content);
                 } catch (Exception e) {
-                    debug("debug_chat_papi_error", "%error%", e.getMessage());
+                    debug("debug_chat_papi_error", "%error%",
+                            e.getMessage() == null ? "null" : e.getMessage());
                 }
             }
 
@@ -88,7 +86,6 @@ public class MinecraftChatListener implements Listener {
 
             String toSend = content;
             if (blockMentions) {
-                // everyone/here "entgiften", damit sie nicht mehr triggern
                 toSend = toSend
                         .replace("@everyone", "@\u200Beveryone")
                         .replace("@here", "@\u200Bhere");
@@ -103,11 +100,12 @@ public class MinecraftChatListener implements Listener {
             }
 
             // ==============================
-            // Nachricht an Discord senden (JDA ist selbst asynchron)
+            // Nachricht an Discord senden
             // ==============================
             action.queue(
                     success -> debug("debug_chat_forwarded", "%player%", player.getName()),
-                    error -> debug("debug_chat_failed", "%error%", error.getMessage())
+                    error -> debug("debug_chat_failed", "%error%",
+                            error.getMessage() == null ? "null" : error.getMessage())
             );
         });
     }
@@ -121,13 +119,15 @@ public class MinecraftChatListener implements Listener {
 
     private void debug(String key) {
         if (isDebug()) {
-            plugin.getLogger().info("[Debug] " + Lang.get(key));
+            plugin.getLogger().info("🪲 DEBUG | " + Lang.get(key));
         }
     }
 
     private void debug(String key, String placeholder, String value) {
         if (isDebug()) {
-            plugin.getLogger().info("[Debug] " + Lang.get(key).replace(placeholder, value));
+            plugin.getLogger().info(
+                    "🪲 DEBUG | " + Lang.get(key).replace(placeholder, value)
+            );
         }
     }
 }

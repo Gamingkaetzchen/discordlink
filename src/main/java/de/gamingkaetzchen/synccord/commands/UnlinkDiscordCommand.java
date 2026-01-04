@@ -27,13 +27,15 @@ public class UnlinkDiscordCommand implements CommandExecutor, TabCompleter {
 
         if (!sender.hasPermission("synccord.admin")) {
             sender.sendMessage(Lang.get("no_permission"));
-            debugLog(Lang.get("debug_dcfind_no_permission").replace("%sender%", sender.getName()));
+            debugLog(Lang.get("debug_dcfind_no_permission")
+                    .replace("%sender%", sender.getName()));
             return true;
         }
 
         if (args.length != 1) {
             sender.sendMessage(Lang.get("unlink_usage"));
-            debugLog(Lang.get("debug_dcfind_wrong_usage").replace("%sender%", sender.getName()));
+            debugLog(Lang.get("debug_dcfind_wrong_usage")
+                    .replace("%sender%", sender.getName()));
             return true;
         }
 
@@ -52,7 +54,8 @@ public class UnlinkDiscordCommand implements CommandExecutor, TabCompleter {
 
         if (!DatabaseManager.isLinked(uuid)) {
             sender.sendMessage(Lang.get("unlink_not_found").replace("%name%", target.getName()));
-            debugLog(Lang.get("debug_unlink_not_found").replace("%uuid%", uuid.toString()));
+            debugLog(Lang.get("debug_unlink_not_found")
+                    .replace("%uuid%", uuid.toString()));
             return true;
         }
 
@@ -73,10 +76,10 @@ public class UnlinkDiscordCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             List<String> suggestions = new ArrayList<>();
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
-                if (p.getName() != null && p.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
-                    if (DatabaseManager.isLinked(p.getUniqueId())) {
-                        suggestions.add(p.getName());
-                    }
+                if (p.getName() != null
+                        && p.getName().toLowerCase().startsWith(args[0].toLowerCase())
+                        && DatabaseManager.isLinked(p.getUniqueId())) {
+                    suggestions.add(p.getName());
                 }
             }
             return suggestions;

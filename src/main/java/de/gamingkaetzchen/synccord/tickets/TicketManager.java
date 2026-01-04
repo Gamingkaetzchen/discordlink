@@ -107,9 +107,20 @@ public class TicketManager {
                 );
             }
         }
+
+        if (isDebug()) {
+            plugin.getLogger().info(
+                    Lang.get("debug_ticket_types_loaded_count")
+                            .replace("%count%", String.valueOf(ticketTypes.size()))
+            );
+        }
     }
 
     public Collection<TicketType> getAllTicketTypes() {
+        return ticketTypes.values();
+    }
+
+    public Collection<TicketType> getTicketTypes() {
         return ticketTypes.values();
     }
 
@@ -134,12 +145,24 @@ public class TicketManager {
     public TicketType getTypeByChannelId(String channelId) {
         File file = new File("tickets", channelId + ".yml");
         if (!file.exists()) {
+            if (isDebug()) {
+                plugin.getLogger().info(
+                        Lang.get("debug_ticket_file_missing")
+                                .replace("%file%", file.getName())
+                );
+            }
             return null;
         }
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         String typeId = config.getString("ticket_id");
         if (typeId == null) {
+            if (isDebug()) {
+                plugin.getLogger().info(
+                        Lang.get("debug_ticket_file_no_type")
+                                .replace("%file%", file.getName())
+                );
+            }
             return null;
         }
 
@@ -159,10 +182,23 @@ public class TicketManager {
 
     public void linkPlayer(long discordId, UUID uuid) {
         linkedPlayers.put(discordId, uuid);
+        if (isDebug()) {
+            plugin.getLogger().info(
+                    Lang.get("debug_ticket_link_player")
+                            .replace("%discord%", String.valueOf(discordId))
+                            .replace("%uuid%", uuid.toString())
+            );
+        }
     }
 
     public void unlinkPlayer(long discordId) {
         linkedPlayers.remove(discordId);
+        if (isDebug()) {
+            plugin.getLogger().info(
+                    Lang.get("debug_ticket_unlink_player")
+                            .replace("%discord%", String.valueOf(discordId))
+            );
+        }
     }
 
     public boolean isLinked(long discordId) {
@@ -173,8 +209,48 @@ public class TicketManager {
         return linkedPlayers;
     }
 
-    public Collection<TicketType> getTicketTypes() {
-        return ticketTypes.values();
+    // ===== Ticket-Zählung für Placeholder / Stats =====
+    /**
+     * Zählt grob die offenen Tickets über die Dateien im /tickets-Ordner. (Jede
+     * vorhandene channelId.yml wird als offenes Ticket gewertet.)
+     */
+    public int getOpenTicketCount() {
+        File dir = new File("tickets");
+        if (!dir.exists() || !dir.isDirectory()) {
+            return 0;
+        }
+
+        File[] files = dir.listFiles((f, name) -> name.endsWith(".yml"));
+        if (files == null) {
+            return 0;
+        }
+        return files.length;
+    }
+
+    /**
+     * Zählt offene Tickets für eine bestimmte UUID anhand der gespeicherten
+     * ticket-Dateien (tickets/<channelId>.yml).
+     */
+    public int getOpenTicketCount(UUID uuid) {
+        File dir = new File("tickets");
+        if (!dir.exists() || !dir.isDirectory()) {
+            return 0;
+        }
+
+        File[] files = dir.listFiles((f, name) -> name.endsWith(".yml"));
+        if (files == null || files.length == 0) {
+            return 0;
+        }
+
+        int count = 0;
+        for (File file : files) {
+            YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+            String storedUuid = cfg.getString("minecraft_uuid");
+            if (storedUuid != null && storedUuid.equalsIgnoreCase(uuid.toString())) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private boolean isDebug() {

@@ -33,23 +33,24 @@ public class TicketSetupCommand extends ListenerAdapter {
         OptionData typeOption = new OptionData(
                 OptionType.STRING,
                 "type",
-                Lang.get("ticket_setup_option_type"), // z.B. "Tickettyp-ID aus config.yml"
+                Lang.get("ticket_setup_option_type"),
                 true
         ).setAutoComplete(true);
 
         OptionData channelOption = new OptionData(
                 OptionType.CHANNEL,
                 "channel",
-                Lang.get("ticket_setup_option_channel"), // z.B. "Channel, in dem der Button gepostet werden soll"
+                Lang.get("ticket_setup_option_channel"),
                 true
         );
 
         jda.upsertCommand(
-                Commands.slash("ticket", Lang.get("ticket_command_description")) // z.B. "Ticket-System verwalten"
-                        .addSubcommands(new SubcommandData(
-                                "setup",
-                                Lang.get("ticket_setup_sub_description")) // z.B. "Ticket-Buttons posten"
-                                .addOptions(typeOption, channelOption)
+                Commands.slash("ticket", Lang.get("ticket_command_description"))
+                        .addSubcommands(
+                                new SubcommandData(
+                                        "setup",
+                                        Lang.get("ticket_setup_sub_description"))
+                                        .addOptions(typeOption, channelOption)
                         )
         ).queue();
 
@@ -58,7 +59,7 @@ public class TicketSetupCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.getName().equals("ticket") || !"setup".equals(event.getSubcommandName())) {
+        if (!"ticket".equals(event.getName()) || !"setup".equals(event.getSubcommandName())) {
             return;
         }
 
@@ -86,25 +87,33 @@ public class TicketSetupCommand extends ListenerAdapter {
                             type.getCategoryId() != null
                             ? "<#" + type.getCategoryId() + ">"
                             : Lang.get("multiticket_category_none"),
-                            true)
+                            true
+                    )
                     .addField(
                             Lang.get("ticket_panel_roles_label"),
                             formatRoles(type.getSupporterRoles()),
-                            true)
+                            true
+                    )
                     .addField(
                             Lang.get("ticket_panel_questions_label"),
                             String.valueOf(type.getQuestions().size()),
-                            true)
+                            true
+                    )
                     .setFooter(
                             Lang.get("ticket_embed_footer"),
-                            event.getJDA().getSelfUser().getEffectiveAvatarUrl())
+                            event.getJDA().getSelfUser().getEffectiveAvatarUrl()
+                    )
                     .setThumbnail(event.getGuild() != null ? event.getGuild().getIconUrl() : null)
                     .setTimestamp(Instant.now());
 
             Button button = Button.primary("ticket:" + type.getId(), type.getButtonName());
-            channel.sendMessageEmbeds(embed.build()).addActionRow(button).queue();
+            channel.sendMessageEmbeds(embed.build())
+                    .addActionRow(button)
+                    .queue();
 
-            event.getHook().sendMessage(Lang.get("ticket_setup_success")).setEphemeral(true).queue();
+            event.getHook().sendMessage(Lang.get("ticket_setup_success"))
+                    .setEphemeral(true)
+                    .queue();
 
             debugLog(Lang.get("debug_ticket_setup_success")
                     .replace("%type%", ticketId)
@@ -114,7 +123,9 @@ public class TicketSetupCommand extends ListenerAdapter {
 
             event.getHook().sendMessage(
                     Lang.get("ticket_setup_error").replace("%error%", msg)
-            ).setEphemeral(true).queue();
+            )
+                    .setEphemeral(true)
+                    .queue();
 
             debugLog(Lang.get("ticket_setup_error").replace("%error%", msg));
             e.printStackTrace();
@@ -123,7 +134,7 @@ public class TicketSetupCommand extends ListenerAdapter {
 
     @Override
     public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
-        if (!event.getName().equals("ticket")
+        if (!"ticket".equals(event.getName())
                 || !"setup".equals(event.getSubcommandName())
                 || !"type".equals(event.getFocusedOption().getName())) {
             return;
@@ -140,7 +151,7 @@ public class TicketSetupCommand extends ListenerAdapter {
 
     private String formatRoles(List<String> roles) {
         if (roles == null || roles.isEmpty()) {
-            return Lang.get("multiticket_roles_none"); // "_keine Rollen_"
+            return Lang.get("multiticket_roles_none");
         }
         return roles.stream()
                 .map(r -> "<@&" + r + ">")

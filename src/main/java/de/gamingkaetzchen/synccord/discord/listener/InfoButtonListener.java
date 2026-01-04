@@ -17,7 +17,7 @@ public class InfoButtonListener extends ListenerAdapter {
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
         String buttonId = event.getComponentId();
-        if (buttonId == null || !buttonId.equals("show_players")) {
+        if (buttonId == null || !"show_players".equals(buttonId)) {
             return;
         }
 
@@ -34,14 +34,14 @@ public class InfoButtonListener extends ListenerAdapter {
                 .getConfig()
                 .getStringList("info.allowed-roles");
 
-        boolean hasPermission = false;
+        boolean hasPermission;
 
         if (allowedRoles != null && !allowedRoles.isEmpty()) {
-            // 2) prüfen ob Member eine dieser Rollen hat
+            // 2) prüfen, ob Member eine dieser Rollen hat
             hasPermission = member.getRoles().stream()
                     .anyMatch(role -> allowedRoles.contains(role.getId()));
         } else {
-            // 3) Fallback: wenn nix in config steht -> Admin-Recht wie bisher
+            // 3) Fallback: wenn nix in config steht -> Admin-Recht
             hasPermission = member.hasPermission(Permission.ADMINISTRATOR);
         }
 

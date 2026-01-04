@@ -24,6 +24,7 @@ public class TranskriptUtil {
         textChannel.getHistory().retrievePast(100).queue(messages -> {
             StringBuilder sb = new StringBuilder();
             List<Message> reversed = messages.reversed();
+
             for (Message msg : reversed) {
                 sb.append("[")
                         .append(msg.getTimeCreated())
@@ -41,7 +42,10 @@ public class TranskriptUtil {
             TextChannel logChannel = jda.getTextChannelById(logChannelId);
             if (logChannel != null) {
                 logChannel.sendFiles(
-                        net.dv8tion.jda.api.utils.FileUpload.fromData(transcriptStream, "transcript.txt"))
+                        net.dv8tion.jda.api.utils.FileUpload.fromData(
+                                transcriptStream,
+                                "transcript.txt"
+                        ))
                         .setEmbeds(new EmbedBuilder()
                                 .setTitle(Lang.get("ticket_transcript_title"))
                                 .setDescription(Lang.get("ticket_transcript_description"))

@@ -16,16 +16,15 @@ public class EmbitCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.getName().equals("embit")) {
+        if (!"embit".equals(event.getName())) {
             return;
         }
 
         Member member = event.getMember();
 
-        // Kein Member = keine Berechtigung
+        // Kein Member oder keine Admin-Rechte
         if (member == null || !member.hasPermission(Permission.ADMINISTRATOR)) {
 
-            // Debug: keine Berechtigung
             if (Synccord.getInstance().isDebug()) {
                 Synccord.getInstance().getLogger().info(
                         Lang.get("debug_dcfind_no_permission")
@@ -33,7 +32,9 @@ public class EmbitCommand extends ListenerAdapter {
                 );
             }
 
-            event.reply(Lang.get("no_permission")).setEphemeral(true).queue();
+            event.reply(Lang.get("no_permission"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -42,7 +43,7 @@ public class EmbitCommand extends ListenerAdapter {
             Synccord.getInstance().getLogger().info(Lang.get("debug_embit_opened"));
         }
 
-        // Modal-Felder – komplett über Langfile gesteuert
+        // Modal-Felder – Texte komplett über Langfile gesteuert
         TextInput title = TextInput.create(
                 "title",
                 Lang.get("embit_modal_input_title"),

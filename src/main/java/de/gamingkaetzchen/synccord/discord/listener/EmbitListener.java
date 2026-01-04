@@ -12,16 +12,26 @@ public class EmbitListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(ModalInteractionEvent event) {
-        if (!event.getModalId().equals("embit_modal")) {
+        if (!"embit_modal".equals(event.getModalId())) {
             return;
         }
 
         // Eingaben sammeln
-        String title = event.getValue("title") != null ? event.getValue("title").getAsString().trim() : "";
-        String content = event.getValue("content") != null ? event.getValue("content").getAsString().trim() : "";
-        String image = event.getValue("image") != null ? event.getValue("image").getAsString().trim() : "";
-        String footer = event.getValue("footer") != null ? event.getValue("footer").getAsString().trim() : "";
-        String colorInput = event.getValue("color") != null ? event.getValue("color").getAsString().trim() : "";
+        String title = event.getValue("title") != null
+                ? event.getValue("title").getAsString().trim()
+                : "";
+        String content = event.getValue("content") != null
+                ? event.getValue("content").getAsString().trim()
+                : "";
+        String image = event.getValue("image") != null
+                ? event.getValue("image").getAsString().trim()
+                : "";
+        String footer = event.getValue("footer") != null
+                ? event.getValue("footer").getAsString().trim()
+                : "";
+        String colorInput = event.getValue("color") != null
+                ? event.getValue("color").getAsString().trim()
+                : "";
 
         String colorHex = colorInput.isEmpty() ? "#2ECC71" : colorInput;
         Color color;
@@ -71,7 +81,10 @@ public class EmbitListener extends ListenerAdapter {
             }
 
         } catch (Exception e) {
-            event.reply(Lang.get("embit_fail")).setEphemeral(true).queue();
+            event.reply(Lang.get("embit_fail"))
+                    .setEphemeral(true)
+                    .queue();
+
             if (isDebug()) {
                 e.printStackTrace();
             }

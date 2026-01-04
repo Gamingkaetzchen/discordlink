@@ -27,7 +27,9 @@ public class UnlinkMCCommand extends ListenerAdapter {
                 );
             }
 
-            event.reply(Lang.get("no_permission")).setEphemeral(true).queue();
+            event.reply(Lang.get("no_permission"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -41,7 +43,9 @@ public class UnlinkMCCommand extends ListenerAdapter {
                 );
             }
 
-            event.reply(Lang.get("unlinkmc_missing_uuid")).setEphemeral(true).queue();
+            event.reply(Lang.get("unlinkmc_missing_uuid"))
+                    .setEphemeral(true)
+                    .queue();
             return;
         }
 
@@ -52,10 +56,15 @@ public class UnlinkMCCommand extends ListenerAdapter {
             if (!DatabaseManager.isLinked(uuid)) {
                 if (isDebug()) {
                     Synccord.getInstance().getLogger().info(
-                            Lang.get("debug_unlinkmc_not_linked").replace("%uuid%", uuidStr));
+                            Lang.get("debug_unlinkmc_not_linked")
+                                    .replace("%uuid%", uuidStr)
+                    );
                 }
 
-                event.reply(Lang.get("unlinkmc_not_linked").replace("%uuid%", uuidStr))
+                event.reply(
+                        Lang.get("unlinkmc_not_linked")
+                                .replace("%uuid%", uuidStr)
+                )
                         .setEphemeral(true)
                         .queue();
                 return;
@@ -65,19 +74,28 @@ public class UnlinkMCCommand extends ListenerAdapter {
 
             if (isDebug()) {
                 Synccord.getInstance().getLogger().info(
-                        Lang.get("debug_unlinkmc_success").replace("%uuid%", uuid.toString()));
+                        Lang.get("debug_unlinkmc_success")
+                                .replace("%uuid%", uuid.toString())
+                );
             }
 
-            event.reply(Lang.get("unlinkmc_success").replace("%uuid%", uuid.toString()))
+            event.reply(
+                    Lang.get("unlinkmc_success")
+                            .replace("%uuid%", uuid.toString())
+            )
                     .setEphemeral(true)
                     .queue();
 
         } catch (IllegalArgumentException e) {
             if (isDebug()) {
                 Synccord.getInstance().getLogger().warning(
-                        Lang.get("debug_unlinkmc_invalid_uuid").replace("%uuid%", uuidStr));
+                        Lang.get("debug_unlinkmc_invalid_uuid")
+                                .replace("%uuid%", uuidStr)
+                );
             }
-            event.reply(Lang.get("unlinkmc_invalid_uuid")).setEphemeral(true).queue();
+            event.reply(Lang.get("unlinkmc_invalid_uuid"))
+                    .setEphemeral(true)
+                    .queue();
         }
     }
 

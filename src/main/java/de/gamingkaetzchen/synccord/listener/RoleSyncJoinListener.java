@@ -35,6 +35,7 @@ public class RoleSyncJoinListener implements Listener {
 
             Component kickMessage = MiniMessage.miniMessage().deserialize(rawMessage);
             player.kick(kickMessage);
+
             debugLog(Lang.get("debug_kick_unlinked").replace("%name%", player.getName()));
             return;
         }
@@ -81,8 +82,16 @@ public class RoleSyncJoinListener implements Listener {
                     RoleSyncUtil.syncRolesToMinecraft(member, uuid);
                     debugLog(Lang.get("debug_sync_done").replace("%name%", player.getName()));
                 },
-                (error) -> Synccord.getInstance().getLogger().warning(
-                        Lang.get("error_discord_member").replace("%msg%", error.getMessage()))
+                (error) -> {
+                    Synccord.getInstance().getLogger().warning(
+                            Lang.get("error_discord_member").replace("%msg%", error.getMessage())
+                    );
+                    debugLog(
+                            Lang.get("debug_sync_member_failed")
+                                    .replace("%name%", player.getName())
+                                    .replace("%id%", discordId)
+                    );
+                }
         );
     }
 

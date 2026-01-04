@@ -10,6 +10,7 @@ import de.gamingkaetzchen.synccord.commands.DcFindCommand;
 import de.gamingkaetzchen.synccord.commands.UnlinkDiscordCommand;
 import de.gamingkaetzchen.synccord.database.DatabaseManager;
 import de.gamingkaetzchen.synccord.discord.DiscordBot;
+import de.gamingkaetzchen.synccord.discord.InfoUpdater;
 import de.gamingkaetzchen.synccord.discord.InfoUpdaterOffline;
 import de.gamingkaetzchen.synccord.discord.PlayerListUpdater;
 import de.gamingkaetzchen.synccord.listener.DiscordJoinLeaveForwardListener;
@@ -30,7 +31,7 @@ public class Synccord extends JavaPlugin {
     private boolean debug;
     private TicketManager ticketManager;
 
-    // <-- neu: für %synccord_uptime%
+    // für %synccord_uptime%
     private long startTimeMillis;
 
     @Override
@@ -40,9 +41,6 @@ public class Synccord extends JavaPlugin {
 
         this.debug = getConfig().getBoolean("debug", false);
         this.startTimeMillis = System.currentTimeMillis();
-
-        // Playerlist-Status laden (channel + message aus playerlist-state.yml)
-        PlayerListUpdater.init();
 
         // Sprache laden
         Lang.init();
@@ -56,9 +54,18 @@ public class Synccord extends JavaPlugin {
         // TicketManager vor dem Bot!
         ticketManager = new TicketManager(this);
 
-        // Befehle
-        getCommand("unlinkdiscord").setExecutor(new UnlinkDiscordCommand());
-        getCommand("dcfind").setExecutor(new DcFindCommand());
+        // Befehle (plugin.yml muss diese Commands definieren!)
+        if (getCommand("unlinkdiscord") != null) {
+            getCommand("unlinkdiscord").setExecutor(new UnlinkDiscordCommand());
+        } else {
+            getLogger().warning("[Synccord] Command 'unlinkdiscord' ist nicht in der plugin.yml registriert.");
+        }
+
+        if (getCommand("dcfind") != null) {
+            getCommand("dcfind").setExecutor(new DcFindCommand());
+        } else {
+            getLogger().warning("[Synccord] Command 'dcfind' ist nicht in der plugin.yml registriert.");
+        }
 
         // Listener
         getServer().getPluginManager().registerEvents(new TicketJoinAlertListener(), this);
@@ -93,15 +100,27 @@ public class Synccord extends JavaPlugin {
             if (isDebug()) {
                 getLogger().info("[Synccord] PlaceholderAPI-Hook registriert.");
             }
-        } else {
-            if (isDebug()) {
-                getLogger().info("[Synccord] PlaceholderAPI nicht gefunden – keine Synccord-Placeholders.");
-            }
+        } else if (isDebug()) {
+            getLogger().info("[Synccord] PlaceholderAPI nicht gefunden – keine Synccord-Placeholders.");
+        }
+
+        // Discord-Token validieren, bevor wir überhaupt versuchen zu verbinden
+        String token = getConfig().getString("discord.token");
+        if (token == null || token.isEmpty() || "PUT-YOUR-TOKEN-HERE".equalsIgnoreCase(token)) {
+            getLogger().severe(Lang.get("error_no_discord_token"));
+            // Kein Bot → Plugin bringt so nichts, also sauber wieder aus
+            getServer().getPluginManager().disablePlugin(this);
+            return;
         }
 
         // DiscordBot starten
         try {
-            discordBot = new DiscordBot(getConfig().getString("discord.token"), ticketManager);
+            discordBot = new DiscordBot(token, ticketManager);
+
+            // PlayerListUpdater nach dem Start des DiscordBots initialisieren
+            if (discordBot.getJDA() != null) {
+                PlayerListUpdater.init(discordBot.getJDA());
+            }
 
             // Start-Meldung mit kleiner Verzögerung schicken,
             // damit JDA sicher ready ist
@@ -129,14 +148,19 @@ public class Synccord extends JavaPlugin {
             e.printStackTrace();
             getServer().getPluginManager().disablePlugin(this);
         }
-
     }
 
     @Override
     public void onDisable() {
-        InfoUpdaterOffline.sendOfflineEmbedSync();
-        try {
-            if (discordBot != null && discordBot.getJDA() != null) {
+
+        // 🔒 Erst den InfoUpdater stoppen, sonst sendet er weiter an einen toten Bot!
+        InfoUpdater.stopAutoUpdate();
+
+        // Offline-Embed nur, wenn der Bot überhaupt existiert
+        if (discordBot != null && discordBot.getJDA() != null) {
+            InfoUpdaterOffline.sendOfflineEmbedSync();
+
+            try {
                 String channelId = getConfig().getString("discord.chat-channel-id");
                 if (channelId != null && !channelId.isEmpty()) {
                     var channel = discordBot.getJDA().getTextChannelById(channelId);
@@ -145,10 +169,11 @@ public class Synccord extends JavaPlugin {
                         channel.sendMessage(stopMsg).queue();
                     }
                 }
+            } catch (Exception e) {
+                getLogger().warning("Konnte Stop-Meldung nicht an Discord senden: " + e.getMessage());
             }
-        } catch (Exception e) {
-            getLogger().warning("Konnte Stop-Meldung nicht an Discord senden: " + e.getMessage());
         }
+
         if (discordBot != null) {
             discordBot.shutdown();
         }
@@ -185,5 +210,4 @@ public class Synccord extends JavaPlugin {
     public long getStartTimeMillis() {
         return startTimeMillis;
     }
-
 }

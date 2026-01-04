@@ -39,13 +39,14 @@ public class LinkManager {
         long now = System.currentTimeMillis();
         CodeEntry existing = activeCodes.get(uuid);
 
+        // Noch gültigen Code wiederverwenden
         if (existing != null && existing.expiresAt > now) {
             debugLog(
                     Lang.get("debug_link_code_still_valid")
                             .replace("%uuid%", uuid.toString())
-                            .replace("%code%", existing.code)
+                            .replace("%code%", existing.code())
             );
-            return existing.code;
+            return existing.code();
         }
 
         String code = generateUniqueCode(6);
@@ -73,7 +74,7 @@ public class LinkManager {
         }
 
         CodeEntry entry = activeCodes.get(uuid);
-        if (entry == null || System.currentTimeMillis() > entry.expiresAt) {
+        if (entry == null || System.currentTimeMillis() > entry.expiresAt()) {
             debugLog(
                     Lang.get("debug_link_code_expired")
                             .replace("%code%", code)
@@ -93,8 +94,10 @@ public class LinkManager {
     }
 
     public static void link(UUID uuid, String discordId) {
+        // Code sofort invalidieren
         activeCodes.remove(uuid);
         reverseCodes.entrySet().removeIf(entry -> entry.getValue().equals(uuid));
+
         DatabaseManager.link(uuid, discordId);
 
         debugLog(
@@ -107,11 +110,10 @@ public class LinkManager {
     private static String generateUniqueCode(int length) {
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         Random random = new Random();
-        StringBuilder sb = new StringBuilder();
         String code;
 
         do {
-            sb.setLength(0);
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < length; i++) {
                 sb.append(chars.charAt(random.nextInt(chars.length())));
             }

@@ -36,6 +36,10 @@ public class InfoUpdater {
         startTask();
     }
 
+    /**
+     * Wird nach Bot-Start aufgerufen. Versucht, die alte Status-Message zu
+     * laden oder erstellt eine neue, falls sie nicht mehr existiert.
+     */
     public static void recoverOrOffline(JDA jda) {
         debug("debug_info_try_recover");
         loadState();
@@ -45,7 +49,12 @@ public class InfoUpdater {
             return;
         }
 
-        var channel = jda.getChannelById(MessageChannel.class, lastChannelId);
+        if (jda == null) {
+            debug("debug_info_jda_null");
+            return;
+        }
+
+        MessageChannel channel = jda.getChannelById(MessageChannel.class, lastChannelId);
         if (channel == null) {
             debug("debug_info_channel_not_found");
             return;
@@ -59,30 +68,35 @@ public class InfoUpdater {
                 },
                 failure -> {
                     debug("debug_info_message_not_found_creating_new");
-                    String iconUrl = Synccord.getInstance()
-                            .getDiscordBot()
-                            .getJDA()
-                            .getSelfUser()
-                            .getAvatarUrl();
-
-                    EmbedBuilder embed = buildStatusEmbed(iconUrl);
-                    channel.sendMessageEmbeds(embed.build())
-                            .setActionRow(
-                                    Button.primary(
-                                            "show_players",
-                                            "🔍 " + Lang.get("show_players_button"))
-                            )
-                            .queue(sentMsg -> {
-                                debug("debug_info_message_sent");
-                                startAutoUpdate(channel, sentMsg);
-                            });
+                    try {
+                        String iconUrl = jda.getSelfUser().getAvatarUrl();
+                        EmbedBuilder embed = buildStatusEmbed(iconUrl);
+                        channel.sendMessageEmbeds(embed.build())
+                                .setActionRow(
+                                        Button.primary(
+                                                "show_players",
+                                                "🔍 " + Lang.get("show_players_button"))
+                                )
+                                .queue(sentMsg -> {
+                                    debug("debug_info_message_sent");
+                                    startAutoUpdate(channel, sentMsg);
+                                });
+                    } catch (Exception ex) {
+                        Bukkit.getLogger().warning(Lang.get("debug_info_embed_update_exception"));
+                        ex.printStackTrace();
+                    }
                 }
         );
     }
 
+    /**
+     * Startet/Restartet den periodischen Update-Task.
+     */
     private static void startTask() {
+        // vorhandenen Task stoppen
         if (task != null) {
             task.cancel();
+            task = null;
         }
 
         int interval = Synccord.getInstance().getConfig().getInt("tps-monitor.update-interval", 60);
@@ -91,7 +105,17 @@ public class InfoUpdater {
         task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!Synccord.getInstance().getConfig().getBoolean("tps-monitor.auto-update", true)) {
+                Synccord plugin = Synccord.getInstance();
+
+                // Plugin deaktiviert? → Task abbrechen
+                if (!plugin.isEnabled()) {
+                    debug("debug_info_plugin_disabled");
+                    cancel();
+                    return;
+                }
+
+                // Auto-Update deaktiviert? → Task abbrechen
+                if (!plugin.getConfig().getBoolean("tps-monitor.auto-update", true)) {
                     debug("debug_info_autoupdate_disabled");
                     cancel();
                     return;
@@ -103,13 +127,31 @@ public class InfoUpdater {
                     return;
                 }
 
-                try {
-                    String iconUrl = Synccord.getInstance()
-                            .getDiscordBot()
-                            .getJDA()
-                            .getSelfUser()
-                            .getAvatarUrl();
+                // 🔒 JDA / Bot prüfen, bevor wir irgendwas queue()n
+                if (plugin.getDiscordBot() == null) {
+                    debug("debug_info_bot_null");
+                    cancel();
+                    return;
+                }
 
+                JDA jda = plugin.getDiscordBot().getJDA();
+                if (jda == null) {
+                    debug("debug_info_jda_null");
+                    cancel();
+                    return;
+                }
+
+                JDA.Status status = jda.getStatus();
+                if (status == JDA.Status.SHUTTING_DOWN
+                        || status == JDA.Status.SHUTDOWN
+                        || status == JDA.Status.DISCONNECTED) {
+                    debug("debug_info_jda_stopped");
+                    cancel();
+                    return;
+                }
+
+                try {
+                    String iconUrl = jda.getSelfUser().getAvatarUrl();
                     EmbedBuilder embed = buildStatusEmbed(iconUrl);
 
                     lastMessage.editMessageEmbeds(embed.build())
@@ -124,14 +166,27 @@ public class InfoUpdater {
                                     }
                             );
                 } catch (Exception e) {
-                    // Lang-Key ist bereits ein Debugtext
                     Bukkit.getLogger().warning(Lang.get("debug_info_embed_update_exception"));
                     e.printStackTrace();
                 }
             }
         };
 
-        task.runTaskTimerAsynchronously(Synccord.getInstance(), interval * 20L, interval * 20L);
+        int intervalTicks = interval * 20;
+        task.runTaskTimerAsynchronously(Synccord.getInstance(), intervalTicks, intervalTicks);
+    }
+
+    /**
+     * Kann beim Plugin-Disable / Bot-Shutdown aufgerufen werden, um den Task
+     * sauber zu beenden.
+     */
+    public static void stopAutoUpdate() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+        lastMessage = null;
+        debug("debug_info_autoupdate_stopped");
     }
 
     public static EmbedBuilder buildStatusEmbed(String iconUrl) {

@@ -5,8 +5,10 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import de.gamingkaetzchen.synccord.Synccord;
+import me.clip.placeholderapi.PlaceholderAPI;
 
 public class Lang {
 
@@ -19,8 +21,8 @@ public class Lang {
         String langCode = plugin.getConfig().getString("language", "en");
         File langDir = new File(plugin.getDataFolder(), "lang");
 
-        if (!langDir.exists()) {
-            langDir.mkdirs();
+        if (!langDir.exists() && !langDir.mkdirs()) {
+            Bukkit.getLogger().warning("[Synccord] Could not create lang directory: " + langDir.getAbsolutePath());
         }
 
         // Hauptsprache
@@ -31,7 +33,6 @@ public class Lang {
         // Sicherstellen, dass en.yml + de.yml im Plugin-Ordner landen
         if (!fallbackPath.exists()) {
             plugin.saveResource("lang/en.yml", false);
-            // de.yml zusätzlich mit ausliefern, wenn vorhanden
             if (plugin.getResource("lang/de.yml") != null) {
                 plugin.saveResource("lang/de.yml", false);
             }
@@ -42,7 +43,6 @@ public class Lang {
             if (plugin.getResource("lang/" + langCode + ".yml") != null) {
                 plugin.saveResource("lang/" + langCode + ".yml", false);
             } else {
-                // Fallback auf Englisch, wenn Sprache nicht existiert
                 Bukkit.getLogger().warning("[Synccord] Language '" + langCode
                         + "' not found in plugin resources. Falling back to 'en'.");
                 langCode = "en";
@@ -52,6 +52,10 @@ public class Lang {
 
         langFile = YamlConfiguration.loadConfiguration(langFilePath);
         fallbackFile = YamlConfiguration.loadConfiguration(fallbackPath);
+
+        if (plugin.getConfig().getBoolean("debug", false)) {
+            plugin.getLogger().info("[Synccord] Lang initialized with language '" + langCode + "'.");
+        }
     }
 
     public static String get(String key) {
@@ -61,14 +65,11 @@ public class Lang {
 
         // Sonderfall Prefix: NIE erneut %prefix% ersetzen, um Rekursion zu vermeiden
         if (key.equals("prefix")) {
-            String rawPrefix = langFile.getString("prefix", fallbackFile.getString("prefix"));
+            String rawPrefix = getRaw("prefix");
             return rawPrefix != null ? rawPrefix : "§7[§bSynccord§7] ";
         }
 
-        String msg = langFile.getString(key);
-        if (msg == null) {
-            msg = fallbackFile.getString(key);
-        }
+        String msg = getRaw(key);
 
         if (msg == null) {
             if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
@@ -81,11 +82,59 @@ public class Lang {
         return msg.replace("%prefix%", get("prefix"));
     }
 
+    /**
+     * Holt den Wert aus der Hauptsprache oder dem Fallback, ohne
+     * Prefix-Handling.
+     */
+    private static String getRaw(String key) {
+        if (langFile == null || fallbackFile == null) {
+            // Falls jemand vor init() etwas abfragt
+            return "§c[Lang not initialized: " + key + "]";
+        }
+
+        String msg = langFile.getString(key);
+        if (msg == null) {
+            msg = fallbackFile.getString(key);
+        }
+        return msg;
+    }
+
     public static String get(String key, Map<String, String> placeholders) {
         String msg = get(key);
         if (placeholders != null) {
             for (Map.Entry<String, String> entry : placeholders.entrySet()) {
                 msg = msg.replace("%" + entry.getKey() + "%", entry.getValue());
+            }
+        }
+        return msg;
+    }
+
+    /**
+     * Lang-Nachricht + PlaceholderAPI mit Spieler-Kontext.
+     */
+    public static String get(Player player, String key) {
+        String msg = get(key);
+        return applyPapi(player, key, msg);
+    }
+
+    /**
+     * Lang-Nachricht + eigene Platzhalter + PlaceholderAPI mit Spieler-Kontext.
+     */
+    public static String get(Player player, String key, Map<String, String> placeholders) {
+        String msg = get(key, placeholders);
+        return applyPapi(player, key, msg);
+    }
+
+    private static String applyPapi(Player player, String key, String msg) {
+        if (player != null && Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            try {
+                msg = PlaceholderAPI.setPlaceholders(player, msg);
+            } catch (Throwable t) {
+                if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+                    Synccord.getInstance().getLogger().warning(
+                            "[Synccord] Fehler bei PlaceholderAPI für key '" + key + "': " + t.getMessage()
+                    );
+                }
             }
         }
         return msg;

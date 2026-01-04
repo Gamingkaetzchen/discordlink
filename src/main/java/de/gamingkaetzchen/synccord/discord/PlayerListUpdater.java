@@ -2,10 +2,9 @@ package de.gamingkaetzchen.synccord.discord;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -13,55 +12,75 @@ import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.util.Lang;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
 
-public class PlayerListUpdater {
+/**
+ * Verwaltet die Playerlist-Embed auf Discord. - /setup playerlist erstellt eine
+ * Basenachricht und ruft registerBaseMessage(...) - init(JDA) lädt
+ * channel/message aus playerlist.yml - refreshNow() aktualisiert die Embed
+ * (z.B. bei Join/Quit)
+ */
+public final class PlayerListUpdater {
 
+    private static final String FILE_NAME = "playerlist.yml";
+
+    private static JDA jda;
     private static String channelId;
     private static String messageId;
 
-    private static final String STATE_FILE = "playerlist-state.yml";
-
     private PlayerListUpdater() {
-        // static utility
     }
 
-    /**
-     * Beim Plugin-Start aufrufen, um gespeicherte Message/Channel-IDs zu laden.
-     * (Optional, aber nice für Restarts)
-     */
-    public static void init() {
-        loadState();
-    }
+    public static void init(JDA jdaInstance) {
+        jda = jdaInstance;
 
-    /**
-     * Wird von /setup playerlist aufgerufen, wenn das Embed einmalig gesendet
-     * wurde.
-     */
-    public static void registerBaseMessage(Message message) {
-        if (message == null || message.getChannel() == null) {
+        Synccord plugin = Synccord.getInstance();
+        File file = new File(plugin.getDataFolder(), FILE_NAME);
+
+        if (!file.exists()) {
+            debug("debug_playerlist_state_missing");
             return;
         }
-        channelId = message.getChannel().getId();
-        messageId = message.getId();
-        saveState();
 
-        debug("debug_playerlist_base_saved",
-                "%channel%", channelId,
-                "%message%", messageId
-        );
+        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+        channelId = cfg.getString("channel-id");
+        messageId = cfg.getString("message-id");
 
-        // Direkt beim Setup einmal aktualisieren
-        refreshNow();
+        debug("debug_playerlist_state_loaded",
+                "%channel%", String.valueOf(channelId),
+                "%message%", String.valueOf(messageId));
     }
 
-    /**
-     * Wird vom PlayerActivityListener bei Join/Leave aufgerufen. Baut das
-     * Playerlist-Embed neu und editiert die gespeicherte Nachricht.
-     */
+    public static void registerBaseMessage(Message msg) {
+        Synccord plugin = Synccord.getInstance();
+
+        channelId = msg.getChannel().getId();
+        messageId = msg.getId();
+
+        File file = new File(plugin.getDataFolder(), FILE_NAME);
+        YamlConfiguration cfg = new YamlConfiguration();
+        cfg.set("channel-id", channelId);
+        cfg.set("message-id", messageId);
+
+        try {
+            cfg.save(file);
+        } catch (IOException e) {
+            plugin.getLogger().severe(
+                    Lang.get("playerlist_state_save_error")
+                            .replace("%error%", e.getMessage() == null ? "null" : e.getMessage())
+            );
+        }
+
+        debug("debug_playerlist_registered",
+                "%channel%", channelId,
+                "%message%", messageId);
+    }
+
     public static void refreshNow() {
         Synccord plugin = Synccord.getInstance();
 
@@ -70,188 +89,158 @@ public class PlayerListUpdater {
             return;
         }
 
-        if (channelId == null || messageId == null) {
-            debug("debug_playerlist_no_state");
-            return;
-        }
-
-        DiscordBot bot = plugin.getDiscordBot();
-        if (bot == null) {
-            debug("debug_playerlist_bot_null");
-            return;
-        }
-
-        JDA jda = bot.getJDA();
         if (jda == null) {
             debug("debug_playerlist_jda_null");
             return;
         }
 
-        MessageChannel channel = jda.getChannelById(MessageChannel.class, channelId);
-        if (channel == null) {
-            debug("debug_playerlist_channel_not_found", "%id%", channelId);
+        if (channelId == null || messageId == null) {
+            debug("debug_playerlist_missing_state");
             return;
         }
 
-        // Embed zusammenbauen
-        EmbedBuilder embed = buildPlayerlistEmbed();
+        TextChannel channel = jda.getTextChannelById(channelId);
+        if (channel == null) {
+            debug("debug_playerlist_channel_not_found", "%channel%", channelId);
+            return;
+        }
 
-        // Nachricht bearbeiten
-        channel.retrieveMessageById(messageId).queue(msg -> {
-            msg.editMessageEmbeds(embed.build()).queue();
-            debug("debug_playerlist_updated");
-        }, failure -> {
-            debug("debug_playerlist_edit_failed", "%error%", failure.getMessage());
+        channel.retrieveMessageById(messageId).queue(message -> {
+            MessageEmbed embed = buildPlayerListEmbed();
+
+            message.editMessageEmbeds(embed).queue(
+                    success -> debug("debug_playerlist_updated"),
+                    error -> debug("debug_playerlist_message_edit_failed",
+                            "%error%", error.getMessage() == null ? "null" : error.getMessage())
+            );
+        }, error -> {
+            debug("debug_playerlist_message_load_failed",
+                    "%error%", error.getMessage() == null ? "null" : error.getMessage());
         });
     }
 
-    // ===================== INTERNES RENDERING =====================
-    private static EmbedBuilder buildPlayerlistEmbed() {
+    /**
+     * Baut die Playerlist-Embed: - Titel & Header aus Lang-Keys - Format &
+     * Rank-Aliases aus config.yml (playerlist.*)
+     */
+    private static MessageEmbed buildPlayerListEmbed() {
         Synccord plugin = Synccord.getInstance();
-        var cfg = plugin.getConfig();
+        var config = plugin.getConfig();
 
-        boolean showRank = cfg.getBoolean("playerlist.show-rank", false);
-        boolean showAlias = cfg.getBoolean("playerlist.show-alias", true);
-        boolean showName = cfg.getBoolean("playerlist.show-name", true);
+        int online = Bukkit.getOnlinePlayers().size();
 
-        String format = cfg.getString("playerlist.format", "{alias} {name}").trim();
-        String title = cfg.getString("playerlist.title", Lang.get("setup_playerlist_title"));
-        String descTemplate = cfg.getString("playerlist.description",
-                Lang.get("setup_playerlist_description"));
-        String emptyText = cfg.getString("playerlist.empty", Lang.get("playerlist_empty"));
+        // Titel + Header aus Langfile
+        String title = Lang.get("playerlist_title");                 // z.B. "👥 Online-Spieler"
+        String descriptionPattern = Lang.get("playerlist_header");   // "Aktuell sind {count} Spieler online:"
+        String emptyText = Lang.get("playerlist_empty");             // "Niemand ist online 😴"
+        String footer = Lang.get("playerlist_footer");               // "Wird automatisch aktualisiert"
 
-        List<String> lines = new ArrayList<>();
+        // Format & Aliases aus config
+        String format = config.getString("playerlist.format", "{name}");
+        boolean showRank = config.getBoolean("playerlist.show-rank", false);
+        boolean showAlias = config.getBoolean("playerlist.show-alias", true);
+        boolean showName = config.getBoolean("playerlist.show-name", true);
+        ConfigurationSection aliasSection = config.getConfigurationSection("playerlist.rank-aliases");
 
-        LuckPerms lp = plugin.getLuckPerms();
+        String header = descriptionPattern.replace("{count}", String.valueOf(online));
 
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            String rank = "";
-            String alias = "";
-            String name = p.getName();
+        StringBuilder desc = new StringBuilder();
+        desc.append(header).append("\n\n");
 
-            String primaryGroup = null;
-            if (lp != null) {
-                User user = lp.getUserManager().getUser(p.getUniqueId());
-                if (user != null) {
-                    primaryGroup = user.getPrimaryGroup();
-                    rank = primaryGroup != null ? primaryGroup : "";
-                }
-            }
-
-            if (primaryGroup != null) {
-                alias = cfg.getString("playerlist.rank-aliases." + primaryGroup, "");
-            }
-
-            String line = format;
-            line = line.replace("{rank}", showRank ? rank : "");
-            line = line.replace("{alias}", showAlias ? alias : "");
-            line = line.replace("{name}", showName ? name : "");
-
-            line = line.trim();
-            if (!line.isEmpty()) {
-                lines.add(line);
-            }
-        }
-
-        int count = lines.size();
-        String desc = descTemplate.replace("{count}", String.valueOf(count));
-
-        if (count == 0) {
-            desc = desc + "\n\n" + emptyText;
+        if (online == 0) {
+            desc.append(emptyText);
         } else {
-            StringBuilder sb = new StringBuilder(desc);
-            sb.append("\n\n");
-            for (String l : lines) {
-                sb.append("• ").append(l).append("\n");
+            LuckPerms luckPerms = plugin.getLuckPerms();
+
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                String rank = "";
+                String alias = "";
+
+                if (luckPerms != null) {
+                    User user = luckPerms.getPlayerAdapter(Player.class).getUser(p);
+                    if (user != null) {
+                        rank = user.getPrimaryGroup();
+                    }
+                }
+
+                if (rank == null || rank.isEmpty()) {
+                    rank = "default";
+                }
+
+                if (aliasSection != null) {
+                    alias = aliasSection.getString(rank, rank);
+                } else {
+                    alias = rank;
+                }
+
+                String line = format;
+                line = line.replace("{rank}", showRank ? (rank != null ? rank : "") : "");
+                line = line.replace("{alias}", showAlias ? (alias != null ? alias : "") : "");
+                line = line.replace("{name}", showName ? (p.getName() != null ? p.getName() : "") : "");
+                line = line.trim();
+
+                desc.append("• ").append(line).append("\n");
             }
-            desc = sb.toString().trim();
         }
 
-        String guildId = plugin.getConfig().getString("discord.guild-id");
-        String iconUrl = null;
-        if (guildId != null && !guildId.isBlank() && plugin.getDiscordBot() != null) {
-            var guild = plugin.getDiscordBot().getJDA().getGuildById(guildId);
-            if (guild != null) {
-                iconUrl = guild.getIconUrl();
-            }
+        // Gilden-Icon ermitteln
+        String guildIconUrl = null;
+        String guildId = config.getString("discord.guild-id");
+        Guild guild = null;
+
+        if (guildId != null && !guildId.isEmpty()) {
+            guild = jda.getGuildById(guildId);
+        }
+        if (guild == null && !jda.getGuilds().isEmpty()) {
+            guild = jda.getGuilds().get(0);
+        }
+        if (guild != null) {
+            guildIconUrl = guild.getIconUrl();
         }
 
         EmbedBuilder eb = new EmbedBuilder()
                 .setTitle(title)
-                .setDescription(desc);
+                .setDescription(desc.toString())
+                .setColor(java.awt.Color.CYAN);
 
-        if (iconUrl != null) {
-            eb.setThumbnail(iconUrl);
-            eb.setFooter(Lang.get("playerlist_footer"), iconUrl);
+        if (guildIconUrl != null) {
+            eb.setThumbnail(guildIconUrl);
+            eb.setFooter(footer, guildIconUrl);
         } else {
-            eb.setFooter(Lang.get("playerlist_footer"));
+            eb.setFooter(footer);
         }
 
-        return eb;
+        return eb.build();
     }
 
-    // ===================== STATE SPEICHERN/LADEN =====================
-    private static void loadState() {
-        Synccord plugin = Synccord.getInstance();
-        File file = new File(plugin.getDataFolder(), STATE_FILE);
-        if (!file.exists()) {
-            return;
-        }
-
-        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
-        channelId = yml.getString("channel-id");
-        messageId = yml.getString("message-id");
-
-        debug("debug_playerlist_state_loaded",
-                "%channel%", channelId != null ? channelId : "null",
-                "%message%", messageId != null ? messageId : "null"
-        );
-    }
-
-    private static void saveState() {
-        Synccord plugin = Synccord.getInstance();
-        File file = new File(plugin.getDataFolder(), STATE_FILE);
-        YamlConfiguration yml = new YamlConfiguration();
-
-        yml.set("channel-id", channelId);
-        yml.set("message-id", messageId);
-
-        try {
-            yml.save(file);
-            debug("debug_playerlist_state_saved");
-        } catch (IOException e) {
-            debug("debug_playerlist_state_save_failed");
-            plugin.getLogger().warning("[Synccord] Could not save playerlist-state.yml");
-            e.printStackTrace();
-        }
-    }
-
-    // ===================== DEBUG-HELPER =====================
+    // ===== Debug-Helper =====
     private static boolean isDebug() {
         return Synccord.getInstance().getConfig().getBoolean("debug", false);
     }
 
     private static void debug(String key) {
         if (isDebug()) {
-            Synccord.getInstance().getLogger().info(Lang.get(key));
+            Synccord.getInstance()
+                    .getLogger()
+                    .info("🪲 DEBUG | " + Lang.get(key));
         }
     }
 
     private static void debug(String key, String placeholder, String value) {
         if (isDebug()) {
-            Synccord.getInstance().getLogger().info(
-                    Lang.get(key).replace(placeholder, value)
-            );
+            Synccord.getInstance()
+                    .getLogger()
+                    .info("🪲 DEBUG | " + Lang.get(key).replace(placeholder, value));
         }
     }
 
     private static void debug(String key, String p1, String v1, String p2, String v2) {
         if (isDebug()) {
-            Synccord.getInstance().getLogger().info(
-                    Lang.get(key)
+            Synccord.getInstance()
+                    .getLogger()
+                    .info("🪲 DEBUG | " + Lang.get(key)
                             .replace(p1, v1)
-                            .replace(p2, v2)
-            );
+                            .replace(p2, v2));
         }
     }
 }

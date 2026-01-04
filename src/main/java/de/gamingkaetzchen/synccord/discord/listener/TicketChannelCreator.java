@@ -14,6 +14,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import de.gamingkaetzchen.synccord.Synccord;
 import de.gamingkaetzchen.synccord.discord.LinkManager;
@@ -21,6 +22,7 @@ import de.gamingkaetzchen.synccord.tickets.TicketManager;
 import de.gamingkaetzchen.synccord.tickets.TicketQuestion;
 import de.gamingkaetzchen.synccord.tickets.TicketType;
 import de.gamingkaetzchen.synccord.util.Lang;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -182,12 +184,33 @@ public class TicketChannelCreator {
 
                     event.reply(Lang.get("ticket_created_user_message")).setEphemeral(true).queue();
 
+                    // ==== HIER: Minecraft-Alert mit PAPI-Placeholder-Unterstützung ====
                     Bukkit.getScheduler().runTask(Synccord.getInstance(), () -> {
+                        Plugin papi = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
+                        boolean papiEnabled = papi != null && papi.isEnabled();
+
                         for (Player player : Bukkit.getOnlinePlayers()) {
                             if (player.hasPermission("synccord.ticket.alert")) {
-                                String msg = Lang.get("ticket_alert_message")
-                                        .replace("%user%", member.getEffectiveName())
-                                        .replace("%ticket%", type.getName());
+                                // Zuerst eigene Platzhalter (%user%, %ticket%) über Lang
+                                String msg = Lang.get("ticket_alert_message", Map.of(
+                                        "user", member.getEffectiveName(),
+                                        "ticket", type.getName()
+                                ));
+
+                                // Dann PlaceholderAPI für %synccord_...% usw.
+                                if (papiEnabled) {
+                                    try {
+                                        msg = PlaceholderAPI.setPlaceholders(player, msg);
+                                    } catch (Exception ex) {
+                                        if (Synccord.getInstance().getConfig().getBoolean("debug", false)) {
+                                            Synccord.getInstance().getLogger().warning(
+                                                    "[Debug] PAPI error in ticket_alert_message: "
+                                                    + (ex.getMessage() == null ? "null" : ex.getMessage())
+                                            );
+                                        }
+                                    }
+                                }
+
                                 player.sendMessage(msg);
                             }
                         }

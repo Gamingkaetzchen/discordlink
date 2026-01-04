@@ -509,3 +509,11 @@ debug_embit_submitted: "[Debug] Modal-Daten empfangen: %title% / %content% / %im
 
 discord_join_title: "Spieler beigetreten"
 discord_leave_title: "Spieler hat verlassen"
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Playerlist – Discord Embed
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+playerlist_title: "👥 Online-Spieler"
+playerlist_header: "Aktuell sind {count} Spieler online:"
+playerlist_no_permission: "❌ Dafür hast du keine Berechtigung."
+playerlist_error: "❌ Fehler beim Aktualisieren der Playerlist."
